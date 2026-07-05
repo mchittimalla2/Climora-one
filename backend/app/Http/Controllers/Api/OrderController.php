@@ -69,4 +69,47 @@ class OrderController extends Controller
             'order' => $order
         ], 201);
     }
+public function track(Request $request)
+{
+    $validated = $request->validate([
+        'order_number' => 'required|string',
+        'phone' => 'required|string',
+    ]);
+
+    $order = Order::with('items')
+        ->where('order_number', $validated['order_number'])
+        ->where('phone', $validated['phone'])
+        ->first();
+
+    if (!$order) {
+        return response()->json([
+            'message' => 'Order not found'
+        ], 404);
+    }
+
+    return response()->json($order);
 }
+public function updateStatus(Request $request, $id)
+{
+    $validated = $request->validate([
+        'status' => 'required|string',
+    ]);
+
+    $order = Order::where('order_number', $id)->first();
+
+    if (!$order) {
+        return response()->json([
+            'message' => 'Order not found'
+        ], 404);
+    }
+
+    $order->status = $validated['status'];
+    $order->save();
+
+    return response()->json([
+        'message' => 'Order status updated successfully',
+        'order' => $order->load('items')
+    ]);
+}
+}
+
