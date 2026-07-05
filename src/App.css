@@ -1043,3 +1043,21 @@ body {
 .tracking-result {
   margin-top: 30px;
 }
+.admin-lifecycle .life-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.status-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 20px;
+  background: #4f8f22;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}

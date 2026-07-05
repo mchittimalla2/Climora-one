@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../App.css";
+import { API_BASE_URL } from "../config/api";
 
 const customerSteps = [
   "Order Received",
@@ -39,26 +40,65 @@ function TrackOrder() {
     }));
   };
 
-  const handleTrack = (e) => {
-    e.preventDefault();
+  const handleTrack = async (e) => {
+  e.preventDefault();
 
-    const orders = JSON.parse(localStorage.getItem("climoraone_orders")) || [];
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/track-order`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        order_number: orderId,
+        phone: phone,
+      }),
+    });
 
-    const foundOrder = orders.find(
-      (order) =>
-        order.id.toLowerCase() === orderId.toLowerCase() &&
-        order.phone === phone
-    );
+    const data = await response.json();
 
-    if (!foundOrder) {
+    if (!response.ok) {
       setMatchedOrder(null);
       setError("No order found with this Order ID and phone number.");
       return;
     }
 
-    setMatchedOrder(foundOrder);
+    setMatchedOrder({
+      id: data.order_number,
+      customerName: data.customer_name,
+      phone: data.phone,
+      email: data.email,
+      total: data.total,
+      status: data.status,
+      items: data.items || [],
+      createdAt: data.created_at,
+      steps: [
+        {
+          name: "Order Received",
+          completed: true,
+          completedAt: new Date(data.created_at).toLocaleString(),
+        },
+        {
+          name: "Item Packed",
+          completed: data.status === "Item Packed" || data.status === "Shipped" || data.status === "Delivered",
+        },
+        {
+          name: "Shipped",
+          completed: data.status === "Shipped" || data.status === "Delivered",
+        },
+        {
+          name: "Delivered",
+          completed: data.status === "Delivered",
+        },
+      ],
+    });
+
     setError("");
-  };
+  } catch (error) {
+    console.error("Track order failed:", error);
+    setError("Unable to connect to backend.");
+  }
+};
 
   return (
     <div>
@@ -146,6 +186,7 @@ function TrackOrder() {
       </footer>
     </div>
   );
+  
 }
 
 export default TrackOrder;
