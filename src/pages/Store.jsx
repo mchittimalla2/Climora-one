@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "../App.css";
 import products from "../data/products";
+import { API_BASE_URL } from "../config/api";
 
 function Store() {
   const [cart, setCart] = useState([]);
@@ -329,46 +330,56 @@ function Store() {
           <h2>Checkout</h2>
 
           <form
-            className="checkout-form"
-            onSubmit={(e) => {
-              e.preventDefault();
+              className="checkout-form"
+              onSubmit={async (e) => {
+                e.preventDefault();
 
-              const form = e.target;
+                const form = e.target;
 
-              const newOrder = {
-                id: "ORD" + Date.now(),
-                createdAt: new Date().toISOString(),
-                customerName: form.customerName.value,
-                email: form.email.value,
-                phone: form.phone.value,
-                address: form.address.value,
-                city: form.city.value,
-                state: form.state.value,
-                pincode: form.pincode.value,
-                items: cart,
-                total: total,
-                status: "Payment Pending",
-              };
+                const orderPayload = {
+                  customer_name: form.customerName.value,
+                  email: form.email.value,
+                  phone: form.phone.value,
+                  address: form.address.value,
+                  city: form.city.value,
+                  state: form.state.value,
+                  pincode: form.pincode.value,
+                  total: total,
+                  items: cart.map((item) => ({
+                    product_id: item.id,
+                    product_name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                  })),
+                };
 
-              const existingOrders =
-                JSON.parse(localStorage.getItem("climoraone_orders")) || [];
+                try {
+                  const response = await fetch(
+                    `${API_BASE_URL}/api/orders`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(orderPayload),
+                    }
+                  );
 
-              localStorage.setItem(
-                "climoraone_orders",
-                JSON.stringify([...existingOrders, newOrder])
-              );
+                  const data = await response.json();
 
-              setOrderSuccess(newOrder);
-              setShowCheckout(false);
-              setCart([]);
+                  setOrderSuccess({
+                    id: data.order.order_number,
+                  });
 
-              setTimeout(() => {
-                document
-                  .getElementById("order-success")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }, 100);
-            }}
-          >
+                  setShowCheckout(false);
+                  setCart([]);
+
+                } catch (error) {
+                  console.error(error);
+                  alert("Order submission failed");
+                }
+              }}
+            >
             <input name="customerName" placeholder="Full Name" required />
             <input name="email" type="email" placeholder="Email" required />
 
