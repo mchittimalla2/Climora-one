@@ -346,7 +346,7 @@ function Store() {
                   pincode: form.pincode.value,
                   total: total,
                   items: cart.map((item) => ({
-                    product_id: item.id,
+                    product_id: null,
                     product_name: item.name,
                     quantity: item.quantity,
                     price: item.price,
@@ -354,29 +354,57 @@ function Store() {
                 };
 
                 try {
-                  const response = await fetch(
-                    `${API_BASE_URL}/api/orders`,
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(orderPayload),
-                    }
-                  );
+                  const response = await fetch(`${API_BASE_URL}/api/orders`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(orderPayload),
+                  });
 
                   const data = await response.json();
 
-                  setOrderSuccess({
-                    id: data.order.order_number,
-                  });
+                  if (!response.ok) {
+                    console.error("Order API error:", data);
+                    alert("Order failed. Please check console.");
+                    return;
+                  }
 
+                  const savedOrder = {
+                    id: data.order.order_number,
+                    createdAt: data.order.created_at,
+                    customerName: data.order.customer_name,
+                    email: data.order.email,
+                    phone: data.order.phone,
+                    address: data.order.address,
+                    city: data.order.city,
+                    state: data.order.state,
+                    pincode: data.order.pincode,
+                    items: cart,
+                    total: data.order.total,
+                    status: data.order.status,
+                  };
+
+                  const existingOrders =
+                    JSON.parse(localStorage.getItem("climoraone_orders")) || [];
+
+                  localStorage.setItem(
+                    "climoraone_orders",
+                    JSON.stringify([...existingOrders, savedOrder])
+                  );
+
+                  setOrderSuccess(savedOrder);
                   setShowCheckout(false);
                   setCart([]);
 
+                  setTimeout(() => {
+                    document
+                      .getElementById("order-success")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }, 100);
                 } catch (error) {
-                  console.error(error);
-                  alert("Order submission failed");
+                  console.error("Order submission failed:", error);
+                  alert("Order submission failed. Backend may not be running.");
                 }
               }}
             >
