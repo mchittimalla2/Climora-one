@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "../../App.css";
 import { API_BASE_URL } from "../../config/api";
 
-const defaultSteps = [
+const lifecycleSteps = [
   "Order Received",
   "Item Packed",
   "Shipped",
@@ -12,6 +12,7 @@ const defaultSteps = [
 
 function Orders() {
   const [orders, setOrders] = useState([]);
+  const [expandedDates, setExpandedDates] = useState({});
   const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
@@ -27,9 +28,9 @@ function Orders() {
       history = {};
     }
 
-    const currentIndex = defaultSteps.indexOf(order.status);
+    const currentIndex = lifecycleSteps.indexOf(order.status);
 
-    return defaultSteps.map((step, index) => ({
+    return lifecycleSteps.map((step, index) => ({
       name: step,
       completed:
         step === "Order Received" ||
@@ -102,10 +103,18 @@ function Orders() {
     return groups;
   }, {});
 
+  const toggleDate = (date) => {
+    setExpandedDates({
+      ...expandedDates,
+      [date]: !expandedDates[date],
+    });
+  };
+
   const getStatusClass = (status) => {
     if (status === "Delivered") return "status-badge delivered";
-    if (status === "Shipped" || status === "Out For Delivery")
+    if (status === "Shipped" || status === "Out For Delivery") {
       return "status-badge shipped";
+    }
     return "status-badge pending";
   };
 
@@ -135,131 +144,143 @@ function Orders() {
         ) : (
           Object.keys(groupedOrders).map((date) => (
             <div key={date} className="order-date-section">
-              <h3 className="order-date-title">📅 {date}</h3>
+              <button
+                className="order-date-toggle"
+                onClick={() => toggleDate(date)}
+              >
+                <span>📅 {date} ({groupedOrders[date].length} Orders)</span>
+                <span>{expandedDates[date] ? "▼" : "▶"}</span>
+              </button>
 
-              <div className="order-card-grid">
-                {groupedOrders[date].map((order) => (
-                  <div key={order.id} className="modern-order-card">
-                    <div className="modern-order-header">
-                      <div>
-                        <h3>{order.id}</h3>
-                        <p>{new Date(order.createdAt).toLocaleString()}</p>
-                      </div>
-
-                      <span className={getStatusClass(order.status)}>
-                        {order.status}
-                      </span>
-                    </div>
-
-                    <div className="modern-order-summary">
-                      <div>
-                        <label>Customer</label>
-                        <p>{order.customerName}</p>
-                      </div>
-
-                      <div>
-                        <label>Phone</label>
-                        <p>{order.phone}</p>
-                      </div>
-
-                      <div>
-                        <label>Total</label>
-                        <p>₹{order.total}</p>
-                      </div>
-
-                      <div>
-                        <label>Items</label>
-                        <p>
-                          {order.items.reduce(
-                            (sum, item) => sum + Number(item.quantity || 0),
-                            0
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      className="view-details-btn"
-                      onClick={() =>
-                        setExpandedOrder(
-                          expandedOrder === order.id ? null : order.id
-                        )
-                      }
-                    >
-                      {expandedOrder === order.id ? "Hide Details" : "View Details"}
-                    </button>
-
-                    {expandedOrder === order.id && (
-                      <div className="modern-order-details">
-                        <div className="customer-detail-box">
-                          <h4>Customer Details</h4>
-                          <p>
-                            <strong>Email:</strong> {order.email}
-                          </p>
-                          <p>
-                            <strong>Address:</strong> {order.address}, {order.city},{" "}
-                            {order.state} - {order.pincode}
-                          </p>
+              {expandedDates[date] && (
+                <div className="order-card-grid">
+                  {groupedOrders[date].map((order) => (
+                    <div key={order.id} className="modern-order-card">
+                      <div className="modern-order-header">
+                        <div>
+                          <h3>{order.id}</h3>
+                          <p>{new Date(order.createdAt).toLocaleString()}</p>
                         </div>
 
-                        <div className="items-detail-box">
-                          <h4>Ordered Items</h4>
+                        <span className={getStatusClass(order.status)}>
+                          {order.status}
+                        </span>
+                      </div>
 
-                          {order.items.map((item) => (
-                            <div className="order-item-row" key={item.id}>
-                              <span>{item.product_name || item.name}</span>
-                              <span>Qty: {item.quantity}</span>
-                              <strong>
-                                ₹
-                                {item.subtotal ||
-                                  Number(item.price) * Number(item.quantity)}
-                              </strong>
-                            </div>
-                          ))}
+                      <div className="modern-order-summary">
+                        <div>
+                          <label>Customer</label>
+                          <p>{order.customerName}</p>
                         </div>
 
-                        <h4>Order Lifecycle</h4>
+                        <div>
+                          <label>Phone</label>
+                          <p>{order.phone}</p>
+                        </div>
 
-                        <div className="lifecycle admin-lifecycle">
-                          {order.steps.map((step) => (
-                            <div
-                              key={step.name}
-                              className={
-                                step.completed
-                                  ? "life-step completed"
-                                  : "life-step"
-                              }
-                            >
-                              <div className="life-step-left">
+                        <div>
+                          <label>Total</label>
+                          <p>₹{order.total}</p>
+                        </div>
+
+                        <div>
+                          <label>Items</label>
+                          <p>
+                            {order.items.reduce(
+                              (sum, item) => sum + Number(item.quantity || 0),
+                              0
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        className="view-details-btn"
+                        onClick={() =>
+                          setExpandedOrder(
+                            expandedOrder === order.id ? null : order.id
+                          )
+                        }
+                      >
+                        {expandedOrder === order.id
+                          ? "Hide Details"
+                          : "View Details"}
+                      </button>
+
+                      {expandedOrder === order.id && (
+                        <div className="modern-order-details">
+                          <div className="customer-detail-box">
+                            <h4>Customer Details</h4>
+                            <p>
+                              <strong>Email:</strong> {order.email}
+                            </p>
+                            <p>
+                              <strong>Address:</strong> {order.address},{" "}
+                              {order.city}, {order.state} - {order.pincode}
+                            </p>
+                          </div>
+
+                          <div className="items-detail-box">
+                            <h4>Ordered Items</h4>
+
+                            {order.items.map((item) => (
+                              <div className="order-item-row" key={item.id}>
+                                <span>{item.product_name || item.name}</span>
+                                <span>Qty: {item.quantity}</span>
                                 <strong>
-                                  {step.completed ? "✅" : "⬜"} {step.name}
+                                  ₹
+                                  {item.subtotal ||
+                                    Number(item.price) * Number(item.quantity)}
                                 </strong>
+                              </div>
+                            ))}
+                          </div>
 
-                                {step.completedAt && (
-                                  <p>
-                                    {new Date(step.completedAt).toLocaleString()}
-                                  </p>
+                          <h4>Order Lifecycle</h4>
+
+                          <div className="lifecycle admin-lifecycle">
+                            {order.steps.map((step) => (
+                              <div
+                                key={step.name}
+                                className={
+                                  step.completed
+                                    ? "life-step completed"
+                                    : "life-step"
+                                }
+                              >
+                                <div className="life-step-left">
+                                  <strong>
+                                    {step.completed ? "✅" : "⬜"} {step.name}
+                                  </strong>
+
+                                  {step.completedAt && (
+                                    <p>
+                                      {new Date(
+                                        step.completedAt
+                                      ).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {!step.completed && (
+                                  <button
+                                    className="status-btn"
+                                    onClick={() =>
+                                      markStepComplete(order.id, step.name)
+                                    }
+                                  >
+                                    Mark Completed
+                                  </button>
                                 )}
                               </div>
-
-                              {!step.completed && (
-                                <button
-                                  className="status-btn"
-                                  onClick={() =>
-                                    markStepComplete(order.id, step.name)
-                                  }
-                                >
-                                  Mark Completed
-                                </button>
-                              )}
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))
         )}

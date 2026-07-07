@@ -1265,3 +1265,23 @@ body {
     margin-left: 0;
   }
 }
+.order-date-toggle {
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px;
+  border: 1px solid #dce8d2;
+  border-radius: 14px;
+  background: #f1f7ea;
+  color: #25451f;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 20px 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-date-toggle:hover {
+  background: #e6f4df;
+}
