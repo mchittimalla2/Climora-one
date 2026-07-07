@@ -12,9 +12,7 @@ const defaultSteps = [
 
 function Orders() {
   const [orders, setOrders] = useState([]);
-  const [openDates, setOpenDates] = useState({});
-  const [openCustomers, setOpenCustomers] = useState({});
-  const [openOrders, setOpenOrders] = useState({});
+  const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -97,25 +95,18 @@ function Orders() {
 
   const groupedOrders = orders.reduce((groups, order) => {
     const date = new Date(order.createdAt).toLocaleDateString();
-    const customer = order.customerName || "Unknown Customer";
 
-    if (!groups[date]) groups[date] = {};
-    if (!groups[date][customer]) groups[date][customer] = [];
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(order);
 
-    groups[date][customer].push(order);
     return groups;
   }, {});
 
-  const toggleDate = (date) => {
-    setOpenDates({ ...openDates, [date]: !openDates[date] });
-  };
-
-  const toggleCustomer = (key) => {
-    setOpenCustomers({ ...openCustomers, [key]: !openCustomers[key] });
-  };
-
-  const toggleOrder = (orderId) => {
-    setOpenOrders({ ...openOrders, [orderId]: !openOrders[orderId] });
+  const getStatusClass = (status) => {
+    if (status === "Delivered") return "status-badge delivered";
+    if (status === "Shipped" || status === "Out For Delivery")
+      return "status-badge shipped";
+    return "status-badge pending";
   };
 
   return (
@@ -134,125 +125,141 @@ function Orders() {
       </header>
 
       <section className="admin-dashboard">
-        <h2>Order Operations</h2>
+        <div className="admin-page-title">
+          <h2>Order Operations</h2>
+          <p>Manage customer orders, shipment progress, and delivery lifecycle.</p>
+        </div>
 
         {orders.length === 0 ? (
           <p>No orders placed yet.</p>
         ) : (
           Object.keys(groupedOrders).map((date) => (
-            <div key={date} className="order-folder">
-              <button className="folder-title" onClick={() => toggleDate(date)}>
-                {openDates[date] ? "📂" : "📁"} {date}
-              </button>
+            <div key={date} className="order-date-section">
+              <h3 className="order-date-title">📅 {date}</h3>
 
-              {openDates[date] &&
-                Object.keys(groupedOrders[date]).map((customer) => {
-                  const customerKey = `${date}-${customer}`;
+              <div className="order-card-grid">
+                {groupedOrders[date].map((order) => (
+                  <div key={order.id} className="modern-order-card">
+                    <div className="modern-order-header">
+                      <div>
+                        <h3>{order.id}</h3>
+                        <p>{new Date(order.createdAt).toLocaleString()}</p>
+                      </div>
 
-                  return (
-                    <div key={customerKey} className="customer-folder">
-                      <button
-                        className="folder-title customer-title"
-                        onClick={() => toggleCustomer(customerKey)}
-                      >
-                        {openCustomers[customerKey] ? "📂" : "📁"} {customer}
-                      </button>
-
-                      {openCustomers[customerKey] &&
-                        groupedOrders[date][customer].map((order) => (
-                          <div key={order.id} className="order-card">
-                            <button
-                              className="folder-title order-title"
-                              onClick={() => toggleOrder(order.id)}
-                            >
-                              {openOrders[order.id] ? "📂" : "📁"} {order.id} — ₹
-                              {order.total} — {order.status}
-                            </button>
-
-                            {openOrders[order.id] && (
-                              <>
-                                <div className="order-header">
-                                  <div>
-                                    <p>
-                                      <strong>Customer:</strong>{" "}
-                                      {order.customerName}
-                                    </p>
-                                    <p>
-                                      <strong>Phone:</strong> {order.phone}
-                                    </p>
-                                    <p>
-                                      <strong>Email:</strong> {order.email}
-                                    </p>
-                                    <p>
-                                      <strong>Address:</strong> {order.address},{" "}
-                                      {order.city}, {order.state} -{" "}
-                                      {order.pincode}
-                                    </p>
-                                  </div>
-
-                                  <div className="order-total-box">
-                                    <p>Total</p>
-                                    <h3>₹{order.total}</h3>
-                                    <span>{order.status}</span>
-                                  </div>
-                                </div>
-
-                                <h4>Ordered Items</h4>
-
-                                {order.items.map((item) => (
-                                  <div className="order-item-row" key={item.id}>
-                                    <span>{item.product_name || item.name}</span>
-                                    <span>Qty: {item.quantity}</span>
-                                    <strong>
-                                      ₹
-                                      {item.subtotal ||
-                                        Number(item.price) * Number(item.quantity)}
-                                    </strong>
-                                  </div>
-                                ))}
-
-                                <h4>Order Lifecycle Checklist</h4>
-
-                                <div className="lifecycle admin-lifecycle">
-                                  {order.steps.map((step) => (
-                                    <div
-                                      key={step.name}
-                                      className={
-                                        step.completed
-                                          ? "life-step completed"
-                                          : "life-step"
-                                      }
-                                    >
-                                      <div className="life-step-left">
-                                        <strong>
-                                          {step.completed ? "✅" : "⬜"} {step.name}
-                                        </strong>
-
-                                        {step.completedAt && (
-                                          <p>{new Date(step.completedAt).toLocaleString()}</p>
-                                        )}
-                                      </div>
-
-                                      {!step.completed && (
-                                        <button
-                                          className="status-btn"
-                                          onClick={() =>
-                                            markStepComplete(order.id, step.name)
-                                          }
-                                        >
-                                          Mark Completed
-                                        </button>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        ))}
+                      <span className={getStatusClass(order.status)}>
+                        {order.status}
+                      </span>
                     </div>
-                  );
-                })}
+
+                    <div className="modern-order-summary">
+                      <div>
+                        <label>Customer</label>
+                        <p>{order.customerName}</p>
+                      </div>
+
+                      <div>
+                        <label>Phone</label>
+                        <p>{order.phone}</p>
+                      </div>
+
+                      <div>
+                        <label>Total</label>
+                        <p>₹{order.total}</p>
+                      </div>
+
+                      <div>
+                        <label>Items</label>
+                        <p>
+                          {order.items.reduce(
+                            (sum, item) => sum + Number(item.quantity || 0),
+                            0
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      className="view-details-btn"
+                      onClick={() =>
+                        setExpandedOrder(
+                          expandedOrder === order.id ? null : order.id
+                        )
+                      }
+                    >
+                      {expandedOrder === order.id ? "Hide Details" : "View Details"}
+                    </button>
+
+                    {expandedOrder === order.id && (
+                      <div className="modern-order-details">
+                        <div className="customer-detail-box">
+                          <h4>Customer Details</h4>
+                          <p>
+                            <strong>Email:</strong> {order.email}
+                          </p>
+                          <p>
+                            <strong>Address:</strong> {order.address}, {order.city},{" "}
+                            {order.state} - {order.pincode}
+                          </p>
+                        </div>
+
+                        <div className="items-detail-box">
+                          <h4>Ordered Items</h4>
+
+                          {order.items.map((item) => (
+                            <div className="order-item-row" key={item.id}>
+                              <span>{item.product_name || item.name}</span>
+                              <span>Qty: {item.quantity}</span>
+                              <strong>
+                                ₹
+                                {item.subtotal ||
+                                  Number(item.price) * Number(item.quantity)}
+                              </strong>
+                            </div>
+                          ))}
+                        </div>
+
+                        <h4>Order Lifecycle</h4>
+
+                        <div className="lifecycle admin-lifecycle">
+                          {order.steps.map((step) => (
+                            <div
+                              key={step.name}
+                              className={
+                                step.completed
+                                  ? "life-step completed"
+                                  : "life-step"
+                              }
+                            >
+                              <div className="life-step-left">
+                                <strong>
+                                  {step.completed ? "✅" : "⬜"} {step.name}
+                                </strong>
+
+                                {step.completedAt && (
+                                  <p>
+                                    {new Date(step.completedAt).toLocaleString()}
+                                  </p>
+                                )}
+                              </div>
+
+                              {!step.completed && (
+                                <button
+                                  className="status-btn"
+                                  onClick={() =>
+                                    markStepComplete(order.id, step.name)
+                                  }
+                                >
+                                  Mark Completed
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ))
         )}
