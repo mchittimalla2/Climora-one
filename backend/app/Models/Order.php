@@ -20,6 +20,7 @@ class Order extends Model
         'pincode',
         'total',
         'status',
+        'status_history',
         'payment_status'
     ];
 

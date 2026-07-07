@@ -37,6 +37,9 @@ class OrderController extends Controller
 
         $order = DB::transaction(function () use ($validated) {
             $order = Order::create([
+                                'status_history' => json_encode([
+                    'Order Received' => now()->toDateTimeString()
+                ]),
                 'order_number' => 'CLM-' . date('Y') . '-' . time(),
                 'customer_name' => $validated['customer_name'],
                 'email' => $validated['email'],
