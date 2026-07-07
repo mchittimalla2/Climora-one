@@ -1061,3 +1061,37 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
+.folder-title {
+  cursor: pointer;
+}
+
+.admin-lifecycle .life-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 16px 20px;
+}
+
+.life-step-left {
+  flex: 1;
+  text-align: left;
+}
+
+.status-btn {
+  margin-left: auto;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background: #4f8f22;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.life-step.completed {
+  background: #e6f4df;
+  border: 1px solid #b7dfac;
+}

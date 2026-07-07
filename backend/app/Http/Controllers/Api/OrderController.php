@@ -37,9 +37,6 @@ class OrderController extends Controller
 
         $order = DB::transaction(function () use ($validated) {
             $order = Order::create([
-                                'status_history' => json_encode([
-                    'Order Received' => now()->toDateTimeString()
-                ]),
                 'order_number' => 'CLM-' . date('Y') . '-' . time(),
                 'customer_name' => $validated['customer_name'],
                 'email' => $validated['email'],
@@ -50,6 +47,9 @@ class OrderController extends Controller
                 'pincode' => $validated['pincode'] ?? '',
                 'total' => $validated['total'],
                 'status' => 'Order Received',
+                'status_history' => json_encode([
+                    'Order Received' => now()->toDateTimeString()
+                ]),
                 'payment_status' => 'Pending',
             ]);
 
@@ -72,47 +72,55 @@ class OrderController extends Controller
             'order' => $order
         ], 201);
     }
-public function track(Request $request)
-{
-    $validated = $request->validate([
-        'order_number' => 'required|string',
-        'phone' => 'required|string',
-    ]);
 
-    $order = Order::with('items')
-        ->where('order_number', $validated['order_number'])
-        ->where('phone', $validated['phone'])
-        ->first();
+    public function track(Request $request)
+    {
+        $validated = $request->validate([
+            'order_number' => 'required|string',
+            'phone' => 'required|string',
+        ]);
 
-    if (!$order) {
-        return response()->json([
-            'message' => 'Order not found'
-        ], 404);
+        $order = Order::with('items')
+            ->where('order_number', $validated['order_number'])
+            ->where('phone', $validated['phone'])
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found'
+            ], 404);
+        }
+
+        return response()->json($order);
     }
 
-    return response()->json($order);
-}
-public function updateStatus(Request $request, $id)
-{
-    $validated = $request->validate([
-        'status' => 'required|string',
-    ]);
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string',
+        ]);
 
-    $order = Order::where('order_number', $id)->first();
+        $order = Order::where('order_number', $id)->first();
 
-    if (!$order) {
+        if (!$order) {
+            return response()->json([
+                'message' => 'Order not found'
+            ], 404);
+        }
+
+        $history = $order->status_history
+            ? json_decode($order->status_history, true)
+            : [];
+
+        $history[$validated['status']] = now()->toDateTimeString();
+
+        $order->status = $validated['status'];
+        $order->status_history = json_encode($history);
+        $order->save();
+
         return response()->json([
-            'message' => 'Order not found'
-        ], 404);
+            'message' => 'Order status updated successfully',
+            'order' => $order->load('items')
+        ]);
     }
-
-    $order->status = $validated['status'];
-    $order->save();
-
-    return response()->json([
-        'message' => 'Order status updated successfully',
-        'order' => $order->load('items')
-    ]);
 }
-}
-
