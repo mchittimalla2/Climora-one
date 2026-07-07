@@ -1,46 +1,66 @@
 import { useEffect, useState } from "react";
 import "../../App.css";
+import { API_BASE_URL } from "../../config/api";
 
 function Admin() {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const savedOrders =
-      JSON.parse(localStorage.getItem("climoraone_orders")) || [];
-
-    const savedProducts =
-      JSON.parse(localStorage.getItem("climoraone_products")) || [];
-
-    setOrders(savedOrders);
-    setProducts(savedProducts);
+    fetchDashboardData();
   }, []);
 
+  const fetchDashboardData = async () => {
+    try {
+      const [ordersResponse, productsResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/orders`),
+        fetch(`${API_BASE_URL}/api/products`),
+      ]);
+
+      const ordersData = await ordersResponse.json();
+      const productsData = await productsResponse.json();
+
+      setOrders(ordersData);
+      setProducts(productsData);
+    } catch (error) {
+      console.error("Dashboard load failed:", error);
+      alert("Unable to load dashboard data.");
+    }
+  };
+
+  const totalOrders = orders.length;
+
   const deliveredOrders = orders.filter(
-    (order) =>
-      order.steps?.find((step) => step.name === "Delivered")?.completed
+    (order) => order.status === "Delivered"
   ).length;
 
-  const openOrders = orders.length - deliveredOrders;
+  const openOrders = orders.filter(
+    (order) => order.status !== "Delivered"
+  ).length;
 
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-
-  const totalItemsSold = orders.reduce(
-    (sum, order) =>
-      sum +
-      order.items.reduce((itemSum, item) => itemSum + item.quantity, 0),
+  const totalRevenue = orders.reduce(
+    (sum, order) => sum + Number(order.total || 0),
     0
   );
+
+  const itemsSold = orders.reduce((sum, order) => {
+    const orderItems = order.items || [];
+    return (
+      sum +
+      orderItems.reduce(
+        (itemSum, item) => itemSum + Number(item.quantity || 0),
+        0
+      )
+    );
+  }, 0);
+
+  const totalProducts = products.length;
 
   return (
     <div>
       <header className="header">
         <div className="logo-section">
-          <img
-            src="/images/logo.jpeg"
-            alt="Climoraone"
-            className="header-logo"
-          />
+          <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
         </div>
 
         <nav>
@@ -57,7 +77,7 @@ function Admin() {
         <div className="impact">
           <div>
             <h3>Total Orders</h3>
-            <p>{orders.length}</p>
+            <p>{totalOrders}</p>
           </div>
 
           <div>
@@ -77,12 +97,12 @@ function Admin() {
 
           <div>
             <h3>Items Sold</h3>
-            <p>{totalItemsSold}</p>
+            <p>{itemsSold}</p>
           </div>
 
           <div>
             <h3>Total Products</h3>
-            <p>{products.length}</p>
+            <p>{totalProducts}</p>
           </div>
         </div>
       </section>
