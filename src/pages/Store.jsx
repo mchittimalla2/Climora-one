@@ -3,6 +3,7 @@ import "../App.css";
 import products from "../data/products";
 import { API_BASE_URL } from "../config/api";
 
+
 function Store() {
   const [cart, setCart] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -38,21 +39,31 @@ function Store() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const addToCart = (product, qty = 1) => {
-    const existing = cart.find((item) => item.id === product.id);
+  const addToCart = (product) => {
+  if (Number(product.stock) <= 0) {
+    alert("This product is out of stock.");
+    return;
+  }
 
-    if (existing) {
-      setCart(
-        cart.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + qty }
-            : item
-        )
-      );
-    } else {
-      setCart([...cart, { ...product, quantity: qty }]);
+  const existingItem = cart.find((item) => item.id === product.id);
+
+  if (existingItem) {
+    if (existingItem.quantity >= Number(product.stock)) {
+      alert(`Only ${product.stock} items available in stock.`);
+      return;
     }
-  };
+
+    setCart(
+      cart.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  } else {
+    setCart([...cart, { ...product, quantity: 1 }]);
+  }
+};
 
   const increaseQty = (id) => {
     setCart(
