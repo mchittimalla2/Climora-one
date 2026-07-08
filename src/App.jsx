@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Store from "./pages/Store";
 import Admin from "./pages/admin/Admin";
 import Orders from "./pages/admin/Orders";
-import Products from "./pages/admin/Products";
+import Products from "./pages/admin/products/Products";
 import Reports from "./pages/admin/Reports";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
