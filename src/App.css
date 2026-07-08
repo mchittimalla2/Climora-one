@@ -1427,3 +1427,12 @@ body {
   background: #ddd !important;
   color: #333 !important;
 }
+.success-banner {
+  background: #e6f4df;
+  color: #326b1f;
+  border: 1px solid #b7dfac;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}

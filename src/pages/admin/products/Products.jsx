@@ -10,25 +10,20 @@ function Products() {
   const [searchText, setSearchText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/products`);
-      const data = await response.json();
-      setProducts(data);
-    } catch (error) {
-      console.error("Failed to load products:", error);
-      alert("Unable to load products from backend.");
-    }
+    const response = await fetch(`${API_BASE_URL}/api/products`);
+    const data = await response.json();
+    setProducts(data);
   };
 
   const filteredProducts = products.filter((product) => {
     const text = searchText.toLowerCase();
-
     return (
       product.name?.toLowerCase().includes(text) ||
       product.category?.toLowerCase().includes(text)
@@ -51,61 +46,50 @@ function Products() {
   };
 
   const saveProduct = async (productData) => {
-    try {
-      const isEditing = Boolean(editingProduct);
+    const isEditing = Boolean(editingProduct);
 
-      const url = isEditing
-        ? `${API_BASE_URL}/api/products/${editingProduct.id}`
-        : `${API_BASE_URL}/api/products`;
+    const url = isEditing
+      ? `${API_BASE_URL}/api/products/${editingProduct.id}`
+      : `${API_BASE_URL}/api/products`;
 
-      const method = isEditing ? "PUT" : "POST";
+    const method = isEditing ? "PUT" : "POST";
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(productData),
-      });
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productData),
+    });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Product save failed:", data);
-        alert("Product save failed.");
-        return;
-      }
-
-      closeModal();
-      fetchProducts();
-    } catch (error) {
-      console.error("Product save error:", error);
-      alert("Unable to save product.");
+    if (!response.ok) {
+      alert("Product save failed.");
+      return;
     }
+
+    closeModal();
+    await fetchProducts();
+
+    setSuccessMessage(
+      isEditing ? "Product updated successfully." : "Product added successfully."
+    );
+
+    setTimeout(() => setSuccessMessage(""), 3000);
   };
 
   const deleteProduct = async (productId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    if (!confirmed) return;
+    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+      method: "DELETE",
+    });
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        alert("Failed to delete product.");
-        return;
-      }
-
-      fetchProducts();
-    } catch (error) {
-      console.error("Product delete error:", error);
-      alert("Unable to delete product.");
+    if (!response.ok) {
+      alert("Failed to delete product.");
+      return;
     }
+
+    await fetchProducts();
+    setSuccessMessage("Product deleted successfully.");
+    setTimeout(() => setSuccessMessage(""), 3000);
   };
 
   return (
@@ -128,12 +112,17 @@ function Products() {
           <div>
             <h2>Product Management</h2>
             <p>Add, edit, delete, and manage stock for Climoraone products.</p>
+            <strong>{products.length} products available</strong>
           </div>
 
           <button className="add-product-btn" onClick={openAddModal}>
             + Add Product
           </button>
         </div>
+
+        {successMessage && (
+          <div className="success-banner">{successMessage}</div>
+        )}
 
         <ProductSearch
           searchText={searchText}
