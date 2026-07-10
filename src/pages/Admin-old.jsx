@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../App.css";
 
@@ -83,10 +84,9 @@ function Admin() {
             <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
           </div>
           <nav>
-            <a href="/">Store</a>
+            <Link to="/">Store</Link>
           </nav>
         </header>
-
         <section className="checkout">
           <h2>Admin Login</h2>
 
@@ -123,13 +123,12 @@ function Admin() {
           <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
         </div>
         <nav>
-          <a href="/">Store</a>
+          <Link to="/">Store</Link>
           <button className="nav-btn" onClick={() => setIsLoggedIn(false)}>
             Logout
           </button>
         </nav>
       </header>
-
       <section className="admin-dashboard">
         <h2>Order Operations Dashboard</h2>
 

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "../App.css";
 
 function Contact() {
@@ -5,9 +6,8 @@ function Contact() {
     <div>
       <header className="simple-header">
         <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <a href="/">Back to Store</a>
+        <Link to="/">Back to Store</Link>
       </header>
-
       <main className="page-container">
         <h1>Contact Us</h1>
 
@@ -25,7 +25,6 @@ function Contact() {
           <p>Monday to Saturday, 10:00 AM – 6:00 PM IST</p>
         </div>
       </main>
-
       <Footer />
     </div>
   );

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../../App.css";
 import { API_BASE_URL } from "../../config/api";
@@ -64,13 +65,12 @@ function Admin() {
         </div>
 
         <nav>
-          <a href="/">Store</a>
-          <a href="/admin/orders">Orders</a>
-          <a href="/admin/products">Products</a>
-          <a href="/admin/reports">Reports</a>
+          <Link to="/">Store</Link>
+          <Link to="/admin/orders">Orders</Link>
+          <Link to="/admin/products">Products</Link>
+          <Link to="/admin/reports">Reports</Link>
         </nav>
       </header>
-
       <section className="admin-dashboard">
         <h2>Climoraone Admin Dashboard</h2>
 
