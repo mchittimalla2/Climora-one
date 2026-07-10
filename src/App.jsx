@@ -12,7 +12,7 @@ import "./App.css";
 
 function App() {
   return (
-    <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.VITE_APP_BASE_PATH || "/"}>
       <Routes>
         <Route path="/" element={<Store />} />
         <Route path="/admin" element={<Admin />} />
