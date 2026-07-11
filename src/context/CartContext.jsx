@@ -23,7 +23,10 @@ export function CartProvider({ children }) {
 
   const addToCart = (product, quantity = 1) => {
     const requestedQuantity = Math.max(1, Number(quantity) || 1);
-    const stock = Number(product.stock);
+    const parsedStock = Number(product.stock);
+    const stock = Number.isFinite(parsedStock)
+    ? parsedStock
+    : 10;
 
     if (stock <= 0) {
       return {
@@ -75,10 +78,14 @@ export function CartProvider({ children }) {
           return item;
         }
 
-        const stock = Number(item.stock);
+        const parsedStock = Number(item.stock);
+
+        const stock = Number.isFinite(parsedStock)
+        ? parsedStock
+        : 10;
 
         if (item.quantity >= stock) {
-          return item;
+        return item;
         }
 
         return {
