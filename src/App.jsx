@@ -10,7 +10,7 @@ import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
-
+import Checkout from "./pages/Checkout";
 import Admin from "./pages/admin/Admin";
 import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
@@ -33,7 +33,7 @@ function App() {
           <Route path="/home" element={<StoreRoute />} />
           <Route path="/products" element={<StoreRoute />} />
           <Route path="/cart" element={<StoreRoute />} />
-
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route
