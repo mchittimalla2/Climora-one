@@ -1436,3 +1436,127 @@ body {
   margin-bottom: 16px;
   font-weight: 700;
 }
+.cart-page {
+  min-height: 70vh;
+  padding: 40px clamp(20px, 5vw, 72px);
+  background: #f7faef;
+}
+
+.cart-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.cart-page__header a {
+  color: #2f6d36;
+  font-weight: 700;
+}
+
+.empty-cart {
+  max-width: 620px;
+  margin: 80px auto;
+  padding: 48px 24px;
+  text-align: center;
+  background: white;
+  border-radius: 24px;
+}
+
+.empty-cart__icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.empty-cart p {
+  margin: 12px 0 28px;
+}
+
+.cart-page__content {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.cart-page__item {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 18px;
+}
+
+.cart-page__item img {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.cart-page__quantity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.cart-page__quantity button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cart-page__remove {
+  border: 0;
+  padding: 0;
+  color: #9b2c2c;
+  background: transparent;
+  cursor: pointer;
+}
+
+.cart-summary {
+  padding: 24px;
+  background: white;
+  border-radius: 18px;
+}
+
+.cart-summary div {
+  display: flex;
+  justify-content: space-between;
+  margin: 18px 0;
+}
+
+@media (max-width: 768px) {
+  .cart-page {
+    padding: 24px 16px;
+  }
+
+  .cart-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cart-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-page__item {
+    grid-template-columns: 82px 1fr;
+  }
+
+  .cart-page__item img {
+    width: 82px;
+    height: 82px;
+  }
+
+  .cart-page__item > strong {
+    grid-column: 2;
+  }
+}

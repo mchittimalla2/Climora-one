@@ -3,10 +3,13 @@ import { useState } from "react";
 import "../App.css";
 import products from "../data/products";
 import { API_BASE_URL } from "../config/api";
-
+import { useCart } from "../context/CartContext";
 
 function Store() {
-  const [cart, setCart] = useState([]);
+  const { cart,
+  addToCart,
+  cartCount,
+} = useCart();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -40,11 +43,7 @@ function Store() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const addToCart = (product) => {
-  if (Number(product.stock) <= 0) {
-    alert("This product is out of stock.");
-    return;
-  }
+ 
 
   const existingItem = cart.find((item) => item.id === product.id);
 
@@ -65,24 +64,6 @@ function Store() {
     setCart([...cart, { ...product, quantity: 1 }]);
   }
 };
-
-  const increaseQty = (id) => {
-    setCart(
-      cart.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-  };
-
-  const decreaseQty = (id) => {
-    setCart(
-      cart
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
 
   const buyNow = () => {
     const existing = cart.find((item) => item.id === selectedProduct.id);
@@ -106,10 +87,6 @@ function Store() {
       document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
   return (
     <div>
       <header className="header">
@@ -143,17 +120,31 @@ function Store() {
       </div>
 
       <nav className="header-nav">
-          <a href="#home">Home</a>
-          <a href="#products">Products</a>
-          <a href="#cart">Cart ({cartCount})</a>
+          <Link to="/home">Home</Link>
+          <Link to="/products">Products</Link>
+          <Link to="/cart">Cart ({cartCount})</Link>
       </nav>
 
       {showMobileMenu && (
           <div className="mobile-dropdown">
-          <a href="#home" onClick={() => setShowMobileMenu(false)}>Home</a>
-          <a href="#products" onClick={() => setShowMobileMenu(false)}>Products</a>
-          <a href="#cart" onClick={() => setShowMobileMenu(false)}>Cart ({cartCount})</a>
-          <Link to="/contact" onClick={() => setShowMobileMenu(false)}>Contact</Link>
+            <Link to="/home" onClick={() => setShowMobileMenu(false)}>
+              Home
+            </Link>
+
+            <Link to="/products" onClick={() => setShowMobileMenu(false)}>
+              Products
+            </Link>
+
+            <Link
+            to="/cart"
+            onClick={() => setShowMobileMenu(false)}
+          >
+            Cart ({cartCount})
+          </Link>
+
+            <Link to="/contact" onClick={() => setShowMobileMenu(false)}>
+              Contact
+            </Link>
           </div>
       )}
       </header>
@@ -308,33 +299,6 @@ function Store() {
           </section>
         </>
       )}
-      <section id="cart" className="cart">
-        <h2>Your Cart</h2>
-
-        {cart.length === 0 ? (
-          <p>No products added yet.</p>
-        ) : (
-          <>
-            {cart.map((item) => (
-              <div className="cart-item" key={item.id}>
-                <span>{item.name}</span>
-                <div>
-                  <button onClick={() => decreaseQty(item.id)}>-</button>
-                  <strong>{item.quantity}</strong>
-                  <button onClick={() => increaseQty(item.id)}>+</button>
-                </div>
-                <span>₹{item.price * item.quantity}</span>
-              </div>
-            ))}
-
-            <h3>Total: ₹{total}</h3>
-
-            <button className="checkout-btn" onClick={proceedToCheckout}>
-              Proceed to Checkout
-            </button>
-          </>
-        )}
-      </section>
       {showCheckout && (
         <section id="checkout" className="checkout">
           <h2>Checkout</h2>
@@ -494,5 +458,4 @@ function Store() {
     </div>
   );
 }
-
 export default Store;
