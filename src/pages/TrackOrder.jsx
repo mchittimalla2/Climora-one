@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import "../App.css";
 import { API_BASE_URL } from "../config/api";
@@ -87,9 +88,8 @@ function TrackOrder() {
     <div>
       <header className="simple-header">
         <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <a href="/">Back to Store</a>
+        <Link to="/">Back to Store</Link>
       </header>
-
       <main className="page-container">
         <h1>Track Your Order</h1>
 
@@ -153,7 +153,6 @@ function TrackOrder() {
           )}
         </div>
       </main>
-
       <footer className="footer-bottom-only">
         © 2026 Climoraone. All rights reserved.
       </footer>

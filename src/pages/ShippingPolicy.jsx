@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "../App.css";
 
 function ShippingPolicy() {
@@ -5,9 +6,8 @@ function ShippingPolicy() {
     <div>
       <header className="simple-header">
         <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <a href="/">Back to Store</a>
+        <Link to="/">Back to Store</Link>
       </header>
-
       <main className="page-container">
         <h1>Shipping Policy</h1>
 
@@ -30,7 +30,6 @@ function ShippingPolicy() {
           </p>
         </div>
       </main>
-
       <footer className="footer-bottom-only">
         © 2026 Climoraone. All rights reserved.
       </footer>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../../../App.css";
 import { API_BASE_URL } from "../../../config/api";
@@ -100,13 +101,12 @@ function Products() {
         </div>
 
         <nav>
-          <a href="/admin">Dashboard</a>
-          <a href="/admin/orders">Orders</a>
-          <a href="/admin/reports">Reports</a>
-          <a href="/">Store</a>
+          <Link to="/admin">Dashboard</Link>
+          <Link to="/admin/orders">Orders</Link>
+          <Link to="/admin/reports">Reports</Link>
+          <Link to="/">Store</Link>
         </nav>
       </header>
-
       <section className="admin-dashboard">
         <div className="admin-products-header">
           <div>
@@ -135,7 +135,6 @@ function Products() {
           onDelete={deleteProduct}
         />
       </section>
-
       <ProductModal
         isOpen={isModalOpen}
         onClose={closeModal}

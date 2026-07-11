@@ -10,9 +10,14 @@ import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
 import "./App.css";
 
+const viteBase = import.meta.env.BASE_URL || "/";
+
+const routerBase =
+  viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
+
 function App() {
   return (
-      <BrowserRouter basename={import.meta.env.VITE_APP_BASE_PATH || "/"}>
+      <BrowserRouter basename={routerBase}>
       <Routes>
         <Route path="/" element={<Store />} />
         <Route path="/admin" element={<Admin />} />

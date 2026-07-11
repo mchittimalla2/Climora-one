@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../../App.css";
 
@@ -35,13 +36,12 @@ function Reports() {
         </div>
 
         <nav>
-          <a href="/admin">Dashboard</a>
-          <a href="/admin/orders">Orders</a>
-          <a href="/admin/products">Products</a>
-          <a href="/">Store</a>
+          <Link to="/admin">Dashboard</Link>
+          <Link to="/admin/orders">Orders</Link>
+          <Link to="/admin/products">Products</Link>
+          <Link to="/">Store</Link>
         </nav>
       </header>
-
       <section className="admin-dashboard">
         <h2>Reports</h2>
 

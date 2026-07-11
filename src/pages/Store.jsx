@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import "../App.css";
 import products from "../data/products";
@@ -111,51 +112,51 @@ function Store() {
 
   return (
     <div>
-    <header className="header">
-    <div className="logo-section">
-        <img
-        src="/images/logo.jpeg"
-        alt="Climoraone"
-        className="header-logo"
-        />
-    </div>
+      <header className="header">
+      <div className="logo-section">
+          <img
+          src="/images/logo.jpeg"
+          alt="Climoraone"
+          className="header-logo"
+          />
+      </div>
 
-    <div className="mobile-search-row">
-        <input
-        type="text"
-        placeholder="Search products..."
-        className="search-box"
-        value={searchTerm}
-        onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setSelectedProduct(null);
-            setShowCheckout(false);
-        }}
-        />
+      <div className="mobile-search-row">
+          <input
+          type="text"
+          placeholder="Search products..."
+          className="search-box"
+          value={searchTerm}
+          onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setSelectedProduct(null);
+              setShowCheckout(false);
+          }}
+          />
 
-        <button
-        className="mobile-menu-icon"
-        onClick={() => setShowMobileMenu(!showMobileMenu)}
-        >
-        ☰
-        </button>
-    </div>
+          <button
+          className="mobile-menu-icon"
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          >
+          ☰
+          </button>
+      </div>
 
-    <nav className="header-nav">
-        <a href="#home">Home</a>
-        <a href="#products">Products</a>
-        <a href="#cart">Cart ({cartCount})</a>
-    </nav>
+      <nav className="header-nav">
+          <a href="#home">Home</a>
+          <a href="#products">Products</a>
+          <a href="#cart">Cart ({cartCount})</a>
+      </nav>
 
-    {showMobileMenu && (
-        <div className="mobile-dropdown">
-        <a href="#home" onClick={() => setShowMobileMenu(false)}>Home</a>
-        <a href="#products" onClick={() => setShowMobileMenu(false)}>Products</a>
-        <a href="#cart" onClick={() => setShowMobileMenu(false)}>Cart ({cartCount})</a>
-        <a href="/contact" onClick={() => setShowMobileMenu(false)}>Contact</a>
-        </div>
-    )}
-    </header>
+      {showMobileMenu && (
+          <div className="mobile-dropdown">
+          <a href="#home" onClick={() => setShowMobileMenu(false)}>Home</a>
+          <a href="#products" onClick={() => setShowMobileMenu(false)}>Products</a>
+          <a href="#cart" onClick={() => setShowMobileMenu(false)}>Cart ({cartCount})</a>
+          <Link to="/contact" onClick={() => setShowMobileMenu(false)}>Contact</Link>
+          </div>
+      )}
+      </header>
       {selectedProduct ? (
         <section className="product-detail">
           <button className="back-btn" onClick={() => setSelectedProduct(null)}>
@@ -307,7 +308,6 @@ function Store() {
           </section>
         </>
       )}
-
       <section id="cart" className="cart">
         <h2>Your Cart</h2>
 
@@ -335,7 +335,6 @@ function Store() {
           </>
         )}
       </section>
-
       {showCheckout && (
         <section id="checkout" className="checkout">
           <h2>Checkout</h2>
@@ -450,7 +449,6 @@ function Store() {
           </form>
         </section>
       )}
-
       {orderSuccess && (
         <section id="order-success" className="order-success">
           <h2>Order Placed Successfully</h2>
@@ -459,7 +457,6 @@ function Store() {
           <p>We will send payment and delivery updates shortly.</p>
         </section>
       )}
-
       <footer className="footer">
     <div className="footer-content">
         <div>
@@ -471,16 +468,16 @@ function Store() {
 
         <div>
         <h4>Quick Links</h4>
-        <a href="/">Home</a>
+        <Link to="/">Home</Link>
         <a href="#products">Products</a>
-        <a href="/contact">Contact Us</a>
-        <a href="/track-order">Track Order</a>
+        <Link to="/contact">Contact Us</Link>
+        <Link to="/track-order">Track Order</Link>
         </div>
 
         <div>
         <h4>Policies</h4>
-        <a href="/return-policy">Return Policy</a>
-        <a href="/shipping-policy">Shipping Policy</a>
+        <Link to="/return-policy">Return Policy</Link>
+        <Link to="/shipping-policy">Shipping Policy</Link>
         </div>
 
         <div>
