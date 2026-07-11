@@ -1,20 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import "../App.css";
 import products from "../data/products";
-import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
 
 function Store() {
-  const { cart,
-  addToCart,
-  cartCount,
-} = useCart();
+  const {
+    addToCart,
+    cartCount,
+  } = useCart();
+
+  const navigate = useNavigate();
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -30,7 +30,8 @@ function Store() {
       product.category.toLowerCase().includes(search);
 
     const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -39,60 +40,31 @@ function Store() {
     setSelectedProduct(product);
     setSelectedImage(product.images[0]);
     setQuantity(1);
-    setShowCheckout(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
- 
-
-  const existingItem = cart.find((item) => item.id === product.id);
-
-  if (existingItem) {
-    if (existingItem.quantity >= Number(product.stock)) {
-      alert(`Only ${product.stock} items available in stock.`);
+  const buyNow = () => {
+    if (!selectedProduct) {
       return;
     }
 
-    setCart(
-      cart.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
-  } else {
-    setCart([...cart, { ...product, quantity: 1 }]);
-  }
-};
+    const result = addToCart(selectedProduct, quantity);
 
-  const buyNow = () => {
-    const existing = cart.find((item) => item.id === selectedProduct.id);
-
-    if (!existing) {
-      addToCart(selectedProduct, quantity);
+    if (!result.success) {
+      alert(result.message);
+      return;
     }
 
     setSelectedProduct(null);
-
-    setTimeout(() => {
-      document.getElementById("cart")?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    navigate("/cart");
   };
 
-  const proceedToCheckout = () => {
-    setShowCheckout(true);
-    setOrderSuccess(null);
-
-    setTimeout(() => {
-      document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  };
   return (
     <div>
       <header className="header">
       <div className="logo-section">
           <img
-          src="/images/logo.jpeg"
+          src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
           alt="Climoraone"
           className="header-logo"
           />
@@ -107,7 +79,6 @@ function Store() {
           onChange={(e) => {
               setSearchTerm(e.target.value);
               setSelectedProduct(null);
-              setShowCheckout(false);
           }}
           />
 
@@ -188,13 +159,15 @@ function Store() {
               <div className="detail-actions">
                 <button
                   onClick={() => {
-                    addToCart(selectedProduct, quantity);
+                    const result = addToCart(selectedProduct, quantity);
+
+                    if (!result.success) {
+                      alert(result.message);
+                      return;
+                    }
+
                     setSelectedProduct(null);
-                    setTimeout(() => {
-                      document
-                        .getElementById("cart")
-                        ?.scrollIntoView({ behavior: "smooth" });
-                    }, 100);
+                    navigate("/cart");
                   }}
                 >
                   Add to Cart
@@ -299,132 +272,10 @@ function Store() {
           </section>
         </>
       )}
-      {showCheckout && (
-        <section id="checkout" className="checkout">
-          <h2>Checkout</h2>
-
-          <form
-              className="checkout-form"
-              onSubmit={async (e) => {
-                e.preventDefault();
-
-                const form = e.target;
-
-                const orderPayload = {
-                  customer_name: form.customerName.value,
-                  email: form.email.value,
-                  phone: form.phone.value,
-                  address: form.address.value,
-                  city: form.city.value,
-                  state: form.state.value,
-                  pincode: form.pincode.value,
-                  total: total,
-                  items: cart.map((item) => ({
-                    product_id: null,
-                    product_name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                  })),
-                };
-
-                try {
-                  const response = await fetch(`${API_BASE_URL}/api/orders`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(orderPayload),
-                  });
-
-                  const data = await response.json();
-
-                  if (!response.ok) {
-                    console.error("Order API error:", data);
-                    alert("Order failed. Please check console.");
-                    return;
-                  }
-
-                  const savedOrder = {
-                    id: data.order.order_number,
-                    createdAt: data.order.created_at,
-                    customerName: data.order.customer_name,
-                    email: data.order.email,
-                    phone: data.order.phone,
-                    address: data.order.address,
-                    city: data.order.city,
-                    state: data.order.state,
-                    pincode: data.order.pincode,
-                    items: cart,
-                    total: data.order.total,
-                    status: data.order.status,
-                  };
-
-                  const existingOrders =
-                    JSON.parse(localStorage.getItem("climoraone_orders")) || [];
-
-                  localStorage.setItem(
-                    "climoraone_orders",
-                    JSON.stringify([...existingOrders, savedOrder])
-                  );
-
-                  setOrderSuccess(savedOrder);
-                  setShowCheckout(false);
-                  setCart([]);
-
-                  setTimeout(() => {
-                    document
-                      .getElementById("order-success")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }, 100);
-                } catch (error) {
-                  console.error("Order submission failed:", error);
-                  alert("Order submission failed. Backend may not be running.");
-                }
-              }}
-            >
-            <input name="customerName" placeholder="Full Name" required />
-            <input name="email" type="email" placeholder="Email" required />
-
-            <input
-              name="phone"
-              placeholder="Phone Number"
-              required
-              inputMode="numeric"
-              pattern="[0-9]{10}"
-              maxLength="10"
-              title="Phone number must be exactly 10 digits"
-            />
-
-            <textarea name="address" placeholder="Full Address" required />
-            <input name="city" placeholder="City" required />
-            <input name="state" placeholder="State" required />
-
-            <input
-              name="pincode"
-              placeholder="Pincode"
-              required
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength="6"
-              title="Pincode must be exactly 6 digits"
-            />
-
-            <button type="submit">Place Mock Order</button>
-          </form>
-        </section>
-      )}
-      {orderSuccess && (
-        <section id="order-success" className="order-success">
-          <h2>Order Placed Successfully</h2>
-          <p>Your order ID is:</p>
-          <h3>{orderSuccess.id}</h3>
-          <p>We will send payment and delivery updates shortly.</p>
-        </section>
-      )}
       <footer className="footer">
     <div className="footer-content">
         <div>
-        <img src="/images/logo.jpeg" alt="Climoraone" className="footer-logo" />
+        <img src={`${import.meta.env.BASE_URL}images/logo.jpeg`} alt="Climoraone" className="footer-logo" />
         <p>
             Eco-friendly handmade products supporting rural women artisans across India.
         </p>
@@ -433,7 +284,7 @@ function Store() {
         <div>
         <h4>Quick Links</h4>
         <Link to="/">Home</Link>
-        <a href="#products">Products</a>
+        <Link to="/products">Products</Link>
         <Link to="/contact">Contact Us</Link>
         <Link to="/track-order">Track Order</Link>
         </div>
