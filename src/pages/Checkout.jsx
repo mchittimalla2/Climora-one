@@ -221,14 +221,6 @@ function Checkout() {
   onSubmit={submitOrder}
 >
   <div className="amazon-field">
-    <label htmlFor="country">Country/Region</label>
-
-    <select id="country" name="country" defaultValue="India">
-      <option value="India">India</option>
-    </select>
-  </div>
-
-  <div className="amazon-field">
     <label htmlFor="customerName">
       Full name <span>*</span>
     </label>
@@ -261,7 +253,7 @@ function Checkout() {
       required
     />
 
-    <small>May be used to assist with delivery.</small>
+    <small>Used to assist with delivery.</small>
   </div>
 
   <div className="amazon-field">
@@ -365,11 +357,6 @@ function Checkout() {
     </div>
   </div>
 
-  <label className="amazon-checkbox">
-    <input type="checkbox" name="defaultAddress" />
-    <span>Make this my default delivery address</span>
-  </label>
-
   {orderError && (
     <div className="checkout-error" role="alert">
       {orderError}
@@ -384,7 +371,7 @@ function Checkout() {
     </button>
   </div>
 </form>
-
+</section>
         <aside className="checkout-summary-panel">
           <h2>Order Summary</h2>
 

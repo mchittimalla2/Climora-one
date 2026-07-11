@@ -58,15 +58,20 @@ function Store() {
   };
 
   const openProduct = (product) => {
-    setSelectedProduct(product);
-    setSelectedImage(product.images[0]);
-    setQuantity(1);
+  setSelectedProduct(product);
+  setSelectedImage(product.images[0]);
+  setQuantity(1);
+  setShowMobileMenu(false);
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     });
-  };
+  });
+};
 
   const handleAddToCart = () => {
     if (!selectedProduct) {
