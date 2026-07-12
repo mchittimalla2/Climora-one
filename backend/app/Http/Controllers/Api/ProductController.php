@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    private const IMAGE_SLOTS = ['main', 'side', 'top', 'back'];
+
     public function index()
     {
         return response()->json(
@@ -20,7 +21,6 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateProduct($request, true);
-        $imagePaths = $this->storeImages($request);
 
         $product = Product::create([
             'name' => $validated['name'],
@@ -28,13 +28,18 @@ class ProductController extends Controller
             'price' => $validated['price'],
             'stock' => $validated['stock'] ?? 0,
             'description' => $validated['description'] ?? null,
+        ]);
+
+        $imagePaths = $this->storeSlotImages($request, $product);
+
+        $product->update([
             'main_image' => $imagePaths[0] ?? null,
             'images' => $imagePaths,
         ]);
 
         return response()->json([
             'message' => 'Product created successfully',
-            'product' => $this->serializeProduct($product),
+            'product' => $this->serializeProduct($product->fresh()),
         ], 201);
     }
 
@@ -47,13 +52,8 @@ class ProductController extends Controller
         }
 
         $validated = $this->validateProduct($request, false);
-        $newImagePaths = $this->storeImages($request);
-        $imagePaths = $product->images ?: array_filter([$product->main_image]);
-
-        if (count($newImagePaths) > 0) {
-            $this->deleteImages($imagePaths);
-            $imagePaths = $newImagePaths;
-        }
+        $existingImages = array_pad($product->images ?: array_filter([$product->main_image]), 4, null);
+        $imagePaths = $this->storeSlotImages($request, $product, $existingImages);
 
         $product->update([
             'name' => $validated['name'],
@@ -62,7 +62,7 @@ class ProductController extends Controller
             'stock' => $validated['stock'] ?? 0,
             'description' => $validated['description'] ?? null,
             'main_image' => $imagePaths[0] ?? null,
-            'images' => array_values($imagePaths),
+            'images' => $imagePaths,
         ]);
 
         return response()->json([
@@ -79,7 +79,7 @@ class ProductController extends Controller
             return response()->json(['message' => 'Product not found'], 404);
         }
 
-        $this->deleteImages($product->images ?: array_filter([$product->main_image]));
+        Storage::disk('public')->deleteDirectory("products/{$product->id}");
         $product->delete();
 
         return response()->json([
@@ -89,44 +89,54 @@ class ProductController extends Controller
 
     private function validateProduct(Request $request, bool $imagesRequired): array
     {
+        $imageRule = [$imagesRequired ? 'required' : 'nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'];
+
         return $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'category' => ['nullable', 'string', 'max:100'],
             'price' => ['required', 'numeric', 'min:0'],
-            'stock' => ['nullable', 'integer', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'images' => [$imagesRequired ? 'required' : 'nullable', 'array', 'max:4'],
-            'images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'image_main' => $imageRule,
+            'image_side' => $imageRule,
+            'image_top' => $imageRule,
+            'image_back' => $imageRule,
         ]);
     }
 
-    private function storeImages(Request $request): array
+    private function storeSlotImages(Request $request, Product $product, array $existingImages = []): array
     {
-        $paths = [];
+        $paths = array_pad($existingImages, 4, null);
 
-        foreach ($request->file('images', []) as $image) {
-            $filename = Str::uuid() . '.' . strtolower($image->getClientOriginalExtension());
-            $paths[] = $image->storeAs('products', $filename, 'public');
-        }
+        foreach (self::IMAGE_SLOTS as $index => $slot) {
+            $field = "image_{$slot}";
 
-        return $paths;
-    }
-
-    private function deleteImages(array $paths): void
-    {
-        foreach ($paths as $path) {
-            if ($path) {
-                Storage::disk('public')->delete($path);
+            if (!$request->hasFile($field)) {
+                continue;
             }
+
+            if (!empty($paths[$index])) {
+                Storage::disk('public')->delete($paths[$index]);
+            }
+
+            $image = $request->file($field);
+            $extension = strtolower($image->getClientOriginalExtension());
+            $paths[$index] = $image->storeAs(
+                "products/{$product->id}",
+                "{$slot}.{$extension}",
+                'public'
+            );
         }
+
+        return array_values($paths);
     }
 
     private function serializeProduct(Product $product): array
     {
-        $paths = $product->images ?: array_filter([$product->main_image]);
+        $paths = array_values(array_filter($product->images ?: array_filter([$product->main_image])));
         $urls = array_map(
             fn ($path) => Storage::disk('public')->url($path),
-            array_values($paths)
+            $paths
         );
 
         return [
