@@ -20,7 +20,7 @@ import Products from "./pages/admin/products/Products";
 
 import { CartProvider } from "./context/CartContext";
 import "./App.css";
-import "./BrandExperience.css";
+import "./styles/brand-experience.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
 const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
@@ -33,9 +33,9 @@ function BuyNowRedirect() {
       const buyNowButton = event.target.closest(".buy-btn");
       if (!buyNowButton || buyNowButton.disabled) return;
 
-      window.setTimeout(() => {
-        navigate("/checkout");
-      }, 80);
+      // Store adds the selected quantity to the shared cart first.
+      // Open checkout immediately afterwards with the updated cart.
+      window.setTimeout(() => navigate("/checkout"), 80);
     };
 
     document.addEventListener("click", handleClick);
