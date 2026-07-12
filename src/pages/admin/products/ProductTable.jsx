@@ -1,7 +1,13 @@
 function ProductTable({ products, onEdit, onDelete }) {
   const getStockStatus = (stock) => {
-    if (Number(stock) <= 0) return { label: "Out of Stock", className: "stock-badge out" };
-    if (Number(stock) <= 10) return { label: "Low Stock", className: "stock-badge low" };
+    if (Number(stock) <= 0) {
+      return { label: "Out of Stock", className: "stock-badge out" };
+    }
+
+    if (Number(stock) <= 10) {
+      return { label: "Low Stock", className: "stock-badge low" };
+    }
+
     return { label: "In Stock", className: "stock-badge good" };
   };
 
@@ -30,15 +36,25 @@ function ProductTable({ products, onEdit, onDelete }) {
           ) : (
             products.map((product) => {
               const stockStatus = getStockStatus(product.stock);
+              const image =
+                product.images?.[0] ||
+                product.main_image ||
+                `${import.meta.env.BASE_URL}images/logo.jpeg`;
 
               return (
                 <tr key={product.id}>
                   <td>
                     <img
-                      src={product.main_image || "/images/logo.jpeg"}
+                      src={image}
                       alt={product.name}
                       className="product-thumb"
+                      loading="lazy"
                     />
+                    {product.images?.length > 1 && (
+                      <small className="product-image-count">
+                        {product.images.length} images
+                      </small>
+                    )}
                   </td>
 
                   <td>
@@ -58,8 +74,11 @@ function ProductTable({ products, onEdit, onDelete }) {
 
                   <td>
                     <div className="product-actions">
-                      <button onClick={() => onEdit(product)}>Edit</button>
+                      <button type="button" onClick={() => onEdit(product)}>
+                        Edit
+                      </button>
                       <button
+                        type="button"
                         className="delete-btn"
                         onClick={() => onDelete(product.id)}
                       >
