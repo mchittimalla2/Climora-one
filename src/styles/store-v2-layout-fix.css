@@ -1,185 +1,394 @@
-/* Homepage hero alignment overrides.
-   The left side remains real HTML content.
-   The right side uses the dedicated cropped artisan PNG without cropping or zooming. */
+/* Approved Climoraone homepage composition.
+   The hero copy remains accessible HTML; only the artisan arrangement is an image. */
+
+:root {
+  --climora-cream: #f7efe3;
+  --climora-cream-soft: #fbf6ed;
+  --climora-green: #123f2b;
+  --climora-gold: #bd852e;
+  --climora-ink: #153727;
+}
+
+.store-v2 {
+  background: var(--climora-cream-soft) !important;
+}
+
+.store-v2 .v2-header {
+  min-height: 130px !important;
+  padding: 18px clamp(40px, 5vw, 78px) !important;
+  gap: clamp(28px, 4vw, 66px) !important;
+  background: var(--climora-cream-soft) !important;
+  border-bottom: 1px solid rgba(21, 55, 39, .08) !important;
+  box-shadow: none !important;
+}
 
 .store-v2 .v2-logo-button {
-  min-width: 242px !important;
-  width: 242px !important;
-  height: 68px !important;
-  padding: 4px 12px !important;
-  background: #fffdf9 !important;
-  border-radius: 42px 12px 42px 12px !important;
+  flex: 0 0 auto !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  height: 92px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.store-v2 .v2-logo-button::before,
+.store-v2 .v2-logo-button::after {
+  display: none !important;
 }
 
 .store-v2 .v2-logo-leaf,
 .store-v2 .v2-header-logo {
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
 }
 
 .store-v2 .v2-header-logo {
   object-fit: contain !important;
-  object-position: center !important;
+  object-position: left center !important;
+  filter: none !important;
   transform: none !important;
+}
+
+.store-v2 .v2-search {
+  width: min(365px, 27vw) !important;
+  height: 54px !important;
+  padding: 0 22px !important;
+  border: 1px solid rgba(21, 55, 39, .16) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, .18) !important;
+  color: var(--climora-ink) !important;
+  font-size: 16px !important;
+}
+
+.store-v2 .v2-search::placeholder {
+  color: #686c65 !important;
+}
+
+.store-v2 .v2-nav {
+  gap: clamp(28px, 3.2vw, 56px) !important;
+}
+
+.store-v2 .v2-nav button,
+.store-v2 .v2-nav a {
+  color: #111 !important;
+  font-size: 17px !important;
+  font-weight: 500 !important;
+}
+
+.store-v2 .v2-cart-link {
+  min-width: 144px !important;
+  padding: 14px 22px !important;
+  border: 1.5px solid var(--climora-gold) !important;
+  border-radius: 22px !important;
+  color: #1d1d1a !important;
 }
 
 @media (min-width: 1001px) {
   .store-v2 .v2-hero {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: minmax(470px, 48%) minmax(520px, 52%) !important;
-    align-items: stretch !important;
+    grid-template-columns: minmax(520px, 44%) minmax(650px, 56%) !important;
     width: 100% !important;
-    min-height: 620px !important;
-    aspect-ratio: auto !important;
-    background: #f7f0e5 !important;
+    min-height: 730px !important;
+    background: var(--climora-cream) !important;
     overflow: hidden !important;
+    align-items: stretch !important;
   }
 
   .store-v2 .v2-hero::before {
-    display: none !important;
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background:
+      radial-gradient(circle at 77% 16%, rgba(189, 133, 46, .08), transparent 32%),
+      linear-gradient(90deg, rgba(255,255,255,.18), transparent 46%) !important;
+    pointer-events: none !important;
   }
 
   .store-v2 .v2-hero-copy {
     position: relative !important;
-    inset: auto !important;
     z-index: 2 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    padding: clamp(64px, 6vw, 94px) clamp(44px, 5.2vw, 84px) !important;
-    background: #f7f0e5 !important;
-    pointer-events: auto !important;
+    padding: 92px 52px 88px clamp(58px, 5vw, 92px) !important;
+    background: transparent !important;
   }
 
-  .store-v2 .v2-hero-copy > .v2-eyebrow,
-  .store-v2 .v2-hero-copy > h1,
-  .store-v2 .v2-hero-copy > p {
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    clip: auto !important;
-    white-space: normal !important;
-    border: 0 !important;
+  .store-v2 .v2-eyebrow {
+    margin: 0 0 26px !important;
+    color: var(--climora-gold) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: .22em !important;
   }
 
-  .store-v2 .v2-hero-copy > .v2-eyebrow {
-    margin: 0 0 16px !important;
-  }
-
-  .store-v2 .v2-hero-copy > h1 {
-    margin: 0 0 20px !important;
-    max-width: 620px !important;
+  .store-v2 .v2-hero h1 {
+    max-width: 650px !important;
+    margin: 0 !important;
+    color: var(--climora-green) !important;
+    font-size: clamp(58px, 5.2vw, 82px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -.035em !important;
   }
 
   .store-v2 .v2-hero-copy > p {
-    margin: 18px 0 0 !important;
-    max-width: 590px !important;
+    max-width: 610px !important;
+    margin: 38px 0 0 !important;
+    color: #3f433d !important;
+    font-size: 19px !important;
+    line-height: 1.72 !important;
   }
 
   .store-v2 .v2-actions {
-    position: static !important;
-    width: auto !important;
     display: flex !important;
-    gap: 16px !important;
-    margin-top: 28px !important;
-    pointer-events: auto !important;
+    gap: 24px !important;
+    margin-top: 38px !important;
   }
 
   .store-v2 .v2-actions button {
-    width: auto !important;
-    min-height: 50px !important;
-    padding: 0 28px !important;
-    opacity: 1 !important;
-    color: inherit !important;
+    min-height: 60px !important;
+    padding: 0 34px !important;
+    border-radius: 7px !important;
+    font-size: 17px !important;
   }
 
-  .store-v2 .v2-actions .v2-primary {
-    border-color: #1f3d2b !important;
-    background: #1f3d2b !important;
+  .store-v2 .v2-primary {
+    border: 2px solid var(--climora-green) !important;
+    background: var(--climora-green) !important;
     color: #fff !important;
   }
 
-  .store-v2 .v2-actions .v2-secondary {
-    border-color: #c9a876 !important;
-    background: transparent !important;
-    color: #1f3d2b !important;
+  .store-v2 .v2-secondary {
+    border: 2px solid var(--climora-gold) !important;
+    background: rgba(255,255,255,.08) !important;
+    color: var(--climora-ink) !important;
   }
 
   .store-v2 .v2-hero-visual {
     position: relative !important;
     display: block !important;
     align-self: stretch !important;
-    min-height: 620px !important;
-    overflow: hidden !important;
-    background-color: #f7f0e5 !important;
+    min-height: 730px !important;
+    background-color: var(--climora-cream) !important;
     background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
-    background-size: contain !important;
     background-position: center bottom !important;
+    background-size: min(100%, 920px) auto !important;
+    overflow: hidden !important;
   }
 
-  .store-v2 .v2-hero-visual::before,
+  .store-v2 .v2-hero-visual::before {
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 auto 0 0 !important;
+    width: 16% !important;
+    background: linear-gradient(90deg, var(--climora-cream), rgba(247,239,227,.45), transparent) !important;
+    pointer-events: none !important;
+  }
+
   .store-v2 .v2-hero-visual::after {
     display: none !important;
   }
 }
 
-@media (max-width: 1000px) {
+.store-v2 .v2-trust-strip {
+  padding: 32px clamp(50px, 6vw, 100px) !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0 !important;
+  background: linear-gradient(90deg, #0f3827, #123f2b 45%, #0e3625) !important;
+}
+
+.store-v2 .v2-trust-strip > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  min-height: 82px !important;
+  padding: 0 30px !important;
+  border-right: 1px solid rgba(189,133,46,.65) !important;
+  text-align: left !important;
+}
+
+.store-v2 .v2-trust-strip > div:last-child {
+  border-right: 0 !important;
+}
+
+.store-v2 .v2-trust-icon {
+  flex: 0 0 auto !important;
+  color: var(--climora-gold) !important;
+  font-family: Georgia, serif !important;
+  font-size: 46px !important;
+  line-height: 1 !important;
+}
+
+.store-v2 .v2-trust-strip > div > span:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+
+.store-v2 .v2-trust-strip strong {
+  color: #fff !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+}
+
+.store-v2 .v2-trust-strip small {
+  color: rgba(255,255,255,.82) !important;
+  font-size: 15px !important;
+}
+
+@media (max-width: 1200px) and (min-width: 1001px) {
+  .store-v2 .v2-header {
+    gap: 24px !important;
+    padding-inline: 34px !important;
+  }
+
   .store-v2 .v2-logo-button {
-    width: 224px !important;
-    min-width: 224px !important;
-    height: 64px !important;
+    width: 230px !important;
+    min-width: 230px !important;
+  }
+
+  .store-v2 .v2-search {
+    width: 260px !important;
+  }
+
+  .store-v2 .v2-nav {
+    gap: 22px !important;
   }
 
   .store-v2 .v2-hero {
-    display: grid !important;
+    grid-template-columns: 46% 54% !important;
+    min-height: 650px !important;
+  }
+
+  .store-v2 .v2-hero h1 {
+    font-size: 58px !important;
+  }
+
+  .store-v2 .v2-hero-visual {
+    min-height: 650px !important;
+    background-size: 100% auto !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  .store-v2 .v2-header {
+    min-height: 82px !important;
+    padding: 10px 18px !important;
+    gap: 14px !important;
+  }
+
+  .store-v2 .v2-logo-button {
+    width: 210px !important;
+    min-width: 210px !important;
+    height: 68px !important;
+  }
+
+  .store-v2 .v2-search {
+    order: 3 !important;
+    width: 100% !important;
+    height: 48px !important;
+  }
+
+  .store-v2 .v2-hero {
     grid-template-columns: 1fr !important;
     min-height: auto !important;
-    background: #f7f0e5 !important;
+    background: var(--climora-cream) !important;
   }
 
   .store-v2 .v2-hero-copy {
-    position: relative !important;
-    display: flex !important;
-    padding: 52px 24px 40px !important;
-    background: #f7f0e5 !important;
+    padding: 58px 28px 36px !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+
+  .store-v2 .v2-hero h1 {
+    max-width: 760px !important;
+    color: var(--climora-green) !important;
+  }
+
+  .store-v2 .v2-hero-copy > p {
+    max-width: 650px !important;
   }
 
   .store-v2 .v2-hero-visual {
     display: block !important;
-    min-height: 470px !important;
-    overflow: hidden !important;
-    background-color: #f7f0e5 !important;
+    min-height: 520px !important;
+    background-color: var(--climora-cream) !important;
     background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
-    background-size: contain !important;
     background-position: center bottom !important;
+    background-size: contain !important;
   }
 
-  .store-v2 .v2-hero-visual::before,
-  .store-v2 .v2-hero-visual::after {
-    display: none !important;
+  .store-v2 .v2-trust-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .store-v2 .v2-trust-strip > div:nth-child(2) {
+    border-right: 0 !important;
   }
 }
 
 @media (max-width: 640px) {
   .store-v2 .v2-logo-button {
-    width: 205px !important;
-    min-width: 205px !important;
-    height: 60px !important;
-    padding: 4px 8px !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    height: 62px !important;
   }
 
   .store-v2 .v2-hero-copy {
-    padding: 42px 20px 34px !important;
+    padding: 48px 20px 28px !important;
+  }
+
+  .store-v2 .v2-hero h1 {
+    font-size: 44px !important;
+  }
+
+  .store-v2 .v2-hero-copy > p {
+    font-size: 16px !important;
+  }
+
+  .store-v2 .v2-actions {
+    width: 100% !important;
+    flex-direction: column !important;
+  }
+
+  .store-v2 .v2-actions button {
+    width: 100% !important;
   }
 
   .store-v2 .v2-hero-visual {
-    min-height: 360px !important;
+    min-height: 400px !important;
     background-size: contain !important;
-    background-position: center bottom !important;
+  }
+
+  .store-v2 .v2-trust-strip {
+    padding: 20px 12px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .store-v2 .v2-trust-strip > div {
+    justify-content: flex-start !important;
+    min-height: 72px !important;
+    padding: 8px 18px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(189,133,46,.35) !important;
+  }
+
+  .store-v2 .v2-trust-strip > div:last-child {
+    border-bottom: 0 !important;
   }
 }
