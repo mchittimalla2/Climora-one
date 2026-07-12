@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "../../../App.css";
+import "./ProductAdmin.css";
 import { API_BASE_URL } from "../../../config/api";
 import ProductSearch from "./ProductSearch";
 import ProductTable from "./ProductTable";
@@ -12,15 +13,29 @@ function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [pageError, setPageError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/products`);
-    const data = await response.json();
-    setProducts(data);
+    try {
+      setPageError("");
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
+        headers: { Accept: "application/json" },
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Unable to load products.");
+      }
+
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setPageError(error.message || "Unable to load products.");
+    }
   };
 
   const filteredProducts = products.filter((product) => {
@@ -42,62 +57,100 @@ function Products() {
   };
 
   const closeModal = () => {
+    if (isSaving) return;
     setEditingProduct(null);
     setIsModalOpen(false);
   };
 
   const saveProduct = async (productData) => {
     const isEditing = Boolean(editingProduct);
-
     const url = isEditing
       ? `${API_BASE_URL}/api/products/${editingProduct.id}`
       : `${API_BASE_URL}/api/products`;
 
-    const method = isEditing ? "PUT" : "POST";
+    const formData = new FormData();
+    formData.append("name", productData.name);
+    formData.append("category", productData.category || "");
+    formData.append("price", String(productData.price));
+    formData.append("stock", String(productData.stock));
+    formData.append("description", productData.description || "");
 
-    const response = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(productData),
+    productData.images.forEach((image) => {
+      formData.append("images[]", image);
     });
 
-    if (!response.ok) {
-      alert("Product save failed.");
-      return;
+    if (isEditing) {
+      formData.append("_method", "PUT");
     }
 
-    closeModal();
-    await fetchProducts();
+    try {
+      setIsSaving(true);
+      setPageError("");
 
-    setSuccessMessage(
-      isEditing ? "Product updated successfully." : "Product added successfully."
-    );
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData,
+      });
 
-    setTimeout(() => setSuccessMessage(""), 3000);
+      const data = await response.json();
+
+      if (!response.ok) {
+        const validationErrors = data?.errors
+          ? Object.values(data.errors).flat().join(" ")
+          : "";
+
+        throw new Error(
+          validationErrors || data?.message || "Product save failed."
+        );
+      }
+
+      closeModal();
+      await fetchProducts();
+      setSuccessMessage(
+        isEditing
+          ? "Product updated successfully."
+          : "Product added successfully."
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      setPageError(error.message || "Product save failed.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const deleteProduct = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+        method: "DELETE",
+        headers: { Accept: "application/json" },
+      });
+      const data = await response.json();
 
-    if (!response.ok) {
-      alert("Failed to delete product.");
-      return;
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to delete product.");
+      }
+
+      await fetchProducts();
+      setSuccessMessage("Product deleted successfully.");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (error) {
+      setPageError(error.message || "Failed to delete product.");
     }
-
-    await fetchProducts();
-    setSuccessMessage("Product deleted successfully.");
-    setTimeout(() => setSuccessMessage(""), 3000);
   };
 
   return (
     <div>
       <header className="header">
         <div className="logo-section">
-          <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
+          <img
+            src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
+            alt="Climoraone"
+            className="header-logo"
+          />
         </div>
 
         <nav>
@@ -107,6 +160,7 @@ function Products() {
           <Link to="/">Store</Link>
         </nav>
       </header>
+
       <section className="admin-dashboard">
         <div className="admin-products-header">
           <div>
@@ -124,6 +178,8 @@ function Products() {
           <div className="success-banner">{successMessage}</div>
         )}
 
+        {pageError && <div className="product-page-error">{pageError}</div>}
+
         <ProductSearch
           searchText={searchText}
           setSearchText={setSearchText}
@@ -135,11 +191,13 @@ function Products() {
           onDelete={deleteProduct}
         />
       </section>
+
       <ProductModal
         isOpen={isModalOpen}
         onClose={closeModal}
         onSave={saveProduct}
         editingProduct={editingProduct}
+        isSaving={isSaving}
       />
     </div>
   );
