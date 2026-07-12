@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import {
   BrowserRouter,
   Navigate,
   Route,
   Routes,
+  useNavigate,
 } from "react-router-dom";
 
 import StoreRoute from "./components/StoreRoute";
@@ -18,16 +20,36 @@ import Products from "./pages/admin/products/Products";
 
 import { CartProvider } from "./context/CartContext";
 import "./App.css";
+import "./BrandExperience.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
+const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
 
-const routerBase =
-  viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
+function BuyNowRedirect() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      const buyNowButton = event.target.closest(".buy-btn");
+      if (!buyNowButton || buyNowButton.disabled) return;
+
+      window.setTimeout(() => {
+        navigate("/checkout");
+      }, 80);
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [navigate]);
+
+  return null;
+}
 
 function App() {
   return (
     <CartProvider>
       <BrowserRouter basename={routerBase}>
+        <BuyNowRedirect />
         <Routes>
           <Route path="/" element={<StoreRoute />} />
           <Route path="/home" element={<StoreRoute />} />
@@ -36,33 +58,15 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/track-order" element={<TrackOrder />} />
-          <Route
-            path="/return-policy"
-            element={<ReturnPolicy />}
-          />
-          <Route
-            path="/shipping-policy"
-            element={<ShippingPolicy />}
-          />
+          <Route path="/return-policy" element={<ReturnPolicy />} />
+          <Route path="/shipping-policy" element={<ShippingPolicy />} />
 
           <Route path="/admin" element={<Admin />} />
-          <Route
-            path="/admin/orders"
-            element={<Orders />}
-          />
-          <Route
-            path="/admin/products"
-            element={<Products />}
-          />
-          <Route
-            path="/admin/reports"
-            element={<Reports />}
-          />
+          <Route path="/admin/orders" element={<Orders />} />
+          <Route path="/admin/products" element={<Products />} />
+          <Route path="/admin/reports" element={<Reports />} />
 
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </CartProvider>
