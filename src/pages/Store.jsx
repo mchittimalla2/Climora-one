@@ -105,9 +105,6 @@ function Store() {
     });
   }, [products, searchTerm, selectedCategory]);
 
-  const heroProduct = products[0];
-  const craftImage = products[1]?.images?.[0] || heroProduct?.images?.[1] || heroProduct?.images?.[0] || placeholderImage;
-
   const scrollToSection = (id) => {
     setSelectedProduct(null);
     setShowMobileMenu(false);
@@ -142,7 +139,7 @@ function Store() {
     <div className="store-v2">
       <header className="v2-header">
         <button type="button" onClick={() => scrollToSection("home")} className="v2-logo-button" aria-label="Go to homepage">
-          <BrandLogo className="v2-header-logo" />
+          <span className="v2-logo-leaf"><BrandLogo className="v2-header-logo" /></span>
         </button>
 
         <input
@@ -220,8 +217,12 @@ function Store() {
                 <button type="button" className="v2-secondary" onClick={() => scrollToSection("craft")}>Explore Our Craft</button>
               </div>
             </div>
-            <div className="v2-hero-visual">
-              <img className="v2-hero-image" src={heroProduct?.images?.[0] || placeholderImage} alt="Premium handcrafted décor" />
+            <div className="v2-hero-visual" aria-label="Artisan-inspired Climoraone motif">
+              <div className="v2-hero-symbols" aria-hidden="true">
+                <span className="artisan-symbol artisan-symbol--wheel">◉</span>
+                <span className="artisan-symbol artisan-symbol--leaf">⌁</span>
+                <span className="artisan-symbol artisan-symbol--grain">≋</span>
+              </div>
               <div className="v2-hero-badge"><strong>Made by hand</strong><span>Each piece carries the detail and character that only skilled craftsmanship can create.</span></div>
             </div>
           </section>
@@ -268,11 +269,16 @@ function Store() {
           </section>
 
           <section id="craft" className="v2-craft">
-            <img src={craftImage} alt="Detail of handcrafted artisan work" loading="lazy" />
+            <div className="v2-craft-art" aria-hidden="true">
+              <span className="craft-icon craft-icon--top">◒</span>
+              <span className="craft-icon craft-icon--middle">✦</span>
+              <span className="craft-icon craft-icon--bottom">⌂</span>
+            </div>
             <div className="v2-craft-copy">
               <span className="v2-eyebrow">The art behind every piece</span>
               <h2>Crafted slowly. Chosen thoughtfully.</h2>
               <p>Climoraone brings together exceptional handcrafted products created with patience, precision and a respect for material. Every piece is selected first for its beauty and quality—its artisan story makes it even more meaningful.</p>
+              <p className="v2-impact-note">Behind the collection is a wider purpose: creating sustained opportunities for women and rural artisans across India, while helping traditional skills remain relevant for the next generation.</p>
               <div className="v2-craft-points">
                 <div><strong>Distinctive by nature</strong><br />Subtle variations make every handcrafted piece genuinely individual.</div>
                 <div><strong>Made to be lived with</strong><br />Timeless forms designed to add character to contemporary homes.</div>
