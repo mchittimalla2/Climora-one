@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Climoraone premium handcrafted decor</title>
+  <desc id="desc">An elegant artisan-inspired arrangement featuring a wooden doll, elephant, vase and home decor pieces on a warm ivory background.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf8f0"/>
+      <stop offset="1" stop-color="#efe4d0"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c48a3a"/>
+      <stop offset="1" stop-color="#7a431f"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#214f34"/>
+      <stop offset="1" stop-color="#173f2a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d3a34f"/>
+      <stop offset="1" stop-color="#a86e17"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#193323" flood-opacity=".16"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <path d="M170 210 C430 35 1180 35 1430 220" fill="none" stroke="#214f34" stroke-width="5" stroke-linecap="round"/>
+  <path d="M170 210 l0 24 M1430 220 l0 24" stroke="#214f34" stroke-width="5" stroke-linecap="round"/>
+  <path d="M770 82 l20 20 20-20 20 20 20-20" fill="none" stroke="#b6873d" stroke-width="5" stroke-linecap="round"/>
+
+  <g opacity=".18" fill="none" stroke="#b6873d" stroke-width="4">
+    <path d="M1030 170c-85 28-137 114-114 194 25 87 123 127 207 86 74-36 102-128 63-201-34-63-107-91-173-69"/>
+    <path d="M1028 195c-66 24-105 90-84 151 22 66 95 96 159 64 57-28 78-97 47-153-26-48-81-68-130-49"/>
+    <path d="M1027 223c-47 18-76 66-60 112 17 48 71 70 117 46 42-21 57-70 35-111-20-35-60-49-95-35"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <g transform="translate(620 430)">
+      <ellipse cx="110" cy="235" rx="120" ry="28" fill="#2f241c" opacity=".14"/>
+      <path d="M40 95c0-45 33-82 77-82 42 0 76 35 76 78v140H40z" fill="url(#wood)"/>
+      <ellipse cx="116" cy="79" rx="58" ry="50" fill="#bb7b35"/>
+      <path d="M77 65c18-43 82-53 103-4-26-12-66-11-103 4z" fill="#1f1b19"/>
+      <circle cx="96" cy="79" r="6" fill="#fff"/><circle cx="137" cy="79" r="6" fill="#fff"/>
+      <circle cx="96" cy="79" r="2.8" fill="#1d251f"/><circle cx="137" cy="79" r="2.8" fill="#1d251f"/>
+      <path d="M109 100c8 6 16 6 24 0" fill="none" stroke="#7e2d24" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="116" cy="57" r="6" fill="#b52c26"/>
+      <path d="M40 134c29-20 122-23 153 0v97H40z" fill="#a8322b"/>
+      <path d="M59 141c15 32 32 63 51 90M174 141c-15 32-32 63-51 90" stroke="#d9a74d" stroke-width="7"/>
+      <path d="M92 135c8 22 37 22 47 0" fill="none" stroke="#d9a74d" stroke-width="6"/>
+      <path d="M34 147c-27 8-42 26-50 52 34 4 61-11 77-35z" fill="#b77a36"/>
+      <path d="M197 147c28 8 43 26 51 52-35 4-62-11-78-35z" fill="#b77a36"/>
+    </g>
+
+    <g transform="translate(400 560)">
+      <ellipse cx="110" cy="165" rx="110" ry="23" fill="#2f241c" opacity=".13"/>
+      <path d="M60 75c0-34 26-61 59-61 32 0 58 26 58 59v72H60z" fill="#996126"/>
+      <path d="M74 73c-24-26-45-18-60 3 21 12 39 27 53 48z" fill="#bb7d34"/>
+      <path d="M166 73c24-26 45-18 60 3-21 12-39 27-53 48z" fill="#bb7d34"/>
+      <path d="M119 65c24 0 42 17 42 38 0 19-16 35-38 36-15 0-30-10-35-24-5-18 7-38 31-50z" fill="#ad6f2f"/>
+      <path d="M121 101c13 13 19 32 14 55" fill="none" stroke="#8a4f20" stroke-width="9" stroke-linecap="round"/>
+      <path d="M83 48c18-12 56-13 74 0" fill="none" stroke="#d1a04d" stroke-width="8"/>
+      <path d="M42 126h153v37H42z" rx="18" fill="#a62e28"/>
+      <path d="M52 137h133" stroke="#d9a74d" stroke-width="6" stroke-dasharray="12 10"/>
+    </g>
+
+    <g transform="translate(820 350)">
+      <ellipse cx="110" cy="315" rx="116" ry="26" fill="#2f241c" opacity=".12"/>
+      <path d="M55 90c0-40 28-70 55-70s55 30 55 70v205H55z" fill="url(#wood)"/>
+      <path d="M69 114c28 24 56 24 82 0M70 164c28 24 56 24 82 0M71 214c27 23 54 23 80 0" fill="none" stroke="#d5aa57" stroke-width="7" opacity=".75"/>
+      <path d="M81 43c10-20 48-20 58 0" fill="none" stroke="#244f35" stroke-width="8"/>
+      <g fill="#486d35">
+        <path d="M104 13c-25-50-60-66-88-45 22 15 42 32 60 59z"/>
+        <path d="M116 9c20-53 55-70 85-51-20 18-38 39-52 66z"/>
+        <path d="M100 0c-8-48 7-81 36-94 8 28 9 56-2 88z"/>
+      </g>
+    </g>
+
+    <g transform="translate(1135 555)">
+      <ellipse cx="105" cy="174" rx="105" ry="22" fill="#2f241c" opacity=".12"/>
+      <path d="M38 55h134l-13 103H52z" fill="#8f5b28"/>
+      <path d="M52 72h106M49 102h111M47 132h115" stroke="#c99747" stroke-width="5" opacity=".7"/>
+      <path d="M54 50c9-22 23-35 51-38 28 3 43 16 51 38z" fill="#a96f31"/>
+      <path d="M105 8c-8-17 0-28 0-28s8 11 0 28z" fill="#7f4d22"/>
+      <path d="M76 86l18 17-18 18-18-18zM134 86l18 17-18 18-18-18z" fill="#f1dfb7" opacity=".9"/>
+    </g>
+
+    <g transform="translate(1285 605)">
+      <ellipse cx="75" cy="135" rx="77" ry="18" fill="#2f241c" opacity=".12"/>
+      <ellipse cx="75" cy="69" rx="57" ry="50" fill="#a4662d"/>
+      <ellipse cx="75" cy="50" rx="42" ry="35" fill="#c08a3f"/>
+      <path d="M31 68h88v56H31z" fill="#7e4a21"/>
+      <path d="M30 86h90" stroke="#d2a14d" stroke-width="5"/>
+      <path d="M75 16c-10-20 1-33 1-33s11 15-1 33z" fill="#884f20"/>
+    </g>
+  </g>
+
+  <g opacity=".24" fill="none" stroke="#b6873d" stroke-width="3">
+    <path d="M1375 360c45-82 84-102 119-121-22 52-53 96-119 121z"/>
+    <path d="M1388 372c55-56 104-67 145-72-35 33-79 59-145 72z"/>
+    <path d="M305 280c-46-45-86-58-121-62 29 27 66 48 121 62z"/>
+  </g>
+</svg>
