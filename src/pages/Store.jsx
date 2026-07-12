@@ -157,7 +157,7 @@ function Store() {
           <button type="button" onClick={() => scrollToSection("products")}>Collection</button>
           <button type="button" onClick={() => scrollToSection("craft")}>Our Craft</button>
           <Link to="/contact">Contact</Link>
-          <button type="button" className="v2-cart-link" onClick={() => scrollToSection("cart")}>Cart ({cartCount})</button>
+          <button type="button" className="v2-cart-link" onClick={() => scrollToSection("cart")}>🛒 Cart ({cartCount})</button>
         </nav>
 
         <button type="button" className="v2-menu-button" onClick={() => setShowMobileMenu(!showMobileMenu)} aria-label="Open menu">☰</button>
@@ -217,21 +217,14 @@ function Store() {
                 <button type="button" className="v2-secondary" onClick={() => scrollToSection("craft")}>Explore Our Craft</button>
               </div>
             </div>
-            <div className="v2-hero-visual" aria-label="Artisan-inspired Climoraone motif">
-              <div className="v2-hero-symbols" aria-hidden="true">
-                <span className="artisan-symbol artisan-symbol--wheel">◉</span>
-                <span className="artisan-symbol artisan-symbol--leaf">⌁</span>
-                <span className="artisan-symbol artisan-symbol--grain">≋</span>
-              </div>
-              <div className="v2-hero-badge"><strong>Made by hand</strong><span>Each piece carries the detail and character that only skilled craftsmanship can create.</span></div>
-            </div>
+            <div className="v2-hero-visual" aria-label="Premium Indian handcrafted décor collection" />
           </section>
 
           <section className="v2-trust-strip">
-            <div><strong>Premium Craftsmanship</strong><span>Thoughtfully finished by skilled hands</span></div>
-            <div><strong>Quality Checked</strong><span>Inspected before every dispatch</span></div>
-            <div><strong>Made in India</strong><span>Rooted in enduring craft traditions</span></div>
-            <div><strong>Secure Delivery</strong><span>Carefully packed for safe arrival</span></div>
+            <div><span className="v2-trust-icon">✿</span><span><strong>Handcrafted</strong><small>By skilled artisans</small></span></div>
+            <div><span className="v2-trust-icon">⌁</span><span><strong>Sustainable</strong><small>Natural & eco-friendly</small></span></div>
+            <div><span className="v2-trust-icon">❀</span><span><strong>Made in India</strong><small>Proud of our roots</small></span></div>
+            <div><span className="v2-trust-icon">▣</span><span><strong>Secure Delivery</strong><small>Pan India</small></span></div>
           </section>
 
           <section id="products" className="v2-section">
@@ -328,9 +321,7 @@ function Store() {
           <div><BrandLogo className="footer-logo" /><p>Premium handcrafted décor bringing timeless Indian craftsmanship into beautiful homes.</p></div>
           <div><h4>Explore</h4><button type="button" className="footer-link-button" onClick={() => scrollToSection("products")}>Collection</button><button type="button" className="footer-link-button" onClick={() => scrollToSection("craft")}>Our Craft</button><Link to="/track-order">Track Order</Link></div>
           <div><h4>Customer Care</h4><Link to="/return-policy">Return Policy</Link><Link to="/shipping-policy">Shipping Policy</Link><Link to="/contact">Contact Us</Link></div>
-          <div><h4>Contact</h4><p>support@climoraone.com</p><p>WhatsApp: +91 98765 43210</p></div>
         </div>
-        <div className="footer-bottom">© 2026 Climoraone. Crafted with purpose.</div>
       </footer>
     </div>
   );
