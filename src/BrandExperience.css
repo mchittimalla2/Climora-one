@@ -1,0 +1,470 @@
+/* Centralized Climoraone branding */
+.header-logo,
+.footer-logo,
+.simple-header .header-logo,
+.checkout-brand img,
+.tracking-brand img {
+  content: url("/images/climoraone-logo.svg");
+  object-fit: contain;
+  background: #fff;
+}
+
+.header-logo {
+  width: clamp(150px, 18vw, 220px);
+  height: 58px;
+}
+
+.footer-logo {
+  width: min(240px, 100%);
+  height: auto;
+  border-radius: 8px;
+}
+
+.brand-logo {
+  display: block;
+  width: 210px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.brand-logo--footer {
+  width: 170px;
+  height: 54px;
+}
+
+/* Compact order confirmation */
+.checkout-success-page {
+  min-height: calc(100vh - 92px);
+  padding: 44px 20px;
+  display: grid;
+  place-items: center;
+}
+
+.checkout-success-card {
+  width: min(500px, 100%);
+  padding: 34px 32px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 18px 48px rgba(28, 61, 34, 0.11);
+}
+
+.checkout-success-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 34px;
+}
+
+.checkout-success-card h1 {
+  margin: 0 0 12px;
+  font-size: clamp(29px, 4vw, 40px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.checkout-success-card > strong {
+  display: block;
+  margin: 8px 0 18px;
+  color: #376d31;
+  font-size: clamp(18px, 3vw, 25px);
+  overflow-wrap: anywhere;
+}
+
+.checkout-success-card p {
+  margin: 8px 0;
+  line-height: 1.55;
+}
+
+.checkout-success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.checkout-success-actions a {
+  min-width: 150px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+/* Track order */
+.tracking-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f7faf4 0%, #eef4e9 100%);
+  color: #1f3223;
+}
+
+.tracking-header {
+  min-height: 82px;
+  padding: 10px clamp(20px, 5vw, 70px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #fff;
+  border-bottom: 1px solid #dfe8dc;
+}
+
+.tracking-brand {
+  display: inline-flex;
+}
+
+.tracking-back-link {
+  color: #376d31;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tracking-main {
+  width: min(940px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 54px 0 70px;
+  flex: 1;
+}
+
+.tracking-intro {
+  max-width: 640px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.tracking-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #a5680c;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tracking-intro h1 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.1;
+}
+
+.tracking-intro p {
+  margin: 0;
+  color: #647067;
+  line-height: 1.6;
+}
+
+.tracking-card,
+.tracking-result-card {
+  background: #fff;
+  border: 1px solid #dbe5d8;
+  border-radius: 18px;
+  box-shadow: 0 16px 42px rgba(33, 72, 40, 0.08);
+}
+
+.tracking-card {
+  padding: 24px;
+}
+
+.tracking-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.tracking-form label {
+  display: grid;
+  gap: 7px;
+  color: #283f2c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tracking-form input {
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border: 1px solid #b9c9b8;
+  border-radius: 9px;
+  font: inherit;
+  outline: none;
+}
+
+.tracking-form input:focus {
+  border-color: #4b8a42;
+  box-shadow: 0 0 0 3px rgba(75, 138, 66, 0.13);
+}
+
+.tracking-form button {
+  min-height: 46px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  background: #3f7d35;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tracking-error {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  color: #922f2a;
+  background: #fff2ef;
+  border: 1px solid #efc8c3;
+}
+
+.tracking-result-card {
+  margin-top: 24px;
+  padding: 28px;
+}
+
+.tracking-order-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e2e9df;
+}
+
+.tracking-order-header span,
+.tracking-summary-grid span,
+.tracking-item-row span {
+  color: #6c776e;
+  font-size: 13px;
+}
+
+.tracking-order-header h2 {
+  margin: 5px 0;
+  font-size: clamp(20px, 4vw, 28px);
+  overflow-wrap: anywhere;
+}
+
+.tracking-order-header p {
+  margin: 0;
+  color: #6c776e;
+}
+
+.tracking-status {
+  padding: 8px 13px;
+  border-radius: 999px;
+  color: #315d2b !important;
+  background: #e8f2e4;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tracking-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 22px 0;
+}
+
+.tracking-summary-grid > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-radius: 11px;
+  background: #f6f9f4;
+}
+
+.tracking-items,
+.tracking-timeline-wrap {
+  margin-top: 26px;
+}
+
+.tracking-items h3,
+.tracking-timeline-wrap h3 {
+  margin: 0 0 13px;
+  font-size: 18px;
+}
+
+.tracking-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid #e7ece5;
+}
+
+.tracking-item-row > div {
+  display: grid;
+  gap: 4px;
+}
+
+.tracking-timeline {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+}
+
+.tracking-step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  color: #8a928b;
+}
+
+.tracking-step::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: #d8dfd6;
+  z-index: 0;
+}
+
+.tracking-step:first-child::before {
+  display: none;
+}
+
+.tracking-step.completed::before {
+  background: #5c9853;
+}
+
+.tracking-step-dot {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid #cfd8cc;
+  background: #fff;
+  font-weight: 900;
+}
+
+.tracking-step.completed {
+  color: #2d542b;
+}
+
+.tracking-step.completed .tracking-step-dot {
+  color: #fff;
+  border-color: #4f8b46;
+  background: #4f8b46;
+}
+
+.tracking-step div {
+  display: grid;
+  gap: 4px;
+}
+
+.tracking-step small {
+  color: #7b857d;
+  font-size: 10px;
+}
+
+.tracking-footer {
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  color: #dfe9dc;
+  background: #1d4026;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .header-logo {
+    width: 190px;
+    height: 68px;
+  }
+
+  .checkout-success-page {
+    padding: 26px 14px;
+  }
+
+  .checkout-success-card {
+    padding: 28px 18px;
+    border-radius: 15px;
+  }
+
+  .checkout-success-card h1 {
+    font-size: 29px;
+  }
+
+  .checkout-success-actions {
+    flex-direction: column;
+  }
+
+  .checkout-success-actions a {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tracking-header {
+    min-height: 70px;
+    padding: 8px 16px;
+  }
+
+  .brand-logo {
+    width: 150px;
+    height: 54px;
+  }
+
+  .tracking-main {
+    width: min(100% - 20px, 940px);
+    padding: 34px 0 46px;
+  }
+
+  .tracking-card,
+  .tracking-result-card {
+    padding: 18px;
+    border-radius: 14px;
+  }
+
+  .tracking-form {
+    grid-template-columns: 1fr;
+  }
+
+  .tracking-form button {
+    width: 100%;
+  }
+
+  .tracking-order-header {
+    flex-direction: column;
+  }
+
+  .tracking-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tracking-timeline {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tracking-step {
+    grid-template-columns: 34px 1fr;
+    justify-items: start;
+    align-items: center;
+    text-align: left;
+  }
+
+  .tracking-step::before {
+    top: -12px;
+    left: 16px;
+    width: 2px;
+    height: 24px;
+  }
+
+  .tracking-footer {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+}
