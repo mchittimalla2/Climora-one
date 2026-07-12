@@ -27,11 +27,7 @@ function Products() {
         headers: { Accept: "application/json" },
       });
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Unable to load products.");
-      }
-
+      if (!response.ok) throw new Error(data?.message || "Unable to load products.");
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
       setPageError(error.message || "Unable to load products.");
@@ -45,16 +41,6 @@ function Products() {
       product.category?.toLowerCase().includes(text)
     );
   });
-
-  const openAddModal = () => {
-    setEditingProduct(null);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (product) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
 
   const closeModal = () => {
     if (isSaving) return;
@@ -75,13 +61,11 @@ function Products() {
     formData.append("stock", String(productData.stock));
     formData.append("description", productData.description || "");
 
-    productData.images.forEach((image) => {
-      formData.append("images[]", image);
+    Object.entries(productData.imageFiles).forEach(([slot, file]) => {
+      if (file) formData.append(`image_${slot}`, file);
     });
 
-    if (isEditing) {
-      formData.append("_method", "PUT");
-    }
+    if (isEditing) formData.append("_method", "PUT");
 
     try {
       setIsSaving(true);
@@ -92,27 +76,19 @@ function Products() {
         headers: { Accept: "application/json" },
         body: formData,
       });
-
       const data = await response.json();
 
       if (!response.ok) {
         const validationErrors = data?.errors
           ? Object.values(data.errors).flat().join(" ")
           : "";
-
-        throw new Error(
-          validationErrors || data?.message || "Product save failed."
-        );
+        throw new Error(validationErrors || data?.message || "Product save failed.");
       }
 
       setEditingProduct(null);
       setIsModalOpen(false);
       await fetchProducts();
-      setSuccessMessage(
-        isEditing
-          ? "Product updated successfully."
-          : "Product added successfully."
-      );
+      setSuccessMessage(isEditing ? "Product updated successfully." : "Product added successfully.");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       setPageError(error.message || "Product save failed.");
@@ -130,11 +106,7 @@ function Products() {
         headers: { Accept: "application/json" },
       });
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Failed to delete product.");
-      }
-
+      if (!response.ok) throw new Error(data?.message || "Failed to delete product.");
       await fetchProducts();
       setSuccessMessage("Product deleted successfully.");
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -147,13 +119,8 @@ function Products() {
     <div>
       <header className="header">
         <div className="logo-section">
-          <img
-            src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-            alt="Climoraone"
-            className="header-logo"
-          />
+          <img src={`${import.meta.env.BASE_URL}images/logo.jpeg`} alt="Climoraone" className="header-logo" />
         </div>
-
         <nav>
           <Link to="/admin">Dashboard</Link>
           <Link to="/admin/orders">Orders</Link>
@@ -169,26 +136,18 @@ function Products() {
             <p>Add, edit, delete, and manage stock for Climoraone products.</p>
             <strong>{products.length} products available</strong>
           </div>
-
-          <button className="add-product-btn" onClick={openAddModal}>
+          <button className="add-product-btn" onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}>
             + Add Product
           </button>
         </div>
 
-        {successMessage && (
-          <div className="success-banner">{successMessage}</div>
-        )}
-
+        {successMessage && <div className="success-banner">{successMessage}</div>}
         {pageError && <div className="product-page-error">{pageError}</div>}
 
-        <ProductSearch
-          searchText={searchText}
-          setSearchText={setSearchText}
-        />
-
+        <ProductSearch searchText={searchText} setSearchText={setSearchText} />
         <ProductTable
           products={filteredProducts}
-          onEdit={openEditModal}
+          onEdit={(product) => { setEditingProduct(product); setIsModalOpen(true); }}
           onDelete={deleteProduct}
         />
       </section>
