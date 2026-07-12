@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
@@ -21,81 +21,118 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'customer_name' => 'required|string',
-            'email' => 'required|email',
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'city' => 'nullable|string',
-            'state' => 'nullable|string',
-            'pincode' => 'nullable|string',
-            'total' => 'required|numeric',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
-            'items.*.product_name' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric',
+            'customer_name' => ['required', 'string', 'min:2', 'max:100'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'regex:/^[0-9]{10}$/'],
+            'address' => ['required', 'string', 'min:5', 'max:500'],
+            'city' => ['required', 'string', 'max:100'],
+            'state' => ['required', 'string', 'max:100'],
+            'pincode' => ['required', 'digits:6'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:products,id',
+            ],
+            'items.*.quantity' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:100',
+            ],
         ]);
 
         try {
             $order = DB::transaction(function () use ($validated) {
-                foreach ($validated['items'] as $item) {
-                    $product = Product::lockForUpdate()->find($item['product_id']);
+                $preparedItems = [];
+                $calculatedTotal = 0;
 
-                    if (!$product) {
-                        throw new \Exception("Product not found: " . $item['product_name']);
-                    }
+                foreach ($validated['items'] as $requestedItem) {
+                    $product = Product::query()
+                        ->lockForUpdate()
+                        ->findOrFail($requestedItem['product_id']);
 
-                    if ($product->stock < $item['quantity']) {
-                        throw new \Exception(
-                            "Only {$product->stock} quantity available for {$product->name}."
+                    $quantity = (int) $requestedItem['quantity'];
+                    $availableStock = (int) $product->stock;
+
+                    if ($availableStock < $quantity) {
+                        throw new \RuntimeException(
+                            "Only {$availableStock} item(s) are available for {$product->name}."
                         );
                     }
+
+                    $unitPrice = (float) $product->price;
+                    $subtotal = round($unitPrice * $quantity, 2);
+
+                    $preparedItems[] = [
+                        'product' => $product,
+                        'quantity' => $quantity,
+                        'unit_price' => $unitPrice,
+                        'subtotal' => $subtotal,
+                    ];
+
+                    $calculatedTotal += $subtotal;
                 }
 
+                $calculatedTotal = round($calculatedTotal, 2);
+
                 $order = Order::create([
-                    'order_number' => 'CLM-' . date('Y') . '-' . time(),
+                    'order_number' => sprintf(
+                        'CLM-%s-%s',
+                        now()->format('Y'),
+                        strtoupper(uniqid())
+                    ),
                     'customer_name' => $validated['customer_name'],
-                    'email' => $validated['email'],
+                    'email' => strtolower($validated['email']),
                     'phone' => $validated['phone'],
                     'address' => $validated['address'],
-                    'city' => $validated['city'] ?? '',
-                    'state' => $validated['state'] ?? '',
-                    'pincode' => $validated['pincode'] ?? '',
-                    'total' => $validated['total'],
+                    'city' => $validated['city'],
+                    'state' => $validated['state'],
+                    'pincode' => $validated['pincode'],
+                    'total' => $calculatedTotal,
                     'status' => 'Order Received',
                     'status_history' => json_encode([
-                        'Order Received' => now()->toDateTimeString()
+                        'Order Received' => now()->toDateTimeString(),
                     ]),
                     'payment_status' => 'Pending',
                 ]);
 
-                foreach ($validated['items'] as $item) {
-                    $product = Product::lockForUpdate()->find($item['product_id']);
+                foreach ($preparedItems as $preparedItem) {
+                    $product = $preparedItem['product'];
 
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $product->id,
                         'product_name' => $product->name,
-                        'quantity' => $item['quantity'],
-                        'price' => $item['price'],
-                        'subtotal' => $item['quantity'] * $item['price'],
+                        'quantity' => $preparedItem['quantity'],
+                        'price' => $preparedItem['unit_price'],
+                        'subtotal' => $preparedItem['subtotal'],
                     ]);
 
-                    $product->stock = $product->stock - $item['quantity'];
-                    $product->save();
+                    $product->decrement(
+                        'stock',
+                        $preparedItem['quantity']
+                    );
                 }
 
                 return $order->load('items');
-            });
+            }, 3);
 
             return response()->json([
-                'message' => 'Order created successfully',
-                'order' => $order
+                'message' => 'Order created successfully.',
+                'order' => $order,
             ], 201);
-        } catch (\Exception $error) {
+        } catch (\RuntimeException $error) {
             return response()->json([
-                'message' => $error->getMessage()
-            ], 422);
+                'message' => $error->getMessage(),
+            ], 409);
+        } catch (\Throwable $error) {
+            report($error);
+
+            return response()->json([
+                'message' => 'Unable to place the order. Please try again.',
+            ], 500);
         }
     }
 
