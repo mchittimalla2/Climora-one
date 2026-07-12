@@ -1,0 +1,513 @@
+:root {
+  --climora-green: #214f2c;
+  --climora-green-soft: #4c8a3f;
+  --climora-cream: #f7f8f2;
+  --climora-gold: #b8832f;
+  --climora-text: #1d2b20;
+  --climora-muted: #667066;
+  --climora-border: #dde5da;
+}
+
+/* Centralized logo replacement for all existing headers and footers. */
+.header-logo,
+.footer-logo,
+.checkout-brand img,
+.simple-header img,
+.logo-section img {
+  content: url("/images/climoraone-logo.svg");
+  object-fit: contain;
+  background: #fff;
+}
+
+.header-logo,
+.logo-section img {
+  width: clamp(150px, 18vw, 230px);
+  max-height: 72px;
+}
+
+.footer-logo {
+  width: min(250px, 100%);
+  max-height: 110px;
+}
+
+.brand-logo {
+  display: block;
+  width: clamp(160px, 20vw, 245px);
+  height: auto;
+  object-fit: contain;
+}
+
+.brand-logo--footer {
+  width: 180px;
+}
+
+/* Compact order success view. */
+.checkout-success-page {
+  min-height: calc(100vh - 90px);
+  padding: 48px 20px;
+  display: grid;
+  place-items: start center;
+}
+
+.checkout-success-card {
+  width: min(100%, 560px);
+  padding: 38px 36px;
+  border: 1px solid var(--climora-border);
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgba(33, 79, 44, 0.1);
+  text-align: center;
+}
+
+.checkout-success-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 18px;
+  font-size: 32px;
+}
+
+.checkout-success-card h1 {
+  margin: 0 0 14px;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+}
+
+.checkout-success-card > strong {
+  display: block;
+  margin: 8px 0 18px;
+  color: var(--climora-green-soft);
+  font-size: clamp(20px, 3vw, 28px);
+  overflow-wrap: anywhere;
+}
+
+.checkout-success-card p {
+  margin: 8px 0;
+  color: var(--climora-muted);
+  font-size: 16px;
+}
+
+.checkout-success-actions {
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkout-success-actions a {
+  min-width: 160px;
+  padding: 13px 20px;
+}
+
+/* Track order redesign. */
+.tracking-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, var(--climora-cream) 100%);
+  color: var(--climora-text);
+}
+
+.tracking-header {
+  min-height: 88px;
+  padding: 12px clamp(22px, 6vw, 72px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--climora-border);
+}
+
+.tracking-brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tracking-back-link {
+  color: var(--climora-green);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.tracking-main {
+  width: min(100% - 32px, 980px);
+  margin: 0 auto;
+  padding: 56px 0 72px;
+}
+
+.tracking-intro {
+  max-width: 660px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+
+.tracking-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--climora-green-soft);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tracking-intro h1 {
+  margin: 0 0 10px;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.08;
+}
+
+.tracking-intro p {
+  margin: 0;
+  color: var(--climora-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.tracking-card,
+.tracking-result-card {
+  background: #fff;
+  border: 1px solid var(--climora-border);
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(33, 79, 44, 0.08);
+}
+
+.tracking-card {
+  padding: 28px;
+}
+
+.tracking-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.tracking-form label {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+}
+
+.tracking-form label span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tracking-form input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid #aeb9ad;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.tracking-form input:focus {
+  outline: 3px solid rgba(76, 138, 63, 0.16);
+  border-color: var(--climora-green-soft);
+}
+
+.tracking-form button {
+  height: 48px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--climora-green-soft);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tracking-form button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.tracking-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #e8b7b2;
+  border-radius: 10px;
+  background: #fff5f4;
+  color: #9a3027;
+}
+
+.tracking-result-card {
+  margin-top: 24px;
+  padding: 30px;
+}
+
+.tracking-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--climora-border);
+}
+
+.tracking-order-header span,
+.tracking-summary-grid span,
+.tracking-item-row span {
+  color: var(--climora-muted);
+  font-size: 13px;
+}
+
+.tracking-order-header h2 {
+  margin: 4px 0 6px;
+  font-size: clamp(20px, 3vw, 28px);
+  overflow-wrap: anywhere;
+}
+
+.tracking-order-header p {
+  margin: 0;
+  color: var(--climora-muted);
+}
+
+.tracking-status {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: #edf6e9;
+  color: var(--climora-green) !important;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tracking-summary-grid {
+  margin: 24px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.tracking-summary-grid > div {
+  padding: 15px;
+  display: grid;
+  gap: 6px;
+  border-radius: 12px;
+  background: #f7f9f5;
+}
+
+.tracking-items,
+.tracking-timeline-wrap {
+  margin-top: 28px;
+}
+
+.tracking-items h3,
+.tracking-timeline-wrap h3 {
+  margin: 0 0 14px;
+  font-size: 19px;
+}
+
+.tracking-item-row {
+  padding: 14px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--climora-border);
+}
+
+.tracking-item-row > div {
+  display: grid;
+  gap: 5px;
+}
+
+.tracking-timeline {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.tracking-step {
+  position: relative;
+  padding-top: 38px;
+  text-align: center;
+  color: #8b938b;
+}
+
+.tracking-step::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: -50%;
+  right: 50%;
+  height: 2px;
+  background: #dfe5dc;
+}
+
+.tracking-step:first-child::before {
+  display: none;
+}
+
+.tracking-step-dot {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  border: 2px solid #cbd4c8;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.tracking-step.completed {
+  color: var(--climora-green);
+}
+
+.tracking-step.completed::before {
+  background: var(--climora-green-soft);
+}
+
+.tracking-step.completed .tracking-step-dot {
+  border-color: var(--climora-green-soft);
+  background: var(--climora-green-soft);
+  color: #fff;
+}
+
+.tracking-step div {
+  display: grid;
+  gap: 6px;
+}
+
+.tracking-step small {
+  color: var(--climora-muted);
+  line-height: 1.35;
+}
+
+.tracking-footer {
+  padding: 28px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--climora-border);
+  background: #fff;
+  color: var(--climora-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .header-logo,
+  .logo-section img {
+    width: 230px;
+    max-height: 94px;
+  }
+
+  .checkout-success-page {
+    min-height: auto;
+    padding: 28px 16px 44px;
+  }
+
+  .checkout-success-card {
+    padding: 30px 22px;
+    border-radius: 16px;
+  }
+
+  .checkout-success-actions {
+    display: grid;
+  }
+
+  .checkout-success-actions a {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tracking-header {
+    min-height: 78px;
+    padding: 10px 18px;
+  }
+
+  .tracking-header .brand-logo {
+    width: 180px;
+  }
+
+  .tracking-back-link {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .tracking-main {
+    width: min(100% - 24px, 980px);
+    padding: 36px 0 52px;
+  }
+
+  .tracking-intro {
+    text-align: left;
+  }
+
+  .tracking-intro h1 {
+    font-size: 34px;
+  }
+
+  .tracking-intro p {
+    font-size: 15px;
+  }
+
+  .tracking-card,
+  .tracking-result-card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .tracking-form {
+    grid-template-columns: 1fr;
+  }
+
+  .tracking-form button {
+    width: 100%;
+  }
+
+  .tracking-order-header {
+    display: grid;
+  }
+
+  .tracking-status {
+    justify-self: start;
+  }
+
+  .tracking-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tracking-timeline {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .tracking-step {
+    min-height: 62px;
+    padding: 0 0 20px 48px;
+    text-align: left;
+  }
+
+  .tracking-step::before {
+    top: -34px;
+    bottom: 34px;
+    left: 13px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .tracking-step-dot {
+    top: 0;
+    left: 13px;
+  }
+
+  .tracking-step div {
+    padding-top: 3px;
+  }
+
+  .tracking-footer {
+    display: grid;
+    text-align: center;
+  }
+}
