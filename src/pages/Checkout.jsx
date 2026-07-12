@@ -7,13 +7,7 @@ import { useCart } from "../context/CartContext";
 
 function Checkout() {
   const navigate = useNavigate();
-
-  const {
-    cart,
-    cartCount,
-    total,
-    clearCart,
-  } = useCart();
+  const { cart, cartCount, total, clearCart } = useCart();
 
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
   const [orderError, setOrderError] = useState("");
@@ -30,23 +24,20 @@ function Checkout() {
 
     const orderPayload = {
       customer_name: form.customerName.value.trim(),
-      email: form.email.value.trim(),
+      email: form.email.value.trim().toLowerCase(),
       phone: form.phone.value.trim(),
       address: [
         form.address.value.trim(),
         form.addressLine2.value.trim(),
-        ]
+      ]
         .filter(Boolean)
         .join(", "),
       city: form.city.value.trim(),
       state: form.state.value.trim(),
       pincode: form.pincode.value.trim(),
-      total,
       items: cart.map((item) => ({
-        product_id: item.id ?? null,
-        product_name: item.name,
-        quantity: item.quantity,
-        price: Number(item.price),
+        product_id: Number(item.id),
+        quantity: Number(item.quantity),
       })),
     };
 
@@ -66,8 +57,16 @@ function Checkout() {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error("Order API response:", data);
+
+        const validationErrors = data?.errors
+          ? Object.values(data.errors).flat().join(" ")
+          : "";
+
         throw new Error(
-          data?.message || "Unable to place the order."
+          validationErrors ||
+            data?.message ||
+            "Unable to place the order."
         );
       }
 
@@ -81,7 +80,7 @@ function Checkout() {
         city: data.order.city,
         state: data.order.state,
         pincode: data.order.pincode,
-        items: [...cart],
+        items: data.order.items || [...cart],
         total: data.order.total,
         status: data.order.status,
       };
@@ -120,29 +119,21 @@ function Checkout() {
               alt="Climoraone"
             />
           </Link>
-
           <span>Secure Checkout</span>
         </header>
 
         <main className="checkout-success-page">
           <div className="checkout-success-card">
             <div className="checkout-success-icon">✓</div>
-
             <h1>Order placed successfully</h1>
-
             <p>Your order number is</p>
-
             <strong>{orderSuccess.id}</strong>
-
-            <p>
-              We will send payment and delivery updates shortly.
-            </p>
+            <p>We will send payment and delivery updates shortly.</p>
 
             <div className="checkout-success-actions">
               <Link to="/track-order" className="secondary-action">
                 Track Order
               </Link>
-
               <Link to="/" className="primary-action">
                 Continue Shopping
               </Link>
@@ -163,16 +154,13 @@ function Checkout() {
               alt="Climoraone"
             />
           </Link>
-
           <span>Secure Checkout</span>
         </header>
 
         <main className="checkout-empty-page">
           <div className="checkout-empty-card">
             <h1>Your cart is empty</h1>
-
             <p>Add products before continuing to checkout.</p>
-
             <Link to="/products" className="primary-action">
               Continue Shopping
             </Link>
@@ -194,11 +182,7 @@ function Checkout() {
 
         <div className="checkout-header-right">
           <span>🔒 Secure Checkout</span>
-
-          <button
-            type="button"
-            onClick={() => navigate("/cart")}
-          >
+          <button type="button" onClick={() => navigate("/cart")}>
             Back to Cart
           </button>
         </div>
@@ -208,170 +192,161 @@ function Checkout() {
         <section className="checkout-form-panel">
           <div className="checkout-section-title">
             <span>1</span>
-
             <div>
               <h1>Delivery address</h1>
               <p>Enter the information required to deliver your order.</p>
             </div>
           </div>
 
-        <form
-  id="checkout-order-form"
-  className="amazon-checkout-form"
-  onSubmit={submitOrder}
->
-  <div className="amazon-field">
-    <label htmlFor="customerName">
-      Full name <span>*</span>
-    </label>
+          <form
+            id="checkout-order-form"
+            className="amazon-checkout-form"
+            onSubmit={submitOrder}
+          >
+            <div className="amazon-field">
+              <label htmlFor="customerName">
+                Full name <span>*</span>
+              </label>
+              <input
+                id="customerName"
+                name="customerName"
+                type="text"
+                autoComplete="name"
+                minLength="2"
+                maxLength="100"
+                required
+              />
+            </div>
 
-    <input
-      id="customerName"
-      name="customerName"
-      type="text"
-      autoComplete="name"
-      minLength="2"
-      maxLength="100"
-      required
-    />
-  </div>
+            <div className="amazon-field">
+              <label htmlFor="phone">
+                Phone number <span>*</span>
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                pattern="[0-9]{10}"
+                maxLength="10"
+                title="Phone number must contain exactly 10 digits"
+                required
+              />
+              <small>Used to assist with delivery.</small>
+            </div>
 
-  <div className="amazon-field">
-    <label htmlFor="phone">
-      Phone number <span>*</span>
-    </label>
+            <div className="amazon-field">
+              <label htmlFor="email">
+                Email address <span>*</span>
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                maxLength="255"
+                required
+              />
+            </div>
 
-    <input
-      id="phone"
-      name="phone"
-      type="tel"
-      inputMode="numeric"
-      autoComplete="tel"
-      pattern="[0-9]{10}"
-      maxLength="10"
-      title="Phone number must contain exactly 10 digits"
-      required
-    />
+            <div className="amazon-field">
+              <label htmlFor="address">
+                Address <span>*</span>
+              </label>
+              <input
+                id="address"
+                name="address"
+                type="text"
+                autoComplete="address-line1"
+                placeholder="House number, street name"
+                minLength="5"
+                maxLength="300"
+                required
+              />
+              <input
+                id="addressLine2"
+                name="addressLine2"
+                type="text"
+                autoComplete="address-line2"
+                placeholder="Apartment, area, landmark (optional)"
+                maxLength="200"
+              />
+            </div>
 
-    <small>Used to assist with delivery.</small>
-  </div>
+            <div className="amazon-address-row">
+              <div className="amazon-field">
+                <label htmlFor="city">
+                  City <span>*</span>
+                </label>
+                <input
+                  id="city"
+                  name="city"
+                  type="text"
+                  autoComplete="address-level2"
+                  maxLength="100"
+                  required
+                />
+              </div>
 
-  <div className="amazon-field">
-    <label htmlFor="email">
-      Email address <span>*</span>
-    </label>
+              <div className="amazon-field">
+                <label htmlFor="state">
+                  State <span>*</span>
+                </label>
+                <select
+                  id="state"
+                  name="state"
+                  autoComplete="address-level1"
+                  required
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select
+                  </option>
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Kerala">Kerala</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
 
-    <input
-      id="email"
-      name="email"
-      type="email"
-      autoComplete="email"
-      maxLength="255"
-      required
-    />
-  </div>
+              <div className="amazon-field">
+                <label htmlFor="pincode">
+                  Pincode <span>*</span>
+                </label>
+                <input
+                  id="pincode"
+                  name="pincode"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  pattern="[0-9]{6}"
+                  maxLength="6"
+                  title="Pincode must contain exactly 6 digits"
+                  required
+                />
+              </div>
+            </div>
 
-  <div className="amazon-field">
-    <label htmlFor="address">
-      Address <span>*</span>
-    </label>
+            {orderError && (
+              <div className="checkout-error" role="alert">
+                {orderError}
+              </div>
+            )}
 
-    <input
-      id="address"
-      name="address"
-      type="text"
-      autoComplete="address-line1"
-      placeholder="House number, street name"
-      minLength="5"
-      maxLength="300"
-      required
-    />
+            <div className="checkout-mobile-submit">
+              <button type="submit" disabled={isSubmittingOrder}>
+                {isSubmittingOrder
+                  ? "Placing Order..."
+                  : `Place Order • ₹${total}`}
+              </button>
+            </div>
+          </form>
+        </section>
 
-    <input
-      id="addressLine2"
-      name="addressLine2"
-      type="text"
-      autoComplete="address-line2"
-      placeholder="Apartment, area, landmark (optional)"
-      maxLength="200"
-    />
-  </div>
-
-  <div className="amazon-address-row">
-    <div className="amazon-field">
-      <label htmlFor="city">
-        City <span>*</span>
-      </label>
-
-      <input
-        id="city"
-        name="city"
-        type="text"
-        autoComplete="address-level2"
-        maxLength="100"
-        required
-      />
-    </div>
-
-    <div className="amazon-field">
-      <label htmlFor="state">
-        State <span>*</span>
-      </label>
-
-      <select
-        id="state"
-        name="state"
-        autoComplete="address-level1"
-        required
-        defaultValue=""
-      >
-        <option value="" disabled>
-          Select
-        </option>
-        <option value="Andhra Pradesh">Andhra Pradesh</option>
-        <option value="Karnataka">Karnataka</option>
-        <option value="Kerala">Kerala</option>
-        <option value="Maharashtra">Maharashtra</option>
-        <option value="Tamil Nadu">Tamil Nadu</option>
-        <option value="Telangana">Telangana</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-
-    <div className="amazon-field">
-      <label htmlFor="pincode">
-        Pincode <span>*</span>
-      </label>
-
-      <input
-        id="pincode"
-        name="pincode"
-        type="text"
-        inputMode="numeric"
-        autoComplete="postal-code"
-        pattern="[0-9]{6}"
-        maxLength="6"
-        title="Pincode must contain exactly 6 digits"
-        required
-      />
-    </div>
-  </div>
-
-  {orderError && (
-    <div className="checkout-error" role="alert">
-      {orderError}
-    </div>
-  )}
-
-  <div className="checkout-mobile-submit">
-    <button type="submit" disabled={isSubmittingOrder}>
-      {isSubmittingOrder
-        ? "Placing Order..."
-        : `Place Order • ₹${total}`}
-    </button>
-  </div>
-</form>
-</section>
         <aside className="checkout-summary-panel">
           <h2>Order Summary</h2>
 
@@ -384,10 +359,7 @@ function Checkout() {
                     Qty: {item.quantity} × ₹{item.price}
                   </span>
                 </div>
-
-                <strong>
-                  ₹{Number(item.price) * item.quantity}
-                </strong>
+                <strong>₹{Number(item.price) * item.quantity}</strong>
               </div>
             ))}
           </div>
@@ -415,17 +387,14 @@ function Checkout() {
             className="checkout-desktop-submit"
             disabled={isSubmittingOrder}
           >
-            {isSubmittingOrder
-              ? "Placing Order..."
-              : "Place Order"}
+            {isSubmittingOrder ? "Placing Order..." : "Place Order"}
           </button>
 
           <div className="checkout-trust-note">
             <span>🔒</span>
-
             <p>
-              Your information is used only to process and deliver
-              this order.
+              Your information is used only to process and deliver this
+              order.
             </p>
           </div>
         </aside>
