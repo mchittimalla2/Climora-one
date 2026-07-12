@@ -105,7 +105,8 @@ function Products() {
         );
       }
 
-      closeModal();
+      setEditingProduct(null);
+      setIsModalOpen(false);
       await fetchProducts();
       setSuccessMessage(
         isEditing
