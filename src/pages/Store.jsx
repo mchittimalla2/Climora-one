@@ -1,50 +1,152 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "../App.css";
-import products from "../data/products";
-import { useCart } from "../context/CartContext";
-import { useState } from "react";
-import { API_BASE_URL } from "../config/api";
 
+import "../App.css";
+import { API_BASE_URL } from "../config/api";
+import { useCart } from "../context/CartContext";
+
+const placeholderImage = `${import.meta.env.BASE_URL}images/logo.jpeg`;
+
+function resolveProductImage(path) {
+  if (!path) {
+    return placeholderImage;
+  }
+
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  if (/^\/(storage|uploads)\//i.test(path)) {
+    return `${API_BASE_URL}${path}`;
+  }
+
+  return `${import.meta.env.BASE_URL}${String(path).replace(/^\/+/, "")}`;
+}
+
+function normalizeProduct(product) {
+  const imagePaths = Array.isArray(product.images)
+    ? product.images
+    : product.main_image
+      ? [product.main_image]
+      : [];
+
+  const images = imagePaths.length
+    ? imagePaths.map(resolveProductImage)
+    : [placeholderImage];
+
+  return {
+    id: Number(product.id),
+    name: product.name || "Unnamed product",
+    category: product.category || "Other",
+    description: product.description || "",
+    price: Number(product.price) || 0,
+    stock: Math.max(0, Number(product.stock) || 0),
+    images,
+  };
+}
 
 function Store() {
   const {
-  cart,
-  addToCart,
-  increaseQty,
-  decreaseQty,
-  removeFromCart,
-  clearCart,
-  cartCount,
-  total,
-} = useCart();
+    cart,
+    addToCart,
+    increaseQty,
+    decreaseQty,
+    removeFromCart,
+    syncCartWithProducts,
+    cartCount,
+    total,
+  } = useCart();
+
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(null);
-  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-  const [orderError, setOrderError] = useState("");
 
-  const categories = ["All", "Religious", "Toys", "Home Decor"];
+  useEffect(() => {
+    let active = true;
 
-  const filteredProducts = products.filter((product) => {
-    const search = searchTerm.toLowerCase();
+    const loadProducts = async () => {
+      try {
+        setProductsLoading(true);
+        setProductsError("");
 
-    const matchesSearch =
-      product.name.toLowerCase().includes(search) ||
-      product.description.toLowerCase().includes(search) ||
-      product.category.toLowerCase().includes(search);
+        const response = await fetch(`${API_BASE_URL}/api/products`, {
+          headers: {
+            Accept: "application/json",
+          },
+        });
 
-    const matchesCategory =
-      selectedCategory === "All" ||
-      product.category === selectedCategory;
+        const data = await response.json();
 
-    return matchesSearch && matchesCategory;
-  });
+        if (!response.ok) {
+          throw new Error(data?.message || "Unable to load products.");
+        }
+
+        if (!Array.isArray(data)) {
+          throw new Error("The product service returned an invalid response.");
+        }
+
+        const normalizedProducts = data.map(normalizeProduct);
+
+        if (active) {
+          setProducts(normalizedProducts);
+          syncCartWithProducts(normalizedProducts);
+        }
+      } catch (error) {
+        console.error("Product loading failed:", error);
+
+        if (active) {
+          setProductsError(
+            error instanceof Error
+              ? error.message
+              : "Unable to load products."
+          );
+        }
+      } finally {
+        if (active) {
+          setProductsLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const availableCategories = products
+      .map((product) => product.category)
+      .filter(Boolean);
+
+    return ["All", ...new Set(availableCategories)];
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const matchesSearch =
+        !search ||
+        product.name.toLowerCase().includes(search) ||
+        product.description.toLowerCase().includes(search) ||
+        product.category.toLowerCase().includes(search);
+
+      const matchesCategory =
+        selectedCategory === "All" ||
+        product.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, selectedCategory]);
 
   const scrollToSection = (sectionId) => {
     setSelectedProduct(null);
@@ -58,20 +160,17 @@ function Store() {
   };
 
   const openProduct = (product) => {
-  setSelectedProduct(product);
-  setSelectedImage(product.images[0]);
-  setQuantity(1);
-  setShowMobileMenu(false);
+    setSelectedProduct(product);
+    setSelectedImage(product.images[0]);
+    setQuantity(1);
+    setShowMobileMenu(false);
 
-  window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
       });
     });
-  });
-};
+  };
 
   const handleAddToCart = () => {
     if (!selectedProduct) {
@@ -92,10 +191,6 @@ function Store() {
         .getElementById("cart")
         ?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
-  };
-
-  const buyNow = () => {
-    handleAddToCart();
   };
 
   return (
@@ -140,7 +235,6 @@ function Store() {
           >
             Home
           </button>
-
           <button
             type="button"
             className="nav-link-button"
@@ -148,7 +242,6 @@ function Store() {
           >
             Products
           </button>
-
           <button
             type="button"
             className="nav-link-button"
@@ -160,31 +253,19 @@ function Store() {
 
         {showMobileMenu && (
           <div className="mobile-dropdown">
-            <button
-              type="button"
-              onClick={() => scrollToSection("home")}
-            >
+            <button type="button" onClick={() => scrollToSection("home")}>
               Home
             </button>
-
             <button
               type="button"
               onClick={() => scrollToSection("products")}
             >
               Products
             </button>
-
-            <button
-              type="button"
-              onClick={() => scrollToSection("cart")}
-            >
+            <button type="button" onClick={() => scrollToSection("cart")}>
               Cart ({cartCount})
             </button>
-
-            <Link
-              to="/contact"
-              onClick={() => setShowMobileMenu(false)}
-            >
+            <Link to="/contact" onClick={() => setShowMobileMenu(false)}>
               Contact
             </Link>
           </div>
@@ -198,14 +279,10 @@ function Store() {
             className="back-btn"
             onClick={() => {
               setSelectedProduct(null);
-
               window.setTimeout(() => {
                 document
                   .getElementById("products")
-                  ?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }, 100);
             }}
           >
@@ -222,9 +299,7 @@ function Store() {
                   loading="lazy"
                   decoding="async"
                   onClick={() => setSelectedImage(image)}
-                  className={
-                    selectedImage === image ? "active-thumb" : ""
-                  }
+                  className={selectedImage === image ? "active-thumb" : ""}
                 />
               ))}
             </div>
@@ -238,65 +313,55 @@ function Store() {
             </div>
 
             <div className="detail-info">
-              <p className="eco-label">
-                {selectedProduct.category}
-              </p>
-
+              <p className="eco-label">{selectedProduct.category}</p>
               <h2>{selectedProduct.name}</h2>
               <h3>₹{selectedProduct.price}</h3>
               <p>{selectedProduct.description}</p>
+              <p>
+                {selectedProduct.stock > 0
+                  ? `${selectedProduct.stock} in stock`
+                  : "Out of stock"}
+              </p>
 
               <div className="quantity-box">
                 <button
                   type="button"
                   onClick={() =>
-                    setQuantity((current) =>
-                      Math.max(1, current - 1)
-                    )
+                    setQuantity((current) => Math.max(1, current - 1))
                   }
                 >
                   −
                 </button>
-
                 <strong>{quantity}</strong>
-
                 <button
-                type="button"
-                onClick={() => {
-                  const parsedStock = Number(selectedProduct.stock);
-                  const availableStock = Number.isFinite(parsedStock)
-                    ? parsedStock
-                    : 10;
-
-                  setQuantity((current) =>
-                    Math.min(availableStock, current + 1)
-                  );
-                }}
-                disabled={(() => {
-                  const parsedStock = Number(selectedProduct.stock);
-
-                  return (
-                    Number.isFinite(parsedStock) &&
-                    quantity >= parsedStock
-                  );
-                })()}
-              >
-                +
-              </button>
+                  type="button"
+                  onClick={() =>
+                    setQuantity((current) =>
+                      Math.min(selectedProduct.stock, current + 1)
+                    )
+                  }
+                  disabled={
+                    selectedProduct.stock <= 0 ||
+                    quantity >= selectedProduct.stock
+                  }
+                >
+                  +
+                </button>
               </div>
 
               <div className="detail-actions">
                 <button
                   type="button"
                   onClick={handleAddToCart}
+                  disabled={selectedProduct.stock <= 0}
                 >
                   Add to Cart
                 </button>
-
                 <button
                   type="button"
                   className="buy-btn"
-                  onClick={buyNow}
+                  onClick={handleAddToCart}
+                  disabled={selectedProduct.stock <= 0}
                 >
                   Buy Now
                 </button>
@@ -317,19 +382,14 @@ function Store() {
               <span className="tag">
                 Eco-friendly • Handmade • Women-led
               </span>
-
               <h2>
-                Nature-inspired products crafted by rural women
-                artisans
+                Nature-inspired products crafted by rural women artisans
               </h2>
-
               <p>
-                Climoraone is a social enterprise that empowers
-                rural women by helping them create and sell
-                eco-friendly handcrafted products made from wood,
-                cloth, and sustainable materials.
+                Climoraone is a social enterprise that empowers rural women
+                by helping them create and sell eco-friendly handcrafted
+                products made from wood, cloth, and sustainable materials.
               </p>
-
               <button
                 type="button"
                 className="btn"
@@ -343,44 +403,32 @@ function Store() {
           <section className="impact">
             <div>
               <h3>🌿 Eco-Friendly</h3>
-              <p>
-                Products inspired by nature and sustainable living.
-              </p>
+              <p>Products inspired by nature and sustainable living.</p>
             </div>
-
             <div>
               <h3>👩‍🎨 Women Empowerment</h3>
-              <p>
-                Supporting rural women artisans with income
-                opportunities.
-              </p>
+              <p>Supporting rural women artisans with income opportunities.</p>
             </div>
-
             <div>
               <h3>🪵 Handmade</h3>
-              <p>
-                Traditional craftsmanship with care and authenticity.
-              </p>
+              <p>Traditional craftsmanship with care and authenticity.</p>
             </div>
           </section>
 
           <section className="about">
             <h2>About Climoraone</h2>
-
             <p>
-              Every handmade product carries a story. Climoraone
-              creates a platform where rural women can showcase their
-              skills, preserve traditional craftsmanship, and build
-              sustainable livelihoods through nature-based products.
+              Every handmade product carries a story. Climoraone creates a
+              platform where rural women can showcase their skills, preserve
+              traditional craftsmanship, and build sustainable livelihoods
+              through nature-based products.
             </p>
           </section>
 
           <section id="products" className="products">
             <h2>Featured Products</h2>
-
             <p className="section-subtitle">
-              Handpicked eco-friendly products from our artisan
-              community.
+              Handpicked eco-friendly products from our artisan community.
             </p>
 
             <div className="category-bar">
@@ -400,158 +448,142 @@ function Store() {
               ))}
             </div>
 
-            <div className="product-grid">
-              {filteredProducts.length === 0 ? (
-                <p>No products found.</p>
-              ) : (
-                filteredProducts.map((product) => (
-                  <div
-                    className="product-card"
-                    key={product.id}
-                  >
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      loading="lazy"
-                      decoding="async"
-                    />
+            {productsLoading && (
+              <div className="products-status">Loading products...</div>
+            )}
 
-                    <div className="product-info">
-                      <h3>{product.name}</h3>
-                      <p>{product.description}</p>
-                      <h4>₹{product.price}</h4>
+            {productsError && (
+              <div className="products-error" role="alert">
+                {productsError}
+              </div>
+            )}
 
-                      <button
-                        type="button"
-                        onClick={() => openProduct(product)}
-                      >
-                        View Details
-                      </button>
+            {!productsLoading && !productsError && (
+              <div className="product-grid">
+                {filteredProducts.length === 0 ? (
+                  <p>No products are currently available.</p>
+                ) : (
+                  filteredProducts.map((product) => (
+                    <div className="product-card" key={product.id}>
+                      <img
+                        src={product.images[0]}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="product-info">
+                        <h3>{product.name}</h3>
+                        <p>{product.description}</p>
+                        <h4>₹{product.price}</h4>
+                        {product.stock > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openProduct(product)}
+                          >
+                            View Details
+                          </button>
+                        ) : (
+                          <button type="button" disabled>
+                            Out of Stock
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))
-              )}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </section>
 
           <section id="cart" className="cart-section">
-          <div className="cart-section__container">
-            <div className="cart-section__heading">
-              <h2>Your Cart</h2>
-              <p>Review your selected Climoraone products.</p>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="empty-cart-inline">
-                <div
-                  className="empty-cart-inline__icon"
-                  aria-hidden="true"
-                >
-                  🛒
-                </div>
-
-                <h3>Your cart is empty</h3>
-
-                <p>
-                  Looks like you have not added any Climoraone
-                  products yet.
-                </p>
-
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() => scrollToSection("products")}
-                >
-                  Explore Products
-                </button>
+            <div className="cart-section__container">
+              <div className="cart-section__heading">
+                <h2>Your Cart</h2>
+                <p>Review your selected Climoraone products.</p>
               </div>
-            ) : (
-              <div className="cart-layout">
-                <div className="inline-cart-items">
-                  {cart.map((item) => (
-                    <article
-                      className="cart-item"
-                      key={item.id}
-                    >
-                      <div className="cart-item-details">
-                        <h3>{item.name}</h3>
 
-                        <p className="cart-item-unit-price">
-                          ₹{Number(item.price)} each
-                        </p>
-
-                        <div className="cart-item-bottom">
-                          <div className="cart-item-controls">
+              {cart.length === 0 ? (
+                <div className="empty-cart-inline">
+                  <div className="empty-cart-inline__icon" aria-hidden="true">
+                    🛒
+                  </div>
+                  <h3>Your cart is empty</h3>
+                  <p>Add a Climoraone product to continue.</p>
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => scrollToSection("products")}
+                  >
+                    Explore Products
+                  </button>
+                </div>
+              ) : (
+                <div className="cart-layout">
+                  <div className="inline-cart-items">
+                    {cart.map((item) => (
+                      <article className="cart-item" key={item.id}>
+                        <div className="cart-item-details">
+                          <h3>{item.name}</h3>
+                          <p className="cart-item-unit-price">
+                            ₹{Number(item.price)} each
+                          </p>
+                          <div className="cart-item-bottom">
+                            <div className="cart-item-controls">
+                              <button
+                                type="button"
+                                onClick={() => decreaseQty(item.id)}
+                                aria-label={`Reduce quantity of ${item.name}`}
+                              >
+                                −
+                              </button>
+                              <strong>{item.quantity}</strong>
+                              <button
+                                type="button"
+                                onClick={() => increaseQty(item.id)}
+                                disabled={item.quantity >= item.stock}
+                                aria-label={`Increase quantity of ${item.name}`}
+                              >
+                                +
+                              </button>
+                            </div>
                             <button
                               type="button"
-                              onClick={() => decreaseQty(item.id)}
-                              aria-label={`Reduce quantity of ${item.name}`}
+                              className="cart-item-remove"
+                              onClick={() => removeFromCart(item.id)}
                             >
-                              −
-                            </button>
-
-                            <strong>{item.quantity}</strong>
-
-                            <button
-                              type="button"
-                              onClick={() => increaseQty(item.id)}
-                              disabled={(() => {
-                                const parsedStock = Number(item.stock);
-
-                                return (
-                                  Number.isFinite(parsedStock) &&
-                                  item.quantity >= parsedStock
-                                );
-                              })()}
-                              aria-label={`Increase quantity of ${item.name}`}
-                            >
-                              +
+                              Remove
                             </button>
                           </div>
-
-                          <button
-                            type="button"
-                            className="cart-item-remove"
-                            onClick={() => removeFromCart(item.id)}
-                          >
-                            Remove
-                          </button>
                         </div>
-                      </div>
+                        <strong className="cart-item-total">
+                          ₹{Number(item.price) * item.quantity}
+                        </strong>
+                      </article>
+                    ))}
+                  </div>
 
-                      <strong className="cart-item-total">
-                        ₹{Number(item.price) * item.quantity}
-                      </strong>
-                    </article>
-                  ))}
+                  <aside className="inline-cart-summary">
+                    <h3>Order Summary</h3>
+                    <div className="summary-row">
+                      <span>Quantity</span>
+                      <strong>{cartCount}</strong>
+                    </div>
+                    <div className="summary-row summary-total">
+                      <span>Total</span>
+                      <strong>₹{total}</strong>
+                    </div>
+                    <button
+                      type="button"
+                      className="checkout-btn"
+                      onClick={() => navigate("/checkout")}
+                    >
+                      Proceed to Checkout
+                    </button>
+                  </aside>
                 </div>
-
-                <aside className="inline-cart-summary">
-                  <h3>Order Summary</h3>
-
-                  <div className="summary-row">
-                    <span>Quantity</span>
-                    <strong>{cartCount}</strong>
-                  </div>
-
-                  <div className="summary-row summary-total">
-                    <span>Total</span>
-                    <strong>₹{total}</strong>
-                  </div>
-
-                  <button
-                  type="button"
-                  className="checkout-btn"
-                  onClick={() => navigate("/checkout")}
-                  disabled={cart.length === 0}
-                >
-                  Proceed to Checkout
-                </button>
-                </aside>
-              </div>
-            )}
-          </div>
-        </section>
+              )}
+            </div>
+          </section>
         </>
       )}
 
@@ -563,16 +595,14 @@ function Store() {
               alt="Climoraone"
               className="footer-logo"
             />
-
             <p>
-              Eco-friendly handmade products supporting rural women
-              artisans across India.
+              Eco-friendly handmade products supporting rural women artisans
+              across India.
             </p>
           </div>
 
           <div>
             <h4>Quick Links</h4>
-
             <button
               type="button"
               className="footer-link-button"
@@ -580,7 +610,6 @@ function Store() {
             >
               Home
             </button>
-
             <button
               type="button"
               className="footer-link-button"
@@ -588,7 +617,6 @@ function Store() {
             >
               Products
             </button>
-
             <button
               type="button"
               className="footer-link-button"
@@ -596,7 +624,6 @@ function Store() {
             >
               Cart
             </button>
-
             <Link to="/contact">Contact Us</Link>
             <Link to="/track-order">Track Order</Link>
           </div>
