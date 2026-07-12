@@ -1,6 +1,6 @@
-/* Homepage alignment overrides.
-   The headline, description and buttons remain real HTML content.
-   Only the artisan composition is displayed from the approved JPG. */
+/* Homepage hero alignment overrides.
+   The left side remains real HTML content.
+   The right side uses the dedicated cropped artisan PNG without cropping or zooming. */
 
 .store-v2 .v2-logo-button {
   min-width: 242px !important;
@@ -27,18 +27,17 @@
   .store-v2 .v2-hero {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: minmax(430px, 45%) minmax(570px, 55%) !important;
+    grid-template-columns: minmax(470px, 48%) minmax(520px, 52%) !important;
     align-items: stretch !important;
     width: 100% !important;
-    min-height: 650px !important;
+    min-height: 620px !important;
     aspect-ratio: auto !important;
     background: #f7f0e5 !important;
     overflow: hidden !important;
   }
 
   .store-v2 .v2-hero::before {
-    display: block !important;
-    background: radial-gradient(circle at 74% 16%, rgba(201,168,118,.08), transparent 30%) !important;
+    display: none !important;
   }
 
   .store-v2 .v2-hero-copy {
@@ -48,7 +47,8 @@
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    padding: clamp(68px, 6vw, 96px) clamp(42px, 5vw, 78px) !important;
+    padding: clamp(64px, 6vw, 94px) clamp(44px, 5.2vw, 84px) !important;
+    background: #f7f0e5 !important;
     pointer-events: auto !important;
   }
 
@@ -83,7 +83,6 @@
     position: static !important;
     width: auto !important;
     display: flex !important;
-    grid-template-columns: none !important;
     gap: 16px !important;
     margin-top: 28px !important;
     pointer-events: auto !important;
@@ -98,33 +97,33 @@
   }
 
   .store-v2 .v2-actions .v2-primary {
-    border-color: #1F3D2B !important;
-    background: #1F3D2B !important;
+    border-color: #1f3d2b !important;
+    background: #1f3d2b !important;
     color: #fff !important;
   }
 
   .store-v2 .v2-actions .v2-secondary {
-    border-color: #C9A876 !important;
+    border-color: #c9a876 !important;
     background: transparent !important;
-    color: #1F3D2B !important;
+    color: #1f3d2b !important;
   }
 
   .store-v2 .v2-hero-visual {
     position: relative !important;
     display: block !important;
     align-self: stretch !important;
-    min-height: 650px !important;
+    min-height: 620px !important;
     overflow: hidden !important;
     background-color: #f7f0e5 !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero-v2.jpg') !important;
+    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
-    background-size: auto 88% !important;
-    background-position: right bottom !important;
+    background-size: contain !important;
+    background-position: center bottom !important;
   }
 
-  .store-v2 .v2-hero-visual::before {
-    display: block !important;
-    background: linear-gradient(90deg, #f7f0e5 0%, rgba(247,240,229,.86) 8%, rgba(247,240,229,.38) 17%, transparent 31%) !important;
+  .store-v2 .v2-hero-visual::before,
+  .store-v2 .v2-hero-visual::after {
+    display: none !important;
   }
 }
 
@@ -139,7 +138,6 @@
     display: grid !important;
     grid-template-columns: 1fr !important;
     min-height: auto !important;
-    aspect-ratio: auto !important;
     background: #f7f0e5 !important;
   }
 
@@ -147,6 +145,7 @@
     position: relative !important;
     display: flex !important;
     padding: 52px 24px 40px !important;
+    background: #f7f0e5 !important;
   }
 
   .store-v2 .v2-hero-visual {
@@ -154,14 +153,15 @@
     min-height: 470px !important;
     overflow: hidden !important;
     background-color: #f7f0e5 !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero-v2.jpg') !important;
+    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
-    background-size: auto 86% !important;
-    background-position: right bottom !important;
+    background-size: contain !important;
+    background-position: center bottom !important;
   }
 
-  .store-v2 .v2-hero-visual::before {
-    background: linear-gradient(180deg, #f7f0e5 0%, rgba(247,240,229,.18) 13%, transparent 30%) !important;
+  .store-v2 .v2-hero-visual::before,
+  .store-v2 .v2-hero-visual::after {
+    display: none !important;
   }
 }
 
@@ -178,8 +178,8 @@
   }
 
   .store-v2 .v2-hero-visual {
-    min-height: 380px !important;
-    background-size: auto 82% !important;
-    background-position: 82% bottom !important;
+    min-height: 360px !important;
+    background-size: contain !important;
+    background-position: center bottom !important;
   }
 }
