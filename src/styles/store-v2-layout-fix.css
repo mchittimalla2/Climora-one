@@ -27,7 +27,7 @@
   .store-v2 .v2-hero {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: minmax(430px, 43%) minmax(560px, 57%) !important;
+    grid-template-columns: minmax(430px, 46%) minmax(560px, 54%) !important;
     align-items: stretch !important;
     width: 100% !important;
     min-height: 690px !important;
@@ -114,16 +114,16 @@
     display: block !important;
     align-self: stretch !important;
     min-height: 690px !important;
+    overflow: hidden !important;
     background-image: url('/climoraone-dev/images/climoraone-hero-v2.jpg') !important;
     background-repeat: no-repeat !important;
-    /* Show only the artisan half of the full approved composition. */
-    background-size: 210% auto !important;
+    background-size: auto 100% !important;
     background-position: right center !important;
   }
 
   .store-v2 .v2-hero-visual::before {
     display: block !important;
-    background: linear-gradient(90deg, #f7f0e5 0%, rgba(247,240,229,.72) 8%, rgba(247,240,229,.15) 20%, transparent 34%) !important;
+    background: linear-gradient(90deg, #f7f0e5 0%, rgba(247,240,229,.45) 10%, rgba(247,240,229,.08) 24%, transparent 36%) !important;
   }
 }
 
@@ -135,7 +135,8 @@
   }
 
   .store-v2 .v2-hero {
-    display: block !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
     min-height: auto !important;
     aspect-ratio: auto !important;
     background: linear-gradient(180deg, #f7f0e5 0%, #f4eadb 100%) !important;
@@ -144,16 +145,21 @@
   .store-v2 .v2-hero-copy {
     position: relative !important;
     display: flex !important;
-    padding: 52px 24px 46px !important;
+    padding: 52px 24px 40px !important;
   }
 
   .store-v2 .v2-hero-visual {
     display: block !important;
-    min-height: 520px !important;
+    min-height: 500px !important;
+    overflow: hidden !important;
     background-image: url('/climoraone-dev/images/climoraone-hero-v2.jpg') !important;
     background-repeat: no-repeat !important;
-    background-size: 205% auto !important;
+    background-size: auto 100% !important;
     background-position: right center !important;
+  }
+
+  .store-v2 .v2-hero-visual::before {
+    background: linear-gradient(180deg, #f4eadb 0%, rgba(244,234,219,.15) 12%, transparent 28%) !important;
   }
 }
 
@@ -166,12 +172,12 @@
   }
 
   .store-v2 .v2-hero-copy {
-    padding: 42px 20px 38px !important;
+    padding: 42px 20px 34px !important;
   }
 
   .store-v2 .v2-hero-visual {
     min-height: 390px !important;
-    background-size: 215% auto !important;
-    background-position: 100% center !important;
+    background-size: auto 100% !important;
+    background-position: 78% center !important;
   }
 }
