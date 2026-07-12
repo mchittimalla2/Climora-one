@@ -23,10 +23,7 @@ export function CartProvider({ children }) {
 
   const addToCart = (product, quantity = 1) => {
     const requestedQuantity = Math.max(1, Number(quantity) || 1);
-    const parsedStock = Number(product.stock);
-    const stock = Number.isFinite(parsedStock)
-    ? parsedStock
-    : 10;
+    const stock = Math.max(0, Number(product.stock) || 0);
 
     if (stock <= 0) {
       return {
@@ -78,14 +75,10 @@ export function CartProvider({ children }) {
           return item;
         }
 
-        const parsedStock = Number(item.stock);
-
-        const stock = Number.isFinite(parsedStock)
-        ? parsedStock
-        : 10;
+        const stock = Math.max(0, Number(item.stock) || 0);
 
         if (item.quantity >= stock) {
-        return item;
+          return item;
         }
 
         return {
@@ -118,6 +111,34 @@ export function CartProvider({ children }) {
     setCart([]);
   };
 
+  const syncCartWithProducts = (products) => {
+    setCart((currentCart) =>
+      currentCart
+        .map((item) => {
+          const backendProduct = products.find(
+            (product) =>
+              product.id === Number(item.id) ||
+              product.name.trim().toLowerCase() ===
+                String(item.name || "").trim().toLowerCase()
+          );
+
+          if (!backendProduct || backendProduct.stock <= 0) {
+            return null;
+          }
+
+          return {
+            ...item,
+            ...backendProduct,
+            quantity: Math.min(
+              Math.max(1, Number(item.quantity) || 1),
+              backendProduct.stock
+            ),
+          };
+        })
+        .filter(Boolean)
+    );
+  };
+
   const cartCount = useMemo(
     () => cart.reduce((sum, item) => sum + item.quantity, 0),
     [cart]
@@ -141,6 +162,7 @@ export function CartProvider({ children }) {
         decreaseQty,
         removeFromCart,
         clearCart,
+        syncCartWithProducts,
         cartCount,
         total,
       }}
