@@ -317,11 +317,6 @@ function Store() {
               <h2>{selectedProduct.name}</h2>
               <h3>₹{selectedProduct.price}</h3>
               <p>{selectedProduct.description}</p>
-              <p>
-                {selectedProduct.stock > 0
-                  ? `${selectedProduct.stock} in stock`
-                  : "Out of stock"}
-              </p>
 
               <div className="quantity-box">
                 <button

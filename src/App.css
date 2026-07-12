@@ -3080,3 +3080,41 @@ body {
     height: auto;
   }
 }
+
+.checkout-success-card h1 {
+  margin: 18px 0 14px;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.checkout-success-card {
+  width: min(520px, calc(100% - 32px));
+  padding: 42px 34px;
+}
+
+.checkout-success-card p {
+  line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+  .checkout-success-card {
+    padding: 34px 20px;
+  }
+
+  .checkout-success-card h1 {
+    font-size: 30px;
+    line-height: 1.2;
+  }
+
+  .checkout-success-actions {
+    width: 100%;
+  }
+
+  .checkout-success-actions a {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+}
