@@ -2,46 +2,35 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import "../App.css";
+import "../styles/store-v2.css";
 import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
+import { BrandLogo } from "../components/BrandLogo";
 
-const placeholderImage = `${import.meta.env.BASE_URL}images/logo.jpeg`;
+const placeholderImage = `${import.meta.env.BASE_URL}images/climoraone-logo.svg`;
 
 function resolveProductImage(path) {
-  if (!path) {
-    return placeholderImage;
-  }
-
-  if (/^https?:\/\//i.test(path)) {
-    return path;
-  }
-
-  if (/^\/(storage|uploads)\//i.test(path)) {
-    return `${API_BASE_URL}${path}`;
-  }
-
+  if (!path) return placeholderImage;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (/^\/(storage|uploads)\//i.test(path)) return `${API_BASE_URL}${path}`;
   return `${import.meta.env.BASE_URL}${String(path).replace(/^\/+/, "")}`;
 }
 
 function normalizeProduct(product) {
-  const imagePaths = Array.isArray(product.images)
+  const paths = Array.isArray(product.images)
     ? product.images
     : product.main_image
       ? [product.main_image]
       : [];
 
-  const images = imagePaths.length
-    ? imagePaths.map(resolveProductImage)
-    : [placeholderImage];
-
   return {
     id: Number(product.id),
     name: product.name || "Unnamed product",
-    category: product.category || "Other",
+    category: product.category || "Collection",
     description: product.description || "",
     price: Number(product.price) || 0,
     stock: Math.max(0, Number(product.stock) || 0),
-    images,
+    images: paths.length ? paths.map(resolveProductImage) : [placeholderImage],
   };
 }
 
@@ -75,506 +64,252 @@ function Store() {
       try {
         setProductsLoading(true);
         setProductsError("");
-
         const response = await fetch(`${API_BASE_URL}/api/products`, {
-          headers: {
-            Accept: "application/json",
-          },
+          headers: { Accept: "application/json" },
         });
-
         const data = await response.json();
-
-        if (!response.ok) {
+        if (!response.ok || !Array.isArray(data)) {
           throw new Error(data?.message || "Unable to load products.");
         }
-
-        if (!Array.isArray(data)) {
-          throw new Error("The product service returned an invalid response.");
-        }
-
-        const normalizedProducts = data.map(normalizeProduct);
-
+        const normalized = data.map(normalizeProduct);
         if (active) {
-          setProducts(normalizedProducts);
-          syncCartWithProducts(normalizedProducts);
+          setProducts(normalized);
+          syncCartWithProducts(normalized);
         }
       } catch (error) {
-        console.error("Product loading failed:", error);
-
-        if (active) {
-          setProductsError(
-            error instanceof Error
-              ? error.message
-              : "Unable to load products."
-          );
-        }
+        if (active) setProductsError(error.message || "Unable to load products.");
       } finally {
-        if (active) {
-          setProductsLoading(false);
-        }
+        if (active) setProductsLoading(false);
       }
     };
 
     loadProducts();
-
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
 
-  const categories = useMemo(() => {
-    const availableCategories = products
-      .map((product) => product.category)
-      .filter(Boolean);
-
-    return ["All", ...new Set(availableCategories)];
-  }, [products]);
+  const categories = useMemo(
+    () => ["All", ...new Set(products.map((product) => product.category).filter(Boolean))],
+    [products]
+  );
 
   const filteredProducts = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
-
     return products.filter((product) => {
       const matchesSearch =
         !search ||
         product.name.toLowerCase().includes(search) ||
         product.description.toLowerCase().includes(search) ||
         product.category.toLowerCase().includes(search);
-
-      const matchesCategory =
-        selectedCategory === "All" ||
-        product.category === selectedCategory;
-
+      const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [products, searchTerm, selectedCategory]);
 
-  const scrollToSection = (sectionId) => {
+  const heroProduct = products[0];
+  const craftImage = products[1]?.images?.[0] || heroProduct?.images?.[1] || heroProduct?.images?.[0] || placeholderImage;
+
+  const scrollToSection = (id) => {
     setSelectedProduct(null);
     setShowMobileMenu(false);
-
     window.setTimeout(() => {
-      document
-        .getElementById(sectionId)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
   };
 
   const openProduct = (product) => {
     setSelectedProduct(product);
     setSelectedImage(product.images[0]);
     setQuantity(1);
-    setShowMobileMenu(false);
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleAddToCart = () => {
-    if (!selectedProduct) {
-      return;
-    }
-
+  const addSelectedProduct = (goToCheckout = false) => {
+    if (!selectedProduct) return;
     const result = addToCart(selectedProduct, quantity);
-
     if (!result.success) {
       alert(result.message);
       return;
     }
-
+    if (goToCheckout) {
+      window.setTimeout(() => navigate("/checkout"), 50);
+      return;
+    }
     setSelectedProduct(null);
-
-    window.setTimeout(() => {
-      document
-        .getElementById("cart")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+    window.setTimeout(() => scrollToSection("cart"), 100);
   };
 
   return (
-    <div>
-      <header className="header">
-        <div className="logo-section">
-          <img
-            src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-            alt="Climoraone"
-            className="header-logo"
-          />
-        </div>
+    <div className="store-v2">
+      <header className="v2-header">
+        <button type="button" onClick={() => scrollToSection("home")} className="v2-logo-button" aria-label="Go to homepage">
+          <BrandLogo className="v2-header-logo" />
+        </button>
 
-        <div className="mobile-search-row">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="search-box"
-            value={searchTerm}
-            onChange={(event) => {
-              setSearchTerm(event.target.value);
-              setSelectedProduct(null);
-            }}
-          />
+        <input
+          className="v2-search"
+          value={searchTerm}
+          placeholder="Search handcrafted pieces"
+          onChange={(event) => {
+            setSearchTerm(event.target.value);
+            setSelectedProduct(null);
+          }}
+        />
 
-          <button
-            type="button"
-            className="mobile-menu-icon"
-            onClick={() => setShowMobileMenu((current) => !current)}
-            aria-label="Open navigation menu"
-            aria-expanded={showMobileMenu}
-          >
-            ☰
-          </button>
-        </div>
-
-        <nav className="header-nav">
-          <button
-            type="button"
-            className="nav-link-button"
-            onClick={() => scrollToSection("home")}
-          >
-            Home
-          </button>
-          <button
-            type="button"
-            className="nav-link-button"
-            onClick={() => scrollToSection("products")}
-          >
-            Products
-          </button>
-          <button
-            type="button"
-            className="nav-link-button"
-            onClick={() => scrollToSection("cart")}
-          >
-            Cart ({cartCount})
-          </button>
+        <nav className="v2-nav">
+          <button type="button" onClick={() => scrollToSection("home")}>Home</button>
+          <button type="button" onClick={() => scrollToSection("products")}>Collection</button>
+          <button type="button" onClick={() => scrollToSection("craft")}>Our Craft</button>
+          <Link to="/contact">Contact</Link>
+          <button type="button" className="v2-cart-link" onClick={() => scrollToSection("cart")}>Cart ({cartCount})</button>
         </nav>
 
+        <button type="button" className="v2-menu-button" onClick={() => setShowMobileMenu(!showMobileMenu)} aria-label="Open menu">☰</button>
         {showMobileMenu && (
-          <div className="mobile-dropdown">
-            <button type="button" onClick={() => scrollToSection("home")}>
-              Home
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollToSection("products")}
-            >
-              Products
-            </button>
-            <button type="button" onClick={() => scrollToSection("cart")}>
-              Cart ({cartCount})
-            </button>
-            <Link to="/contact" onClick={() => setShowMobileMenu(false)}>
-              Contact
-            </Link>
+          <div className="v2-mobile-menu">
+            <button type="button" onClick={() => scrollToSection("home")}>Home</button>
+            <button type="button" onClick={() => scrollToSection("products")}>Collection</button>
+            <button type="button" onClick={() => scrollToSection("craft")}>Our Craft</button>
+            <button type="button" onClick={() => scrollToSection("cart")}>Cart ({cartCount})</button>
+            <Link to="/track-order">Track Order</Link>
           </div>
         )}
       </header>
 
       {selectedProduct ? (
         <section className="product-detail">
-          <button
-            type="button"
-            className="back-btn"
-            onClick={() => {
-              setSelectedProduct(null);
-              window.setTimeout(() => {
-                document
-                  .getElementById("products")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }, 100);
-            }}
-          >
-            ← Back to Products
-          </button>
-
+          <button type="button" className="back-btn" onClick={() => scrollToSection("products")}>← Back to Collection</button>
           <div className="detail-layout">
             <div className="thumbs">
               {selectedProduct.images.map((image) => (
-                <img
-                  key={image}
-                  src={image}
-                  alt={selectedProduct.name}
-                  loading="lazy"
-                  decoding="async"
-                  onClick={() => setSelectedImage(image)}
-                  className={selectedImage === image ? "active-thumb" : ""}
-                />
+                <img key={image} src={image} alt={selectedProduct.name} onClick={() => setSelectedImage(image)} className={selectedImage === image ? "active-thumb" : ""} />
               ))}
             </div>
-
-            <div className="main-image-box">
-              <img
-                src={selectedImage}
-                alt={selectedProduct.name}
-                decoding="async"
-              />
-            </div>
-
+            <div className="main-image-box"><img src={selectedImage} alt={selectedProduct.name} /></div>
             <div className="detail-info">
               <p className="eco-label">{selectedProduct.category}</p>
               <h2>{selectedProduct.name}</h2>
               <h3>₹{selectedProduct.price}</h3>
               <p>{selectedProduct.description}</p>
-
+              {selectedProduct.stock <= 0 && <p className="out-of-stock-message">Currently unavailable</p>}
               <div className="quantity-box">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQuantity((current) => Math.max(1, current - 1))
-                  }
-                >
-                  −
-                </button>
+                <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button>
                 <strong>{quantity}</strong>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setQuantity((current) =>
-                      Math.min(selectedProduct.stock, current + 1)
-                    )
-                  }
-                  disabled={
-                    selectedProduct.stock <= 0 ||
-                    quantity >= selectedProduct.stock
-                  }
-                >
-                  +
-                </button>
+                <button type="button" onClick={() => setQuantity((value) => Math.min(selectedProduct.stock, value + 1))} disabled={quantity >= selectedProduct.stock}>+</button>
               </div>
-
               <div className="detail-actions">
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={selectedProduct.stock <= 0}
-                >
-                  Add to Cart
-                </button>
-                <button
-                  type="button"
-                  className="buy-btn"
-                  onClick={handleAddToCart}
-                  disabled={selectedProduct.stock <= 0}
-                >
-                  Buy Now
-                </button>
+                <button type="button" onClick={() => addSelectedProduct(false)} disabled={selectedProduct.stock <= 0}>Add to Cart</button>
+                <button type="button" className="buy-btn" onClick={() => addSelectedProduct(true)} disabled={selectedProduct.stock <= 0}>Buy Now</button>
               </div>
-
               <div className="trust-box">
-                <p>🌿 Made with sustainable materials</p>
-                <p>👩‍🎨 Supports rural women artisans</p>
-                <p>🚚 Shipping available across India</p>
+                <p>✦ Premium handcrafted finish</p>
+                <p>✦ Quality checked before dispatch</p>
+                <p>✦ Secure delivery across India</p>
               </div>
             </div>
           </div>
         </section>
       ) : (
         <>
-          <section id="home" className="hero">
-            <div className="hero-content">
-              <span className="tag">
-                Eco-friendly • Handmade • Women-led
-              </span>
-              <h2>
-                Nature-inspired products crafted by rural women artisans
-              </h2>
-              <p>
-                Climoraone is a social enterprise that empowers rural women
-                by helping them create and sell eco-friendly handcrafted
-                products made from wood, cloth, and sustainable materials.
-              </p>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => scrollToSection("products")}
-              >
-                Explore Products
-              </button>
+          <section id="home" className="v2-hero">
+            <div className="v2-hero-copy">
+              <span className="v2-eyebrow">Premium Indian craftsmanship</span>
+              <h1>Timeless pieces for beautifully considered homes.</h1>
+              <p>Discover distinctive handcrafted décor shaped by skilled artisans, premium materials and a devotion to enduring quality.</p>
+              <div className="v2-actions">
+                <button type="button" className="v2-primary" onClick={() => scrollToSection("products")}>Shop the Collection</button>
+                <button type="button" className="v2-secondary" onClick={() => scrollToSection("craft")}>Explore Our Craft</button>
+              </div>
+            </div>
+            <div className="v2-hero-visual">
+              <img className="v2-hero-image" src={heroProduct?.images?.[0] || placeholderImage} alt="Premium handcrafted décor" />
+              <div className="v2-hero-badge"><strong>Made by hand</strong><span>Each piece carries the detail and character that only skilled craftsmanship can create.</span></div>
             </div>
           </section>
 
-          <section className="impact">
-            <div>
-              <h3>🌿 Eco-Friendly</h3>
-              <p>Products inspired by nature and sustainable living.</p>
-            </div>
-            <div>
-              <h3>👩‍🎨 Women Empowerment</h3>
-              <p>Supporting rural women artisans with income opportunities.</p>
-            </div>
-            <div>
-              <h3>🪵 Handmade</h3>
-              <p>Traditional craftsmanship with care and authenticity.</p>
-            </div>
+          <section className="v2-trust-strip">
+            <div><strong>Premium Craftsmanship</strong><span>Thoughtfully finished by skilled hands</span></div>
+            <div><strong>Quality Checked</strong><span>Inspected before every dispatch</span></div>
+            <div><strong>Made in India</strong><span>Rooted in enduring craft traditions</span></div>
+            <div><strong>Secure Delivery</strong><span>Carefully packed for safe arrival</span></div>
           </section>
 
-          <section className="about">
-            <h2>About Climoraone</h2>
-            <p>
-              Every handmade product carries a story. Climoraone creates a
-              platform where rural women can showcase their skills, preserve
-              traditional craftsmanship, and build sustainable livelihoods
-              through nature-based products.
-            </p>
-          </section>
+          <section id="products" className="v2-section">
+            <div className="v2-section-heading">
+              <span className="v2-eyebrow">Curated collection</span>
+              <h2>Objects with presence, character and soul.</h2>
+              <p>Selected pieces that bring warmth, artistry and timeless Indian design into modern spaces.</p>
+            </div>
 
-          <section id="products" className="products">
-            <h2>Featured Products</h2>
-            <p className="section-subtitle">
-              Handpicked eco-friendly products from our artisan community.
-            </p>
-
-            <div className="category-bar">
+            <div className="v2-category-bar">
               {categories.map((category) => (
-                <button
-                  type="button"
-                  key={category}
-                  className={
-                    selectedCategory === category
-                      ? "category-btn active-category"
-                      : "category-btn"
-                  }
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </button>
+                <button key={category} type="button" className={selectedCategory === category ? "active" : ""} onClick={() => setSelectedCategory(category)}>{category}</button>
               ))}
             </div>
 
-            {productsLoading && (
-              <div className="products-status">Loading products...</div>
-            )}
-
-            {productsError && (
-              <div className="products-error" role="alert">
-                {productsError}
-              </div>
-            )}
-
+            {productsLoading && <div className="products-status">Preparing the collection...</div>}
+            {productsError && <div className="products-error">{productsError}</div>}
             {!productsLoading && !productsError && (
-              <div className="product-grid">
-                {filteredProducts.length === 0 ? (
-                  <p>No products are currently available.</p>
-                ) : (
-                  filteredProducts.map((product) => (
-                    <div className="product-card" key={product.id}>
-                      <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div className="product-info">
-                        <h3>{product.name}</h3>
-                        <p>{product.description}</p>
-                        <h4>₹{product.price}</h4>
-                        {product.stock > 0 ? (
-                          <button
-                            type="button"
-                            onClick={() => openProduct(product)}
-                          >
-                            View Details
-                          </button>
-                        ) : (
-                          <button type="button" disabled>
-                            Out of Stock
-                          </button>
-                        )}
+              <div className="v2-product-grid">
+                {filteredProducts.map((product) => (
+                  <article className="v2-product-card" key={product.id}>
+                    <div className="v2-product-image-wrap"><img src={product.images[0]} alt={product.name} loading="lazy" /></div>
+                    <div className="v2-product-body">
+                      <small>{product.category}</small>
+                      <h3>{product.name}</h3>
+                      <div className="v2-product-meta">
+                        <strong>₹{product.price}</strong>
+                        <button type="button" onClick={() => openProduct(product)}>{product.stock > 0 ? "View Details →" : "Unavailable"}</button>
                       </div>
                     </div>
-                  ))
-                )}
+                  </article>
+                ))}
               </div>
             )}
+          </section>
+
+          <section id="craft" className="v2-craft">
+            <img src={craftImage} alt="Detail of handcrafted artisan work" loading="lazy" />
+            <div className="v2-craft-copy">
+              <span className="v2-eyebrow">The art behind every piece</span>
+              <h2>Crafted slowly. Chosen thoughtfully.</h2>
+              <p>Climoraone brings together exceptional handcrafted products created with patience, precision and a respect for material. Every piece is selected first for its beauty and quality—its artisan story makes it even more meaningful.</p>
+              <div className="v2-craft-points">
+                <div><strong>Distinctive by nature</strong><br />Subtle variations make every handcrafted piece genuinely individual.</div>
+                <div><strong>Made to be lived with</strong><br />Timeless forms designed to add character to contemporary homes.</div>
+                <div><strong>Craft with a future</strong><br />Your choice supports skilled artisans and preserves valuable traditions.</div>
+              </div>
+            </div>
+          </section>
+
+          <section className="v2-section">
+            <div className="v2-section-heading center">
+              <span className="v2-eyebrow">The Climoraone promise</span>
+              <h2>Premium from selection to delivery.</h2>
+            </div>
+            <div className="v2-promise-grid">
+              <div className="v2-promise-card"><span>✦</span><h3>Curated Quality</h3><p>Only products that meet our standards for finish, form and material make the collection.</p></div>
+              <div className="v2-promise-card"><span>⌂</span><h3>Designed for Home</h3><p>Elegant, versatile pieces selected to complement both traditional and modern interiors.</p></div>
+              <div className="v2-promise-card"><span>◈</span><h3>Authentically Handmade</h3><p>Created by skilled artisans using craft knowledge refined across generations.</p></div>
+              <div className="v2-promise-card"><span>✓</span><h3>Careful Delivery</h3><p>Secure packaging and dependable delivery, so your purchase arrives with confidence.</p></div>
+            </div>
           </section>
 
           <section id="cart" className="cart-section">
             <div className="cart-section__container">
-              <div className="cart-section__heading">
-                <h2>Your Cart</h2>
-                <p>Review your selected Climoraone products.</p>
-              </div>
-
+              <div className="cart-section__heading"><h2>Your Cart</h2><p>Review your selected Climoraone pieces.</p></div>
               {cart.length === 0 ? (
-                <div className="empty-cart-inline">
-                  <div className="empty-cart-inline__icon" aria-hidden="true">
-                    🛒
-                  </div>
-                  <h3>Your cart is empty</h3>
-                  <p>Add a Climoraone product to continue.</p>
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => scrollToSection("products")}
-                  >
-                    Explore Products
-                  </button>
-                </div>
+                <div className="empty-cart-inline"><div className="empty-cart-inline__icon">🛒</div><h3>Your cart is empty</h3><p>Explore the collection to find a piece for your home.</p><button type="button" className="btn" onClick={() => scrollToSection("products")}>Shop Collection</button></div>
               ) : (
                 <div className="cart-layout">
                   <div className="inline-cart-items">
                     {cart.map((item) => (
                       <article className="cart-item" key={item.id}>
-                        <div className="cart-item-details">
-                          <h3>{item.name}</h3>
-                          <p className="cart-item-unit-price">
-                            ₹{Number(item.price)} each
-                          </p>
-                          <div className="cart-item-bottom">
-                            <div className="cart-item-controls">
-                              <button
-                                type="button"
-                                onClick={() => decreaseQty(item.id)}
-                                aria-label={`Reduce quantity of ${item.name}`}
-                              >
-                                −
-                              </button>
-                              <strong>{item.quantity}</strong>
-                              <button
-                                type="button"
-                                onClick={() => increaseQty(item.id)}
-                                disabled={item.quantity >= item.stock}
-                                aria-label={`Increase quantity of ${item.name}`}
-                              >
-                                +
-                              </button>
-                            </div>
-                            <button
-                              type="button"
-                              className="cart-item-remove"
-                              onClick={() => removeFromCart(item.id)}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                        <strong className="cart-item-total">
-                          ₹{Number(item.price) * item.quantity}
-                        </strong>
+                        <div className="cart-item-details"><h3>{item.name}</h3><p className="cart-item-unit-price">₹{Number(item.price)} each</p><div className="cart-item-bottom"><div className="cart-item-controls"><button type="button" onClick={() => decreaseQty(item.id)}>−</button><strong>{item.quantity}</strong><button type="button" onClick={() => increaseQty(item.id)} disabled={item.quantity >= item.stock}>+</button></div><button type="button" className="cart-item-remove" onClick={() => removeFromCart(item.id)}>Remove</button></div></div>
+                        <strong className="cart-item-total">₹{Number(item.price) * item.quantity}</strong>
                       </article>
                     ))}
                   </div>
-
-                  <aside className="inline-cart-summary">
-                    <h3>Order Summary</h3>
-                    <div className="summary-row">
-                      <span>Quantity</span>
-                      <strong>{cartCount}</strong>
-                    </div>
-                    <div className="summary-row summary-total">
-                      <span>Total</span>
-                      <strong>₹{total}</strong>
-                    </div>
-                    <button
-                      type="button"
-                      className="checkout-btn"
-                      onClick={() => navigate("/checkout")}
-                    >
-                      Proceed to Checkout
-                    </button>
-                  </aside>
+                  <aside className="inline-cart-summary"><h3>Order Summary</h3><div className="summary-row"><span>Quantity</span><strong>{cartCount}</strong></div><div className="summary-row summary-total"><span>Total</span><strong>₹{total}</strong></div><button type="button" className="checkout-btn" onClick={() => navigate("/checkout")}>Proceed to Checkout</button></aside>
                 </div>
               )}
             </div>
@@ -584,61 +319,12 @@ function Store() {
 
       <footer className="footer">
         <div className="footer-content">
-          <div>
-            <img
-              src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-              alt="Climoraone"
-              className="footer-logo"
-            />
-            <p>
-              Eco-friendly handmade products supporting rural women artisans
-              across India.
-            </p>
-          </div>
-
-          <div>
-            <h4>Quick Links</h4>
-            <button
-              type="button"
-              className="footer-link-button"
-              onClick={() => scrollToSection("home")}
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              className="footer-link-button"
-              onClick={() => scrollToSection("products")}
-            >
-              Products
-            </button>
-            <button
-              type="button"
-              className="footer-link-button"
-              onClick={() => scrollToSection("cart")}
-            >
-              Cart
-            </button>
-            <Link to="/contact">Contact Us</Link>
-            <Link to="/track-order">Track Order</Link>
-          </div>
-
-          <div>
-            <h4>Policies</h4>
-            <Link to="/return-policy">Return Policy</Link>
-            <Link to="/shipping-policy">Shipping Policy</Link>
-          </div>
-
-          <div>
-            <h4>Contact</h4>
-            <p>Email: support@climoraone.com</p>
-            <p>WhatsApp: +91 98765 43210</p>
-          </div>
+          <div><BrandLogo className="footer-logo" /><p>Premium handcrafted décor bringing timeless Indian craftsmanship into beautiful homes.</p></div>
+          <div><h4>Explore</h4><button type="button" className="footer-link-button" onClick={() => scrollToSection("products")}>Collection</button><button type="button" className="footer-link-button" onClick={() => scrollToSection("craft")}>Our Craft</button><Link to="/track-order">Track Order</Link></div>
+          <div><h4>Customer Care</h4><Link to="/return-policy">Return Policy</Link><Link to="/shipping-policy">Shipping Policy</Link><Link to="/contact">Contact Us</Link></div>
+          <div><h4>Contact</h4><p>support@climoraone.com</p><p>WhatsApp: +91 98765 43210</p></div>
         </div>
-
-        <div className="footer-bottom">
-          © 2026 Climoraone. All rights reserved.
-        </div>
+        <div className="footer-bottom">© 2026 Climoraone. Crafted with purpose.</div>
       </footer>
     </div>
   );
