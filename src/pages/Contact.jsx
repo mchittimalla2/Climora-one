@@ -1,40 +1,35 @@
-import { Link } from "react-router-dom";
-import "../App.css";
+import { PublicPageLayout } from "../components/PublicPageLayout";
 
 function Contact() {
   return (
-    <div>
-      <header className="simple-header">
-        <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <Link to="/">Back to Store</Link>
-      </header>
-      <main className="page-container">
-        <h1>Contact Us</h1>
+    <PublicPageLayout
+      eyebrow="We are here to help"
+      title="Contact Climoraone"
+      description="Questions about a product, an order, or delivery? Our customer care team is ready to assist."
+    >
+      <div className="contact-grid">
+        <section className="contact-card">
+          <span>Email</span>
+          <h3>Customer support</h3>
+          <p><strong>support@climoraone.com</strong></p>
+          <p>Best for product questions, order support, returns, and delivery concerns.</p>
+        </section>
 
-        <div className="policy-card">
-          <p>
-            For order support, delivery issues, returns, or product questions,
-            please contact us.
-          </p>
+        <section className="contact-card">
+          <span>Phone & WhatsApp</span>
+          <h3>Speak with us</h3>
+          <p><strong>+91 98765 43210</strong></p>
+          <p>Share your order number when contacting us for faster assistance.</p>
+        </section>
 
-          <p><strong>Email:</strong> support@climoraone.com</p>
-          <p><strong>Phone:</strong> +91 98765 43210</p>
-          <p><strong>WhatsApp:</strong> +91 98765 43210</p>
-
-          <h3>Business Hours</h3>
-          <p>Monday to Saturday, 10:00 AM – 6:00 PM IST</p>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="footer-bottom-only">
-      © 2026 Climoraone. All rights reserved.
-    </footer>
+        <section className="contact-card">
+          <span>Business hours</span>
+          <h3>Monday to Saturday</h3>
+          <p><strong>10:00 AM – 6:00 PM IST</strong></p>
+          <p>Messages received outside business hours will be answered on the next working day.</p>
+        </section>
+      </div>
+    </PublicPageLayout>
   );
 }
 
