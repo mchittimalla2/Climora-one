@@ -1,52 +1,43 @@
-import { Link } from "react-router-dom";
-import "../App.css";
+import { PublicPageLayout } from "../components/PublicPageLayout";
 
 function ReturnPolicy() {
   return (
-    <div>
-      <header className="simple-header">
-        <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <Link to="/">Back to Store</Link>
-      </header>
-      <main className="page-container">
-        <h1>Return & Refund Policy</h1>
+    <PublicPageLayout
+      eyebrow="Customer care"
+      title="Return & Refund Policy"
+      description="Clear, considered support for handcrafted products selected with care."
+    >
+      <p className="policy-intro">
+        We accept return requests within 7 days of delivery when a product is damaged, defective, or different from what was ordered.
+      </p>
 
-        <div className="policy-card">
+      <div className="policy-grid">
+        <section className="policy-panel">
+          <h3>Eligibility for returns</h3>
+          <ul>
+            <li>Your order number is required.</li>
+            <li>Photo or video proof of the issue is required.</li>
+            <li>The product must be unused.</li>
+            <li>The original packaging should be retained.</li>
+          </ul>
+        </section>
+
+        <section className="policy-panel">
+          <h3>Handmade character</h3>
           <p>
-            We accept returns within 7 days of delivery only if the product is
-            damaged, defective, or incorrect.
+            Small variations in colour, grain, shape, or finish are natural characteristics of handcrafted work. These details make every piece individual and are not treated as defects.
           </p>
+        </section>
+      </div>
 
-            <h3>Eligibility for Returns</h3>
+      <h3>Refund processing</h3>
+      <p>
+        Once the returned product is received and verified, an approved refund will be processed through the original payment method. Processing timelines may vary by payment provider.
+      </p>
 
-            <ul>
-            <li>Order ID is required.</li>
-            <li>Photo proof of damage is required.</li>
-            <li>Product must be unused.</li>
-            <li>Product should be returned in original packaging.</li>
-            </ul>
-
-            <h3>Important Notes</h3>
-
-            <p>
-            Handmade products may have small variations in color, shape, or finish.
-            These variations are part of the handmade process and are not considered defects.
-            </p>
-
-            <p>
-            Refunds will be processed after the returned product is verified.
-            </p>
-
-            <p>
-            For return support contact:
-            <strong> support@climoraone.com</strong>
-            </p>
-        </div>
-      </main>
-      <footer className="footer-bottom-only">
-        © 2026 Climoraone. All rights reserved.
-      </footer>
-    </div>
+      <h3>Need assistance?</h3>
+      <p>Contact <strong>support@climoraone.com</strong> with your order number and supporting images.</p>
+    </PublicPageLayout>
   );
 }
 
