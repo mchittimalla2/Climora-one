@@ -1,39 +1,41 @@
-import { Link } from "react-router-dom";
-import "../App.css";
+import { PublicPageLayout } from "../components/PublicPageLayout";
 
 function ShippingPolicy() {
   return (
-    <div>
-      <header className="simple-header">
-        <img src="/images/logo.jpeg" alt="Climoraone" className="header-logo" />
-        <Link to="/">Back to Store</Link>
-      </header>
-      <main className="page-container">
-        <h1>Shipping Policy</h1>
+    <PublicPageLayout
+      eyebrow="Careful delivery"
+      title="Shipping Policy"
+      description="Thoughtful packaging and dependable delivery for every handcrafted piece."
+    >
+      <p className="policy-intro">
+        Climoraone currently delivers across India. Every order is prepared with care so handcrafted products arrive safely and beautifully presented.
+      </p>
 
-        <div className="policy-card">
-          <p>We currently ship products across India.</p>
+      <div className="policy-grid">
+        <section className="policy-panel">
+          <h3>Order preparation</h3>
+          <p>Orders are generally processed within 2–3 business days after confirmation.</p>
+        </section>
 
-          <ul>
-            <li>Order Processing Time: 2–3 Business Days</li>
-            <li>Estimated Delivery: 5–10 Business Days</li>
-            <li>Tracking details will be shared after shipment.</li>
-          </ul>
+        <section className="policy-panel">
+          <h3>Estimated delivery</h3>
+          <p>Most orders arrive within 5–10 business days, depending on the destination and courier network.</p>
+        </section>
 
-          <p>
-            Delivery timelines may vary depending on location, courier service,
-            holidays, and weather conditions.
-          </p>
+        <section className="policy-panel">
+          <h3>Tracking updates</h3>
+          <p>Tracking information will be shared after dispatch and can be checked from the Track Order page.</p>
+        </section>
 
-          <p>
-            For shipping support: <strong>support@climoraone.com</strong>
-          </p>
-        </div>
-      </main>
-      <footer className="footer-bottom-only">
-        © 2026 Climoraone. All rights reserved.
-      </footer>
-    </div>
+        <section className="policy-panel">
+          <h3>Delivery considerations</h3>
+          <p>Timelines can vary due to location, holidays, weather conditions, or courier service interruptions.</p>
+        </section>
+      </div>
+
+      <h3>Shipping assistance</h3>
+      <p>For delivery support, contact <strong>support@climoraone.com</strong> with your order number.</p>
+    </PublicPageLayout>
   );
 }
 
