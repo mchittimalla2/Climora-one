@@ -220,16 +220,18 @@
   max-height: none !important;
   object-fit: contain !important;
   object-position: center !important;
-  transform: scale(1.32) !important;
-  transform-origin: center !important;
+  transform: scale(1.12) !important;
+  transform-origin: left center !important;
 }
 
 .store-v2 .v2-logo-button {
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: flex-start !important;
   padding: 0 !important;
+  margin: 0 !important;
   overflow: hidden !important;
+  justify-self: start !important;
 }
 
 .store-v2 .v2-search {
@@ -253,32 +255,49 @@
 }
 
 @media (min-width: 1001px) {
+  .store-v2 .v2-header {
+    padding-left: 18px !important;
+    padding-right: 24px !important;
+  }
+
   .store-v2 .v2-logo-button {
-    width: 244px !important;
-    min-width: 244px !important;
-    height: 72px !important;
+    width: 218px !important;
+    min-width: 218px !important;
+    height: 62px !important;
   }
 }
 
 @media (min-width: 1440px) {
+  .store-v2 .v2-header {
+    padding-left: 28px !important;
+  }
+
   .store-v2 .v2-logo-button {
-    width: 282px !important;
-    min-width: 282px !important;
-    height: 86px !important;
+    width: 250px !important;
+    min-width: 250px !important;
+    height: 76px !important;
   }
 }
 
 @media (max-width: 1000px) {
+  .store-v2 .v2-header {
+    padding: 14px 18px 18px !important;
+  }
+
   .store-v2 .v2-logo-button {
-    width: min(230px, 58vw) !important;
-    height: 66px !important;
+    width: min(205px, 54vw) !important;
+    height: 58px !important;
     padding: 0 !important;
+    margin-left: 0 !important;
+    justify-self: start !important;
   }
 
   .store-v2 .v2-header-logo {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
-    transform: scale(1.18) !important;
+    object-position: left center !important;
+    transform: scale(1.04) !important;
+    transform-origin: left center !important;
   }
 }
