@@ -212,8 +212,22 @@
 }
 
 .store-v2 .v2-header-logo {
-  background: #ffffff !important;
+  background: transparent !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
   object-fit: contain !important;
+  object-position: center !important;
+}
+
+.store-v2 .v2-logo-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2px 0 !important;
+  overflow: visible !important;
 }
 
 .store-v2 .v2-search {
@@ -234,4 +248,34 @@
   background: #173d28 !important;
   border-color: #173d28 !important;
   color: #ffffff !important;
+}
+
+@media (min-width: 1001px) {
+  .store-v2 .v2-logo-button {
+    width: 244px !important;
+    min-width: 244px !important;
+    height: 72px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .store-v2 .v2-logo-button {
+    width: 282px !important;
+    min-width: 282px !important;
+    height: 86px !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  .store-v2 .v2-logo-button {
+    width: min(230px, 58vw) !important;
+    height: 66px !important;
+    padding: 0 !important;
+  }
+
+  .store-v2 .v2-header-logo {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
 }
