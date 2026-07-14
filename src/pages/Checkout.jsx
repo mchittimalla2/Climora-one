@@ -4,6 +4,7 @@ import { useState } from "react";
 import "../App.css";
 import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
+import { BrandLogo } from "../components/BrandLogo";
 
 function Checkout() {
   const navigate = useNavigate();
@@ -114,10 +115,7 @@ function Checkout() {
       <div className="checkout-page">
         <header className="checkout-header">
           <Link to="/" className="checkout-brand">
-            <img
-              src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-              alt="Climoraone"
-            />
+            <BrandLogo className="brand-logo" />
           </Link>
           <span>Secure Checkout</span>
         </header>
@@ -149,10 +147,7 @@ function Checkout() {
       <div className="checkout-page">
         <header className="checkout-header">
           <Link to="/" className="checkout-brand">
-            <img
-              src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-              alt="Climoraone"
-            />
+            <BrandLogo className="brand-logo" />
           </Link>
           <span>Secure Checkout</span>
         </header>
@@ -174,10 +169,7 @@ function Checkout() {
     <div className="checkout-page">
       <header className="checkout-header">
         <Link to="/" className="checkout-brand">
-          <img
-            src={`${import.meta.env.BASE_URL}images/logo.jpeg`}
-            alt="Climoraone"
-          />
+          <BrandLogo className="brand-logo" />
         </Link>
 
         <div className="checkout-header-right">
