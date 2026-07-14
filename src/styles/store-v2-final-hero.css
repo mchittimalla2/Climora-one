@@ -83,12 +83,29 @@
   }
 
   .store-v2 .v2-hero-visual {
+    position: relative !important;
     min-height: 510px !important;
     max-height: 560px !important;
     background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
     background-size: contain !important;
     background-position: center bottom !important;
+    overflow: hidden !important;
+  }
+
+  .store-v2 .v2-hero-visual::before {
+    content: "" !important;
+    display: block !important;
+    position: absolute !important;
+    z-index: 2 !important;
+    inset: 0 auto 0 0 !important;
+    width: clamp(42px, 5vw, 88px) !important;
+    background: linear-gradient(90deg, #f5ede3 0%, rgba(245, 237, 227, .96) 24%, rgba(245, 237, 227, .55) 62%, rgba(245, 237, 227, 0) 100%) !important;
+    pointer-events: none !important;
+  }
+
+  .store-v2 .v2-hero-visual::after {
+    display: none !important;
   }
 }
 
@@ -179,5 +196,10 @@
     background-repeat: no-repeat !important;
     background-size: contain !important;
     background-position: center bottom !important;
+  }
+
+  .store-v2 .v2-hero-visual::before,
+  .store-v2 .v2-hero-visual::after {
+    display: none !important;
   }
 }
