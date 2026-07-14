@@ -1,8 +1,6 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
-import "../App.css";
 import { API_BASE_URL } from "../config/api";
-import { BrandLogo } from "../components/BrandLogo";
+import { PublicPageLayout } from "../components/PublicPageLayout";
 
 const timelineSteps = [
   "Order Received",
@@ -87,108 +85,93 @@ function TrackOrder() {
   };
 
   return (
-    <div className="tracking-page">
-      <header className="tracking-header">
-        <Link to="/" className="tracking-brand" aria-label="Climoraone store">
-          <BrandLogo className="brand-logo" />
-        </Link>
-        <Link to="/" className="tracking-back-link">Back to Store</Link>
-      </header>
+    <PublicPageLayout
+      className="tracking-page"
+      eyebrow="Order updates"
+      title="Track your order"
+      description="Enter your confirmation number and the phone number used at checkout to follow your order journey."
+    >
+      <section className="tracking-card">
+        <form className="tracking-form" onSubmit={handleTrack}>
+          <label>
+            <span>Order number</span>
+            <input
+              placeholder="CLM-2026-XXXXXXXX"
+              value={orderId}
+              onChange={(event) => setOrderId(event.target.value.toUpperCase())}
+              autoComplete="off"
+              required
+            />
+          </label>
 
-      <main className="tracking-main">
-        <section className="tracking-intro">
-          <span className="tracking-eyebrow">Order updates</span>
-          <h1>Track your order</h1>
-          <p>Enter the order number from your confirmation and the 10-digit phone number used at checkout.</p>
-        </section>
+          <label>
+            <span>Phone number</span>
+            <input
+              placeholder="10-digit phone number"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength="10"
+              required
+            />
+          </label>
 
-        <section className="tracking-card">
-          <form className="tracking-form" onSubmit={handleTrack}>
-            <label>
+          <button type="submit" disabled={loading}>
+            {loading ? "Checking..." : "Track Order"}
+          </button>
+        </form>
+
+        {error && <div className="tracking-error" role="alert">{error}</div>}
+      </section>
+
+      {matchedOrder && (
+        <section className="tracking-result-card">
+          <div className="tracking-order-header">
+            <div>
               <span>Order number</span>
-              <input
-                placeholder="CLM-2026-XXXXXXXX"
-                value={orderId}
-                onChange={(event) => setOrderId(event.target.value.toUpperCase())}
-                autoComplete="off"
-                required
-              />
-            </label>
+              <h2>{matchedOrder.id}</h2>
+              <p>Placed {new Date(matchedOrder.createdAt).toLocaleString()}</p>
+            </div>
+            <span className="tracking-status">{matchedOrder.status}</span>
+          </div>
 
-            <label>
-              <span>Phone number</span>
-              <input
-                placeholder="10-digit phone number"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
-                inputMode="numeric"
-                pattern="[0-9]{10}"
-                maxLength="10"
-                required
-              />
-            </label>
+          <div className="tracking-summary-grid">
+            <div><span>Customer</span><strong>{matchedOrder.customerName}</strong></div>
+            <div><span>Total</span><strong>₹{matchedOrder.total}</strong></div>
+            <div><span>Items</span><strong>{matchedOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</strong></div>
+          </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Checking..." : "Track Order"}
-            </button>
-          </form>
-
-          {error && <div className="tracking-error" role="alert">{error}</div>}
-        </section>
-
-        {matchedOrder && (
-          <section className="tracking-result-card">
-            <div className="tracking-order-header">
-              <div>
-                <span>Order number</span>
-                <h2>{matchedOrder.id}</h2>
-                <p>Placed {new Date(matchedOrder.createdAt).toLocaleString()}</p>
+          <div className="tracking-items">
+            <h3>Items ordered</h3>
+            {matchedOrder.items.map((item) => (
+              <div className="tracking-item-row" key={item.id}>
+                <div>
+                  <strong>{item.product_name}</strong>
+                  <span>Quantity: {item.quantity}</span>
+                </div>
+                <strong>₹{item.subtotal || Number(item.price) * Number(item.quantity)}</strong>
               </div>
-              <span className="tracking-status">{matchedOrder.status}</span>
-            </div>
+            ))}
+          </div>
 
-            <div className="tracking-summary-grid">
-              <div><span>Customer</span><strong>{matchedOrder.customerName}</strong></div>
-              <div><span>Total</span><strong>₹{matchedOrder.total}</strong></div>
-              <div><span>Items</span><strong>{matchedOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</strong></div>
-            </div>
-
-            <div className="tracking-items">
-              <h3>Items ordered</h3>
-              {matchedOrder.items.map((item) => (
-                <div className="tracking-item-row" key={item.id}>
+          <div className="tracking-timeline-wrap">
+            <h3>Order progress</h3>
+            <div className="tracking-timeline">
+              {matchedOrder.steps.map((step) => (
+                <div key={step.name} className={step.completed ? "tracking-step completed" : "tracking-step"}>
+                  <span className="tracking-step-dot">{step.completed ? "✓" : ""}</span>
                   <div>
-                    <strong>{item.product_name}</strong>
-                    <span>Quantity: {item.quantity}</span>
+                    <strong>{step.name}</strong>
+                    {step.completedAt && <small>{new Date(step.completedAt).toLocaleString()}</small>}
                   </div>
-                  <strong>₹{item.subtotal || Number(item.price) * Number(item.quantity)}</strong>
                 </div>
               ))}
             </div>
-
-            <div className="tracking-timeline-wrap">
-              <h3>Order progress</h3>
-              <div className="tracking-timeline">
-                {matchedOrder.steps.map((step) => (
-                  <div key={step.name} className={step.completed ? "tracking-step completed" : "tracking-step"}>
-                    <span className="tracking-step-dot">{step.completed ? "✓" : ""}</span>
-                    <div>
-                      <strong>{step.name}</strong>
-                      {step.completedAt && <small>{new Date(step.completedAt).toLocaleString()}</small>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-      </main>
-
-      <footer className="tracking-footer">
-        <BrandLogo className="brand-logo brand-logo--footer" />
-        <span>© 2026 Climoraone. All rights reserved.</span>
-      </footer>
-    </div>
+          </div>
+        </section>
+      )}
+    </PublicPageLayout>
   );
 }
 
