@@ -220,14 +220,16 @@
   max-height: none !important;
   object-fit: contain !important;
   object-position: center !important;
+  transform: scale(1.32) !important;
+  transform-origin: center !important;
 }
 
 .store-v2 .v2-logo-button {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 2px 0 !important;
-  overflow: visible !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
 .store-v2 .v2-search {
@@ -277,5 +279,6 @@
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
+    transform: scale(1.18) !important;
   }
 }
