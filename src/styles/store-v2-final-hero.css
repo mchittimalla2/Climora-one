@@ -1,0 +1,183 @@
+/* Final hero stabilization layer.
+   Keeps the approved text + artwork split while fitting common laptop screens. */
+
+.store-v2 .v2-hero {
+  background: #f5ede3 !important;
+}
+
+.store-v2 .v2-hero-copy,
+.store-v2 .v2-hero-visual {
+  background-color: #f5ede3 !important;
+}
+
+@media (min-width: 1001px) {
+  .store-v2 .v2-header {
+    min-height: 88px !important;
+    padding: 10px 34px !important;
+    gap: 24px !important;
+  }
+
+  .store-v2 .v2-logo-button {
+    width: 220px !important;
+    min-width: 220px !important;
+    height: 68px !important;
+  }
+
+  .store-v2 .v2-search {
+    width: 245px !important;
+    height: 46px !important;
+    font-size: 14px !important;
+  }
+
+  .store-v2 .v2-nav {
+    gap: 22px !important;
+  }
+
+  .store-v2 .v2-nav button,
+  .store-v2 .v2-nav a {
+    font-size: 14px !important;
+  }
+
+  .store-v2 .v2-cart-link {
+    min-width: 108px !important;
+    padding: 10px 16px !important;
+  }
+
+  .store-v2 .v2-hero {
+    grid-template-columns: 43% 57% !important;
+    min-height: 510px !important;
+    max-height: 560px !important;
+  }
+
+  .store-v2 .v2-hero-copy {
+    padding: 54px 30px 48px 44px !important;
+  }
+
+  .store-v2 .v2-eyebrow {
+    margin-bottom: 16px !important;
+    font-size: 12px !important;
+  }
+
+  .store-v2 .v2-hero h1 {
+    max-width: 520px !important;
+    font-size: clamp(46px, 4.3vw, 64px) !important;
+    line-height: 1.01 !important;
+  }
+
+  .store-v2 .v2-hero-copy > p {
+    max-width: 520px !important;
+    margin-top: 20px !important;
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+  }
+
+  .store-v2 .v2-actions {
+    margin-top: 22px !important;
+    gap: 14px !important;
+  }
+
+  .store-v2 .v2-actions button {
+    min-height: 46px !important;
+    padding: 0 22px !important;
+    font-size: 14px !important;
+  }
+
+  .store-v2 .v2-hero-visual {
+    min-height: 510px !important;
+    max-height: 560px !important;
+    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+    background-position: center bottom !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .store-v2 .v2-header {
+    min-height: 104px !important;
+    padding: 12px 56px !important;
+  }
+
+  .store-v2 .v2-logo-button {
+    width: 255px !important;
+    min-width: 255px !important;
+    height: 82px !important;
+  }
+
+  .store-v2 .v2-search {
+    width: 330px !important;
+    height: 50px !important;
+    font-size: 15px !important;
+  }
+
+  .store-v2 .v2-nav {
+    gap: 36px !important;
+  }
+
+  .store-v2 .v2-nav button,
+  .store-v2 .v2-nav a {
+    font-size: 16px !important;
+  }
+
+  .store-v2 .v2-hero {
+    grid-template-columns: 44% 56% !important;
+    min-height: 620px !important;
+    max-height: 680px !important;
+  }
+
+  .store-v2 .v2-hero-copy {
+    padding: 68px 44px 62px 72px !important;
+  }
+
+  .store-v2 .v2-eyebrow {
+    font-size: 14px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .store-v2 .v2-hero h1 {
+    max-width: 650px !important;
+    font-size: clamp(62px, 4.8vw, 78px) !important;
+  }
+
+  .store-v2 .v2-hero-copy > p {
+    max-width: 600px !important;
+    margin-top: 28px !important;
+    font-size: 18px !important;
+  }
+
+  .store-v2 .v2-actions {
+    margin-top: 30px !important;
+    gap: 20px !important;
+  }
+
+  .store-v2 .v2-actions button {
+    min-height: 54px !important;
+    padding: 0 30px !important;
+    font-size: 16px !important;
+  }
+
+  .store-v2 .v2-hero-visual {
+    min-height: 620px !important;
+    max-height: 680px !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  .store-v2 .v2-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    background: #f5ede3 !important;
+  }
+
+  .store-v2 .v2-hero-copy {
+    background: #f5ede3 !important;
+  }
+
+  .store-v2 .v2-hero-visual {
+    background-color: #f5ede3 !important;
+    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
+    background-position: center bottom !important;
+  }
+}
