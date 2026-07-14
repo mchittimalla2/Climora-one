@@ -21,6 +21,7 @@ import Products from "./pages/admin/products/Products";
 import { CartProvider } from "./context/CartContext";
 import "./App.css";
 import "./styles/brand-experience.css";
+import "./styles/store-v2-polish.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
 const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
