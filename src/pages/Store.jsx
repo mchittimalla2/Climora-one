@@ -87,6 +87,15 @@ function Store() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.querySelector(".product-detail")?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedProduct]);
+
   const categories = useMemo(
     () => ["All", ...new Set(products.map((product) => product.category).filter(Boolean))],
     [products]
@@ -117,7 +126,7 @@ function Store() {
     setSelectedProduct(product);
     setSelectedImage(product.images[0]);
     setQuantity(1);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setShowMobileMenu(false);
   };
 
   const addSelectedProduct = (goToCheckout = false) => {
@@ -134,6 +143,13 @@ function Store() {
     setSelectedProduct(null);
     window.setTimeout(() => scrollToSection("cart"), 100);
   };
+
+  const trustItems = [
+    { number: "01", icon: "✦", title: "Handcrafted", copy: "Made with skilled hands" },
+    { number: "02", icon: "⌁", title: "Sustainable", copy: "Natural, considered materials" },
+    { number: "03", icon: "❋", title: "Made in India", copy: "Rooted in Indian craft" },
+    { number: "04", icon: "◇", title: "Secure Delivery", copy: "Carefully packed, pan India" },
+  ];
 
   return (
     <div className="store-v2">
@@ -173,7 +189,7 @@ function Store() {
       </header>
 
       {selectedProduct ? (
-        <section className="product-detail">
+        <section className="product-detail" tabIndex="-1">
           <button type="button" className="back-btn" onClick={() => scrollToSection("products")}>← Back to Collection</button>
           <div className="detail-layout">
             <div className="thumbs">
@@ -220,14 +236,17 @@ function Store() {
             <div className="v2-hero-visual" aria-label="Premium Indian handcrafted décor collection" />
           </section>
 
-          <section className="v2-trust-strip">
-            <div><span className="v2-trust-icon">✿</span><span><strong>Handcrafted</strong><small>By skilled artisans</small></span></div>
-            <div><span className="v2-trust-icon">⌁</span><span><strong>Sustainable</strong><small>Natural & eco-friendly</small></span></div>
-            <div><span className="v2-trust-icon">❀</span><span><strong>Made in India</strong><small>Proud of our roots</small></span></div>
-            <div><span className="v2-trust-icon">▣</span><span><strong>Secure Delivery</strong><small>Pan India</small></span></div>
+          <section className="v2-trust-strip" aria-label="Climoraone product promises">
+            {trustItems.map((item) => (
+              <article className="v2-trust-item" key={item.title}>
+                <span className="v2-trust-number">{item.number}</span>
+                <span className="v2-trust-medallion" aria-hidden="true">{item.icon}</span>
+                <span className="v2-trust-copy"><strong>{item.title}</strong><small>{item.copy}</small></span>
+              </article>
+            ))}
           </section>
 
-          <section id="products" className="v2-section">
+          <section id="products" className="v2-section v2-collection-section">
             <div className="v2-section-heading">
               <span className="v2-eyebrow">Curated collection</span>
               <h2>Objects with presence, character and soul.</h2>
@@ -252,7 +271,7 @@ function Store() {
                       <h3>{product.name}</h3>
                       <div className="v2-product-meta">
                         <strong>₹{product.price}</strong>
-                        <button type="button" onClick={() => openProduct(product)}>{product.stock > 0 ? "View Details →" : "Unavailable"}</button>
+                        <button type="button" onClick={() => openProduct(product)} disabled={product.stock <= 0}>{product.stock > 0 ? "View Details →" : "Unavailable"}</button>
                       </div>
                     </div>
                   </article>
@@ -280,7 +299,7 @@ function Store() {
             </div>
           </section>
 
-          <section className="v2-section">
+          <section className="v2-section v2-promise-section">
             <div className="v2-section-heading center">
               <span className="v2-eyebrow">The Climoraone promise</span>
               <h2>Premium from selection to delivery.</h2>
