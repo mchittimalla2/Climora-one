@@ -196,3 +196,42 @@
     display: none !important;
   }
 }
+
+/* Header refinement: white navigation canvas above the approved warm-ivory hero. */
+.store-v2 .v2-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #eee9df !important;
+  box-shadow: 0 2px 10px rgba(20, 44, 31, 0.035) !important;
+}
+
+.store-v2 .v2-logo-button,
+.store-v2 .v2-logo-leaf {
+  background: #ffffff !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.store-v2 .v2-header-logo {
+  background: #ffffff !important;
+  object-fit: contain !important;
+}
+
+.store-v2 .v2-search {
+  background: #ffffff !important;
+  border: 1px solid #e5e2da !important;
+  box-shadow: none !important;
+}
+
+.store-v2 .v2-cart-link {
+  background: #ffffff !important;
+  border: 1px solid #b99249 !important;
+  color: #173d28 !important;
+  box-shadow: none !important;
+}
+
+.store-v2 .v2-cart-link:hover,
+.store-v2 .v2-cart-link:focus-visible {
+  background: #173d28 !important;
+  border-color: #173d28 !important;
+  color: #ffffff !important;
+}
