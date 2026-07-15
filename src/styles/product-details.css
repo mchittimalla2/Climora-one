@@ -4,6 +4,27 @@
   line-height: 1.65;
 }
 
+/* Keep the INR symbol and amount in a clean commerce font on every device. */
+.detail-info > h3,
+.v2-product-meta > strong,
+.cart-item-unit-price,
+.cart-item-total,
+.summary-total strong {
+  font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.detail-info > h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  color: #173f2a;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
 .detail-info .trust-box {
   margin-top: 14px;
   padding: 8px 10px;
@@ -142,6 +163,12 @@
 }
 
 @media (max-width: 640px) {
+  .detail-info > h3 {
+    margin: 20px 0 22px;
+    font-size: 34px !important;
+    font-weight: 800;
+  }
+
   .detail-info .trust-box {
     margin-top: 10px;
     padding: 7px 4px 0;
@@ -176,5 +203,52 @@
   .product-additional-details dl > div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  /* Mobile collection: horizontal swipe carousel instead of a long vertical list. */
+  .v2-collection-section {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 0;
+    overflow: hidden;
+  }
+
+  .v2-collection-section .v2-section-heading,
+  .v2-collection-section .v2-category-bar,
+  .v2-collection-section .products-status,
+  .v2-collection-section .products-error {
+    margin-right: 20px;
+  }
+
+  .v2-product-grid {
+    display: grid !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(270px, 82vw);
+    gap: 16px;
+    width: 100%;
+    padding: 4px 20px 22px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 0;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .v2-product-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .v2-product-card {
+    width: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .v2-product-meta > strong {
+    font-size: 20px;
+    font-weight: 800;
   }
 }
