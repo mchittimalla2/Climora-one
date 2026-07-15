@@ -7,7 +7,11 @@ export function BrandLogo({ className = "", compact = false, alt = "Climoraone" 
       src={compact ? BRAND_MARK : BRAND_LOGO}
       alt={alt}
       className={className}
-      decoding="async"
+      loading="eager"
+      decoding="sync"
+      fetchPriority="high"
+      width={compact ? 716 : 1536}
+      height={compact ? 716 : 528}
     />
   );
 }
