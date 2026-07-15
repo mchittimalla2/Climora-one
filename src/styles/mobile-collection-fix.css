@@ -1,0 +1,15 @@
+@media (max-width: 640px) {
+  .v2-product-grid {
+    grid-auto-columns: calc((100vw - 58px) / 2) !important;
+    gap: 12px !important;
+    padding-right: 16px !important;
+  }
+
+  .v2-product-card {
+    max-width: 100%;
+  }
+
+  .v2-product-card + .v2-product-card {
+    margin-left: 0;
+  }
+}
