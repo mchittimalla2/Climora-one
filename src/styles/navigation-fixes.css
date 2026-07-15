@@ -1,0 +1,108 @@
+/* Route and mobile-detail corrections layered after all existing styles. */
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.public-page,
+.checkout-page,
+.store-v2,
+.store-v2 .product-detail,
+.store-v2 .detail-layout,
+.store-v2 .main-image-box,
+.store-v2 .detail-info {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.store-v2 .detail-layout > * {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .store-v2 .product-detail {
+    width: 100%;
+    padding: 16px 10px 40px;
+    overflow-x: clip;
+  }
+
+  .store-v2 .back-btn {
+    margin-left: 2px;
+  }
+
+  .store-v2 .detail-layout {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    gap: 14px;
+    overflow: visible;
+  }
+
+  .store-v2 .thumbs {
+    order: 1;
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    gap: 9px;
+    padding: 2px 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .store-v2 .thumbs img {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    flex: 0 0 64px;
+    object-fit: cover;
+  }
+
+  .store-v2 .main-image-box {
+    order: 2;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    padding: 10px;
+    overflow: hidden;
+    aspect-ratio: auto;
+  }
+
+  .store-v2 .main-image-box img {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 auto;
+    object-fit: contain !important;
+    object-position: center center;
+    transform: none !important;
+  }
+
+  .store-v2 .detail-info {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .store-v2 .detail-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .store-v2 .detail-actions button {
+    width: 100%;
+  }
+}
