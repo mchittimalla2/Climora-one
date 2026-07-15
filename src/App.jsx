@@ -56,6 +56,12 @@ function StoreInteractionEnhancements() {
         return;
       }
 
+      const detailImage = event.target.closest(".main-image-box img");
+      if (detailImage && window.matchMedia("(min-width: 641px)").matches) {
+        detailImage.closest(".main-image-box")?.classList.toggle("is-zoomed");
+        return;
+      }
+
       const productImage = event.target.closest(".v2-product-image-wrap");
       if (!productImage) return;
 
