@@ -26,15 +26,26 @@ body,
   cursor: pointer;
 }
 
-/* Desktop and tablet: preserve the full portrait photo before any zoom. */
+/* Desktop: keep the entire product visible at normal browser zoom. */
 @media (min-width: 641px) {
+  .store-v2 .product-detail {
+    padding-top: 18px;
+  }
+
+  .store-v2 .detail-layout {
+    grid-template-columns: 82px minmax(360px, 1.25fr) minmax(300px, .78fr);
+    align-items: start;
+    gap: clamp(18px, 2vw, 30px);
+  }
+
   .store-v2 .main-image-box {
     width: 100%;
     min-height: 0;
-    height: auto;
-    aspect-ratio: 3 / 4;
-    padding: 18px;
+    height: min(66vh, 610px);
+    max-height: calc(100vh - 170px);
+    padding: 16px;
     overflow: hidden;
+    aspect-ratio: auto;
     cursor: zoom-in;
   }
 
@@ -69,7 +80,42 @@ body,
 
   .store-v2 .main-image-box.is-zoomed img,
   .store-v2 .main-image-box.is-zoomed:hover img {
-    transform: scale(1.28) !important;
+    transform: scale(1.22) !important;
+  }
+
+  .store-v2 .detail-info {
+    padding: clamp(24px, 2.4vw, 36px);
+  }
+
+  .store-v2 .detail-info .eco-label {
+    margin-bottom: 8px;
+    color: #b48a48;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  .store-v2 .detail-info h2 {
+    margin: 0 0 14px;
+    color: #173f2a;
+    font-size: clamp(28px, 2.3vw, 40px);
+    line-height: 1.12;
+  }
+
+  .store-v2 .detail-info h3 {
+    margin: 0 0 18px;
+    color: #173f2a;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: clamp(30px, 2.5vw, 42px);
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: -.025em;
+  }
+
+  .store-v2 .detail-info > p:not(.eco-label):not(.out-of-stock-message) {
+    color: #555d55;
+    font-size: 16px;
+    line-height: 1.7;
   }
 }
 
