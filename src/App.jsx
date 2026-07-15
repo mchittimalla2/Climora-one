@@ -25,6 +25,7 @@ import "./styles/brand-experience.css";
 import "./styles/store-v2-polish.css";
 import "./styles/public-pages.css";
 import "./styles/navigation-fixes.css";
+import "./styles/product-details.css";
 import "./styles/admin-premium.css";
 import "./styles/admin-legacy-polish.css";
 
