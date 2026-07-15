@@ -191,6 +191,12 @@
   margin-bottom: 22px !important;
 }
 
+@media (min-width: 1024px) {
+  .store-v2 .cart-section__container {
+    transform: translateY(-40px);
+  }
+}
+
 @media (max-width: 900px) {
   .v2-search-shell {
     order: 3;
