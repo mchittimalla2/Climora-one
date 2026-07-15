@@ -22,14 +22,24 @@ body,
   min-width: 0;
 }
 
-/* Desktop and tablet: display the complete portrait product photo first. */
+.v2-product-image-wrap {
+  cursor: pointer;
+}
+
+/* Desktop and tablet: preserve the full portrait photo before any zoom. */
 @media (min-width: 641px) {
   .store-v2 .main-image-box {
     width: 100%;
     min-height: 0;
-    height: clamp(480px, calc(100vh - 190px), 680px);
+    height: auto;
+    aspect-ratio: 3 / 4;
     padding: 18px;
     overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .store-v2 .main-image-box::after {
+    content: "Click image to zoom";
   }
 
   .store-v2 .main-image-box img {
@@ -39,15 +49,27 @@ body,
     max-width: 100%;
     max-height: 100%;
     margin: 0 auto;
-    object-fit: contain;
+    object-fit: contain !important;
     object-position: center center;
-    transform: scale(1);
+    transform: scale(1) !important;
     transition: transform .35s ease;
   }
 
-  /* A controlled inspection zoom rather than the previous excessive crop. */
   .store-v2 .main-image-box:hover img {
-    transform: scale(1.14);
+    transform: scale(1) !important;
+  }
+
+  .store-v2 .main-image-box.is-zoomed {
+    cursor: zoom-out;
+  }
+
+  .store-v2 .main-image-box.is-zoomed::after {
+    content: "Click again to reset";
+  }
+
+  .store-v2 .main-image-box.is-zoomed img,
+  .store-v2 .main-image-box.is-zoomed:hover img {
+    transform: scale(1.28) !important;
   }
 }
 
