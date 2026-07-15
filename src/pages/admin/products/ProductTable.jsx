@@ -1,3 +1,5 @@
+import { parseProductDetails } from "../../../utils/productDetails";
+
 function ProductTable({ products, onEdit, onDelete }) {
   const getStockStatus = (stock) => {
     if (Number(stock) <= 0) {
@@ -29,9 +31,7 @@ function ProductTable({ products, onEdit, onDelete }) {
         <tbody>
           {products.length === 0 ? (
             <tr>
-              <td colSpan="7" className="empty-table">
-                No products found.
-              </td>
+              <td colSpan="7" className="empty-table">No products found.</td>
             </tr>
           ) : (
             products.map((product) => {
@@ -40,50 +40,32 @@ function ProductTable({ products, onEdit, onDelete }) {
                 product.images?.[0] ||
                 product.main_image ||
                 `${import.meta.env.BASE_URL}images/logo.jpeg`;
+              const details = parseProductDetails(product.description || "");
 
               return (
                 <tr key={product.id}>
                   <td>
-                    <img
-                      src={image}
-                      alt={product.name}
-                      className="product-thumb"
-                      loading="lazy"
-                    />
+                    <img src={image} alt={product.name} className="product-thumb" loading="lazy" />
                     {product.images?.length > 1 && (
-                      <small className="product-image-count">
-                        {product.images.length} images
-                      </small>
+                      <small className="product-image-count">{product.images.length} images</small>
                     )}
                   </td>
 
                   <td>
                     <strong>{product.name}</strong>
-                    <p>{product.description}</p>
+                    <p>{details.summary}</p>
                   </td>
 
                   <td>{product.category || "Uncategorized"}</td>
                   <td>₹{product.price}</td>
                   <td>{product.stock ?? 0}</td>
 
-                  <td>
-                    <span className={stockStatus.className}>
-                      {stockStatus.label}
-                    </span>
-                  </td>
+                  <td><span className={stockStatus.className}>{stockStatus.label}</span></td>
 
                   <td>
                     <div className="product-actions">
-                      <button type="button" onClick={() => onEdit(product)}>
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        onClick={() => onDelete(product.id)}
-                      >
-                        Delete
-                      </button>
+                      <button type="button" onClick={() => onEdit(product)}>Edit</button>
+                      <button type="button" className="delete-btn" onClick={() => onDelete(product.id)}>Delete</button>
                     </div>
                   </td>
                 </tr>
