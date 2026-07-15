@@ -5,6 +5,15 @@
   padding: 22px;
 }
 
+.product-modal--wide {
+  width: min(1080px, calc(100vw - 36px));
+  max-height: calc(100vh - 28px);
+  overflow-y: auto;
+  padding: clamp(20px, 3vw, 34px);
+  border-radius: 24px;
+  background: #fffdf9;
+}
+
 .product-modal-header {
   display: flex;
   align-items: flex-start;
@@ -15,24 +24,73 @@
 
 .product-modal-header h2 {
   margin: 0;
-  font-size: 24px;
+  color: #173f2a;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(28px, 3vw, 40px);
 }
 
 .product-modal-header p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   color: #68756b;
   font-size: 13px;
 }
 
 .product-form {
   display: grid;
-  gap: 15px;
+  gap: 20px;
+}
+
+.product-form-section {
+  display: grid;
+  gap: 16px;
+  padding: clamp(18px, 2.5vw, 28px);
+  border: 1px solid rgba(23, 63, 42, .12);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff, #faf5eb);
+}
+
+.product-form-section__heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(23, 63, 42, .1);
+}
+
+.product-form-section__heading > span {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: #173f2a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.product-form-section__heading h3 {
+  margin: 0;
+  color: #173f2a;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+}
+
+.product-form-section__heading p {
+  margin: 4px 0 0;
+  color: #718076;
+  font-size: 12px;
 }
 
 .product-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
+}
+
+.product-form-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .product-form label {
@@ -44,24 +102,27 @@
 }
 
 .product-form input,
-.product-form textarea {
+.product-form textarea,
+.product-form select {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 11px;
+  padding: 11px 12px;
   border: 1px solid #bccbbb;
-  border-radius: 8px;
+  border-radius: 10px;
   outline: none;
   background: #fff;
+  color: #24382a;
   font: inherit;
 }
 
 .product-form textarea {
-  min-height: 78px;
+  min-height: 86px;
   resize: vertical;
 }
 
 .product-form input:focus,
-.product-form textarea:focus {
+.product-form textarea:focus,
+.product-form select:focus {
   border-color: #4b8a42;
   box-shadow: 0 0 0 3px rgba(75, 138, 66, 0.12);
 }
@@ -69,30 +130,30 @@
 .product-image-slots {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .product-image-slot {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  gap: 11px;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #d5e0d2;
-  border-radius: 10px;
+  border-radius: 14px;
   background: #f8faf6;
 }
 
 .product-image-slot__preview {
   display: grid;
-  width: 76px;
-  height: 76px;
+  width: 84px;
+  height: 84px;
   place-items: center;
   overflow: hidden;
   color: #7a887c;
   background: #fff;
   border: 1px dashed #a9b8a6;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 11px;
 }
 
@@ -140,20 +201,43 @@
 }
 
 .product-modal-actions {
+  position: sticky;
+  bottom: -1px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding-top: 4px;
+  padding: 16px 0 2px;
+  background: linear-gradient(180deg, rgba(255,253,249,0), #fffdf9 28%);
+}
+
+.product-modal-actions button {
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 840px) {
+  .product-form-grid--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
-  .product-modal--compact {
+  .product-modal--compact,
+  .product-modal--wide {
     width: calc(100vw - 18px);
     padding: 16px;
+    border-radius: 16px;
   }
 
   .product-form-grid,
+  .product-form-grid--three,
   .product-image-slots {
     grid-template-columns: 1fr;
+  }
+
+  .product-form-section {
+    padding: 16px;
   }
 }
