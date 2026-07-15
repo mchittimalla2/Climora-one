@@ -4,6 +4,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 
@@ -23,9 +24,26 @@ import "./App.css";
 import "./styles/brand-experience.css";
 import "./styles/store-v2-polish.css";
 import "./styles/public-pages.css";
+import "./styles/navigation-fixes.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
 const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
+  return null;
+}
 
 function BuyNowRedirect() {
   const navigate = useNavigate();
@@ -49,6 +67,7 @@ function App() {
   return (
     <CartProvider>
       <BrowserRouter basename={routerBase}>
+        <ScrollToTop />
         <BuyNowRedirect />
         <Routes>
           <Route path="/" element={<StoreRoute />} />
