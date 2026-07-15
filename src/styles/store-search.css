@@ -1,12 +1,16 @@
 .v2-search-shell {
   position: relative;
   width: min(100%, 430px);
+  min-width: 0;
+  box-sizing: border-box;
   z-index: 40;
 }
 
 .v2-search-shell .v2-search {
   width: 100%;
+  max-width: 100%;
   padding-right: 44px;
+  box-sizing: border-box;
 }
 
 .v2-search-clear {
@@ -32,6 +36,8 @@
   top: calc(100% + 10px);
   left: 0;
   right: 0;
+  width: 100%;
+  box-sizing: border-box;
   overflow: hidden;
   border: 1px solid rgba(23, 63, 42, .12);
   border-radius: 18px;
@@ -163,10 +169,44 @@
   cursor: pointer;
 }
 
+/* Keep the cart visually connected to the section above it. */
+.store-v2 .v2-promise-section {
+  padding-bottom: 28px !important;
+}
+
+.store-v2 .cart-section {
+  min-height: 0 !important;
+  padding-top: 28px !important;
+  padding-bottom: 64px !important;
+  margin-top: 0 !important;
+}
+
+.store-v2 .cart-section__container {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.store-v2 .cart-section__heading {
+  margin-top: 0 !important;
+  margin-bottom: 22px !important;
+}
+
 @media (max-width: 900px) {
   .v2-search-shell {
     order: 3;
+    flex: 0 0 100%;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .store-v2 .v2-search-shell .v2-search {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .v2-search-suggestions {
@@ -174,5 +214,49 @@
     max-height: min(55vh, 430px);
     overflow-y: auto;
     border-radius: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .store-v2 .v2-header {
+    box-sizing: border-box;
+  }
+
+  .store-v2 .v2-search-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .store-v2 .v2-search-shell .v2-search {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 46px !important;
+  }
+
+  .store-v2 .v2-search-clear {
+    right: 20px;
+  }
+
+  .store-v2 .v2-search-suggestions {
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+
+  .store-v2 .v2-promise-section {
+    padding-bottom: 18px !important;
+  }
+
+  .store-v2 .cart-section {
+    padding-top: 20px !important;
+    padding-bottom: 44px !important;
+  }
+
+  .store-v2 .cart-section__heading {
+    margin-bottom: 18px !important;
   }
 }
