@@ -241,12 +241,6 @@ function Store() {
               setSelectedCategory("All");
               setSelectedProduct(null);
               setSearchFocused(true);
-              if (value.trim().length >= 2) {
-                window.clearTimeout(window.__climoraSearchTimer);
-                window.__climoraSearchTimer = window.setTimeout(() => {
-                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 280);
-              }
             }}
           />
           {searchTerm && <button type="button" className="v2-search-clear" onClick={clearSearch} aria-label="Clear search">×</button>}
