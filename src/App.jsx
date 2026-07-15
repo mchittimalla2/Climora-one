@@ -45,15 +45,26 @@ function ScrollToTop() {
   return null;
 }
 
-function BuyNowRedirect() {
+function StoreInteractionEnhancements() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleClick = (event) => {
       const buyNowButton = event.target.closest(".buy-btn");
-      if (!buyNowButton || buyNowButton.disabled) return;
+      if (buyNowButton && !buyNowButton.disabled) {
+        window.setTimeout(() => navigate("/checkout"), 80);
+        return;
+      }
 
-      window.setTimeout(() => navigate("/checkout"), 80);
+      const productImage = event.target.closest(".v2-product-image-wrap");
+      if (!productImage) return;
+
+      const productCard = productImage.closest(".v2-product-card");
+      const detailsButton = productCard?.querySelector(".v2-product-meta button");
+
+      if (detailsButton && !detailsButton.disabled) {
+        detailsButton.click();
+      }
     };
 
     document.addEventListener("click", handleClick);
@@ -68,7 +79,7 @@ function App() {
     <CartProvider>
       <BrowserRouter basename={routerBase}>
         <ScrollToTop />
-        <BuyNowRedirect />
+        <StoreInteractionEnhancements />
         <Routes>
           <Route path="/" element={<StoreRoute />} />
           <Route path="/home" element={<StoreRoute />} />
