@@ -6,6 +6,7 @@ import "../styles/store-v2.css";
 import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
 import { BrandLogo } from "../components/BrandLogo";
+import { parseProductDetails, visibleSpecifications } from "../utils/productDetails";
 
 const placeholderImage = `${import.meta.env.BASE_URL}images/climoraone-logo.svg`;
 
@@ -22,12 +23,14 @@ function normalizeProduct(product) {
     : product.main_image
       ? [product.main_image]
       : [];
+  const details = parseProductDetails(product.description || "");
 
   return {
     id: Number(product.id),
     name: product.name || "Unnamed product",
     category: product.category || "Collection",
-    description: product.description || "",
+    description: details.summary,
+    specifications: details.specifications,
     price: Number(product.price) || 0,
     stock: Math.max(0, Number(product.stock) || 0),
     images: paths.length ? paths.map(resolveProductImage) : [placeholderImage],
@@ -56,6 +59,7 @@ function Store() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAllDetails, setShowAllDetails] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -104,11 +108,13 @@ function Store() {
   const filteredProducts = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     return products.filter((product) => {
+      const specificationText = Object.values(product.specifications || {}).join(" ").toLowerCase();
       const matchesSearch =
         !search ||
         product.name.toLowerCase().includes(search) ||
         product.description.toLowerCase().includes(search) ||
-        product.category.toLowerCase().includes(search);
+        product.category.toLowerCase().includes(search) ||
+        specificationText.includes(search);
       const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -117,6 +123,7 @@ function Store() {
   const scrollToSection = (id) => {
     setSelectedProduct(null);
     setShowMobileMenu(false);
+    setShowAllDetails(false);
     window.setTimeout(() => {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 80);
@@ -126,6 +133,7 @@ function Store() {
     setSelectedProduct(product);
     setSelectedImage(product.images[0]);
     setQuantity(1);
+    setShowAllDetails(false);
     setShowMobileMenu(false);
   };
 
@@ -150,6 +158,13 @@ function Store() {
     { number: "03", icon: "❋", title: "Made in India", copy: "Rooted in Indian craft" },
     { number: "04", icon: "◇", title: "Secure Delivery", copy: "Carefully packed, pan India" },
   ];
+
+  const detailRows = selectedProduct
+    ? visibleSpecifications(selectedProduct.specifications)
+    : [];
+  const highlightKeys = ["material", "color", "productType", "netQuantity"];
+  const highlightRows = detailRows.filter((row) => highlightKeys.includes(row.key));
+  const additionalRows = detailRows.filter((row) => !highlightKeys.includes(row.key));
 
   return (
     <div className="store-v2">
@@ -202,7 +217,7 @@ function Store() {
               <p className="eco-label">{selectedProduct.category}</p>
               <h2>{selectedProduct.name}</h2>
               <h3>₹{selectedProduct.price}</h3>
-              <p>{selectedProduct.description}</p>
+              <p className="product-description">{selectedProduct.description}</p>
               {selectedProduct.stock <= 0 && <p className="out-of-stock-message">Currently unavailable</p>}
               <div className="quantity-box">
                 <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))}>−</button>
@@ -220,6 +235,43 @@ function Store() {
               </div>
             </div>
           </div>
+
+          {detailRows.length > 0 && (
+            <section className="product-specifications" aria-label="Product information">
+              <div className="product-specifications__heading">
+                <span className="v2-eyebrow">Know your piece</span>
+                <h2>Product highlights</h2>
+                <p>Clear, standardized information to help you choose with confidence.</p>
+              </div>
+
+              {highlightRows.length > 0 && (
+                <div className="product-highlights-grid">
+                  {highlightRows.map((row) => (
+                    <article key={row.key}>
+                      <span>{row.label}</span>
+                      <strong>{row.value}</strong>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {additionalRows.length > 0 && (
+                <div className="product-additional-details">
+                  <button type="button" className="product-details-toggle" onClick={() => setShowAllDetails((current) => !current)} aria-expanded={showAllDetails}>
+                    <span>Additional details</span>
+                    <span>{showAllDetails ? "−" : "+"}</span>
+                  </button>
+                  {showAllDetails && (
+                    <dl>
+                      {additionalRows.map((row) => (
+                        <div key={row.key}><dt>{row.label}</dt><dd>{row.value}</dd></div>
+                      ))}
+                    </dl>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
         </section>
       ) : (
         <>
