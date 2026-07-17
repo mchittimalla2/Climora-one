@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { BrandLogo } from "./BrandLogo";
 import { adminApi, clearAdminSession, getAdminUser } from "../auth/adminAuth";
 import "../styles/admin-premium.css";
+import "../styles/admin-user.css";
 
 const links = [
   { to: "/admin", label: "Dashboard", end: true },
