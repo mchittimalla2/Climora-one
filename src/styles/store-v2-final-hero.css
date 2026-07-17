@@ -87,7 +87,7 @@
     min-height: 510px !important;
     max-height: 560px !important;
     background-color: #f5ede3 !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-image: url('/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
     background-size: contain !important;
     background-position: center bottom !important;
@@ -184,7 +184,7 @@
 
   .store-v2 .v2-hero-visual {
     background-color: #f5ede3 !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-image: url('/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
     background-size: contain !important;
     background-position: center bottom !important;

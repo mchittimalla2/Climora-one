@@ -35,7 +35,7 @@
 .v2-hero { position:relative; width:100%; min-height:calc(100vh - 78px); background:linear-gradient(90deg,#f7f0e5 0%,#f7f0e5 47%,#f4eadb 100%); overflow:hidden; display:grid; grid-template-columns:minmax(400px,44%) minmax(520px,56%); align-items:center; }
 .v2-hero::before { content:""; position:absolute; inset:0; pointer-events:none; background:radial-gradient(circle at 75% 15%,rgba(182,135,61,.1),transparent 28%),linear-gradient(90deg,rgba(255,255,255,.2),transparent); }
 .v2-hero-copy { position:relative; z-index:2; padding:clamp(58px,6vw,92px) clamp(36px,5vw,76px); display:flex; flex-direction:column; justify-content:center; }
-.v2-hero-visual { position:relative; z-index:1; align-self:stretch; min-height:580px; background-image:url('/climoraone-dev/images/climoraone-hero-v2.jpg'); background-position:center; background-size:cover; background-repeat:no-repeat; }
+.v2-hero-visual { position:relative; z-index:1; align-self:stretch; min-height:580px; background-image:url('/images/climoraone-hero-v2.jpg'); background-position:center; background-size:cover; background-repeat:no-repeat; }
 .v2-hero-visual::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg,#f7f0e5 0%,rgba(247,240,229,.58) 8%,transparent 24%); pointer-events:none; }
 .v2-eyebrow { display:inline-flex; margin-bottom:14px; color:#b6873d; font-size:12px; font-weight:700; letter-spacing:.24em; text-transform:uppercase; width:fit-content; }
 .v2-hero h1 { max-width:620px; margin:0 0 16px; color:#1f3d2b; font-size:clamp(46px,4.5vw,70px); line-height:1.04; letter-spacing:-.025em; font-weight:700; }

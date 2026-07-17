@@ -176,7 +176,7 @@
     align-self: stretch !important;
     min-height: clamp(500px, 47vw, 730px) !important;
     background-color: var(--climora-cream) !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-image: url('/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
     background-position: right bottom !important;
     background-size: 100% auto !important;
@@ -346,7 +346,7 @@
     display: block !important;
     min-height: 520px !important;
     background-color: var(--climora-cream) !important;
-    background-image: url('/climoraone-dev/images/climoraone-hero.png') !important;
+    background-image: url('/images/climoraone-hero.png') !important;
     background-repeat: no-repeat !important;
     background-position: center bottom !important;
     background-size: contain !important;
