@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminIdentifierAuthController;
 use App\Http\Controllers\Api\AdminProfileController;
 
 Route::options('/{any}', function () {
@@ -19,9 +20,9 @@ Route::post('/orders', [OrderController::class, 'store']);
 Route::post('/track-order', [OrderController::class, 'track']);
 
 Route::prefix('admin/auth')->group(function () {
-    Route::post('/login', [AdminAuthController::class, 'login']);
-    Route::post('/verify-otp', [AdminAuthController::class, 'verifyOtp']);
-    Route::post('/resend-otp', [AdminAuthController::class, 'resendOtp']);
+    Route::post('/login', [AdminIdentifierAuthController::class, 'login']);
+    Route::post('/verify-otp', [AdminIdentifierAuthController::class, 'verifyOtp']);
+    Route::post('/resend-otp', [AdminIdentifierAuthController::class, 'resendOtp']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AdminAuthController::class, 'me']);
@@ -32,6 +33,8 @@ Route::prefix('admin/auth')->group(function () {
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [AdminProfileController::class, 'updateProfile']);
     Route::put('/profile/password', [AdminProfileController::class, 'changePassword']);
+    Route::post('/profile/email-change', [AdminProfileController::class, 'requestEmailChange']);
+    Route::post('/profile/email-change/verify', [AdminProfileController::class, 'verifyEmailChange']);
 
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
