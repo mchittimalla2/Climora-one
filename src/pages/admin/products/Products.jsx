@@ -1,13 +1,14 @@
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import AdminLayout from "../../../components/AdminLayout";
 import "../../../App.css";
 import "./ProductAdmin.css";
-import { adminApi } from "../../../auth/adminAuth";
+import { adminApi, getAdminUser } from "../../../auth/adminAuth";
 import ProductSearch from "./ProductSearch";
 import ProductTable from "./ProductTable";
 import ProductModal from "./ProductModal";
 
 function Products() {
+  const user = getAdminUser();
   const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,31 +63,33 @@ function Products() {
   };
 
   const deleteProduct = async (productId) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Permanently delete this product and its images? This cannot be undone.")) return;
     try {
+      setPageError("");
       const response = await adminApi(`/api/admin/products/${productId}`, { method: "DELETE" });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || "Failed to delete product.");
-      await fetchProducts(); setSuccessMessage("Product deleted successfully.");
+      await fetchProducts(); setSuccessMessage("Product permanently deleted successfully.");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) { setPageError(error.message || "Failed to delete product."); }
   };
 
   return (
-    <div>
-      <header className="header">
-        <div className="logo-section"><img src={`${import.meta.env.BASE_URL}images/logo.jpeg`} alt="Climoraone" className="header-logo" /></div>
-        <nav><Link to="/admin">Dashboard</Link><Link to="/admin/orders">Orders</Link><Link to="/admin/reports">Reports</Link></nav>
-      </header>
-      <section className="admin-dashboard">
-        <div className="admin-products-header"><div><h2>Product Management</h2><p>Add, edit, delete, and manage stock for Climoraone products.</p><strong>{products.length} products available</strong></div><button className="add-product-btn" onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}>+ Add Product</button></div>
-        {successMessage && <div className="success-banner">{successMessage}</div>}
-        {pageError && <div className="product-page-error">{pageError}</div>}
+    <AdminLayout
+      eyebrow="Catalogue operations"
+      title="Product management"
+      description="Add, edit and manage inventory for the Climoraone collection. Permanent deletion is reserved for the break-glass account."
+      actions={<button className="add-product-btn" onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}>+ Add Product</button>}
+    >
+      <section className="admin-panel product-admin-container">
+        <div className="admin-products-header"><div><strong>{products.length} products available</strong><p>Signed in as {user?.name || "Administrator"}.</p></div></div>
+        {successMessage && <div className="admin-alert success">{successMessage}</div>}
+        {pageError && <div className="admin-alert error">{pageError}</div>}
         <ProductSearch searchText={searchText} setSearchText={setSearchText} />
-        <ProductTable products={filteredProducts} onEdit={(product) => { setEditingProduct(product); setIsModalOpen(true); }} onDelete={deleteProduct} />
+        <ProductTable products={filteredProducts} onEdit={(product) => { setEditingProduct(product); setIsModalOpen(true); }} onDelete={user?.is_break_glass ? deleteProduct : undefined} />
       </section>
       <ProductModal isOpen={isModalOpen} onClose={closeModal} onSave={saveProduct} editingProduct={editingProduct} isSaving={isSaving} />
-    </div>
+    </AdminLayout>
   );
 }
 
