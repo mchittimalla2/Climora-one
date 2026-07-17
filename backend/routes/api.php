@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\AdminAuthController;
+use App\Http\Controllers\Api\AdminProfileController;
 
 Route::options('/{any}', function () {
     return response('', 204)
@@ -13,22 +14,10 @@ Route::options('/{any}', function () {
         ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
 })->where('any', '.*');
 
-/*
-|--------------------------------------------------------------------------
-| Public storefront APIs
-|--------------------------------------------------------------------------
-*/
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::post('/track-order', [OrderController::class, 'track']);
 
-/*
-|--------------------------------------------------------------------------
-| Admin authentication
-|--------------------------------------------------------------------------
-| The sender is info@climoraone.com. The OTP recipient is always the
-| personal email stored on the authenticated User record.
-*/
 Route::prefix('admin/auth')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login']);
     Route::post('/verify-otp', [AdminAuthController::class, 'verifyOtp']);
@@ -40,13 +29,10 @@ Route::prefix('admin/auth')->group(function () {
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Protected admin APIs
-|--------------------------------------------------------------------------
-| Product writes, order visibility and order-status changes are never public.
-*/
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+    Route::put('/profile', [AdminProfileController::class, 'updateProfile']);
+    Route::put('/profile/password', [AdminProfileController::class, 'changePassword']);
+
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
