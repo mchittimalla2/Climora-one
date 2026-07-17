@@ -10,6 +10,7 @@ import {
 
 import StoreRoute from "./components/StoreRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import AdminFetchBridge from "./components/AdminFetchBridge";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
@@ -44,7 +45,6 @@ function ScrollToTop() {
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
     });
-
     return () => window.cancelAnimationFrame(frame);
   }, [pathname]);
 
@@ -72,10 +72,8 @@ function StoreInteractionEnhancements() {
 
       const productImage = event.target.closest(".v2-product-image-wrap");
       if (!productImage) return;
-
       const productCard = productImage.closest(".v2-product-card");
       const detailsButton = productCard?.querySelector(".v2-product-meta button");
-
       if (detailsButton && !detailsButton.disabled) detailsButton.click();
     };
 
@@ -90,15 +88,18 @@ const protect = (element) => <ProtectedAdminRoute>{element}</ProtectedAdminRoute
 
 function AdminRoutes() {
   return (
-    <Routes>
-      <Route path="/login" element={<AdminLogin />} />
-      <Route path="/admin" element={protect(<Admin />)} />
-      <Route path="/admin/orders" element={protect(<Orders />)} />
-      <Route path="/admin/products" element={protect(<Products />)} />
-      <Route path="/admin/reports" element={protect(<Reports />)} />
-      <Route path="/" element={<Navigate to="/admin" replace />} />
-      <Route path="*" element={<Navigate to="/admin" replace />} />
-    </Routes>
+    <>
+      <AdminFetchBridge />
+      <Routes>
+        <Route path="/login" element={<AdminLogin />} />
+        <Route path="/admin" element={protect(<Admin />)} />
+        <Route path="/admin/orders" element={protect(<Orders />)} />
+        <Route path="/admin/products" element={protect(<Products />)} />
+        <Route path="/admin/reports" element={protect(<Reports />)} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    </>
   );
 }
 
