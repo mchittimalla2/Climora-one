@@ -71,8 +71,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        if (!$request->user()?->isBreakGlass()) {
+            return response()->json([
+                'message' => 'Permanent deletion is restricted to the break-glass account.',
+            ], 403);
+        }
+
         $product = Product::find($id);
 
         if (!$product) {
@@ -83,7 +89,7 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json([
-            'message' => 'Product deleted successfully',
+            'message' => 'Product permanently deleted successfully',
         ]);
     }
 
