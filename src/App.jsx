@@ -20,6 +20,7 @@ import Admin from "./pages/admin/Admin";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
+import Profile from "./pages/admin/Profile";
 import Products from "./pages/admin/products/Products";
 
 import { CartProvider } from "./context/CartContext";
@@ -96,6 +97,7 @@ function AdminRoutes() {
         <Route path="/admin/orders" element={protect(<Orders />)} />
         <Route path="/admin/products" element={protect(<Products />)} />
         <Route path="/admin/reports" element={protect(<Reports />)} />
+        <Route path="/admin/profile" element={protect(<Profile />)} />
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
