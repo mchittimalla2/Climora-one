@@ -9,12 +9,14 @@ import {
 } from "react-router-dom";
 
 import StoreRoute from "./components/StoreRoute";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import TrackOrder from "./pages/TrackOrder";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/admin/Admin";
+import AdminLogin from "./pages/admin/AdminLogin";
 import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
 import Products from "./pages/admin/products/Products";
@@ -31,6 +33,7 @@ import "./styles/admin-legacy-polish.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
 const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
+const isAdminHost = window.location.hostname === "admin.climoraone.com" || window.location.hostname.startsWith("admin.");
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -52,6 +55,8 @@ function StoreInteractionEnhancements() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isAdminHost) return undefined;
+
     const handleClick = (event) => {
       const buyNowButton = event.target.closest(".buy-btn");
       if (buyNowButton && !buyNowButton.disabled) {
@@ -71,9 +76,7 @@ function StoreInteractionEnhancements() {
       const productCard = productImage.closest(".v2-product-card");
       const detailsButton = productCard?.querySelector(".v2-product-meta button");
 
-      if (detailsButton && !detailsButton.disabled) {
-        detailsButton.click();
-      }
+      if (detailsButton && !detailsButton.disabled) detailsButton.click();
     };
 
     document.addEventListener("click", handleClick);
@@ -83,30 +86,47 @@ function StoreInteractionEnhancements() {
   return null;
 }
 
+const protect = (element) => <ProtectedAdminRoute>{element}</ProtectedAdminRoute>;
+
+function AdminRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<AdminLogin />} />
+      <Route path="/admin" element={protect(<Admin />)} />
+      <Route path="/admin/orders" element={protect(<Orders />)} />
+      <Route path="/admin/products" element={protect(<Products />)} />
+      <Route path="/admin/reports" element={protect(<Reports />)} />
+      <Route path="/" element={<Navigate to="/admin" replace />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
+    </Routes>
+  );
+}
+
+function StoreRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<StoreRoute />} />
+      <Route path="/home" element={<StoreRoute />} />
+      <Route path="/products" element={<StoreRoute />} />
+      <Route path="/cart" element={<StoreRoute />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/track-order" element={<TrackOrder />} />
+      <Route path="/return-policy" element={<ReturnPolicy />} />
+      <Route path="/shipping-policy" element={<ShippingPolicy />} />
+      <Route path="/admin/*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <CartProvider>
       <BrowserRouter basename={routerBase}>
         <ScrollToTop />
         <StoreInteractionEnhancements />
-        <Routes>
-          <Route path="/" element={<StoreRoute />} />
-          <Route path="/home" element={<StoreRoute />} />
-          <Route path="/products" element={<StoreRoute />} />
-          <Route path="/cart" element={<StoreRoute />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/track-order" element={<TrackOrder />} />
-          <Route path="/return-policy" element={<ReturnPolicy />} />
-          <Route path="/shipping-policy" element={<ShippingPolicy />} />
-
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/orders" element={<Orders />} />
-          <Route path="/admin/products" element={<Products />} />
-          <Route path="/admin/reports" element={<Reports />} />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {isAdminHost ? <AdminRoutes /> : <StoreRoutes />}
       </BrowserRouter>
     </CartProvider>
   );
