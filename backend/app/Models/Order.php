@@ -21,11 +21,21 @@ class Order extends Model
         'total',
         'status',
         'status_history',
-        'payment_status'
+        'payment_status',
     ];
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
+
+    public function emailNotifications()
+    {
+        return $this->hasMany(EmailNotification::class);
     }
 }
