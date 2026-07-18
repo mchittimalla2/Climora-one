@@ -33,6 +33,14 @@ export async function adminApi(path, options = {}) {
     headers,
   });
 
-  if (response.status === 401 || response.status === 428) clearAdminSession();
+  if (response.status === 401 || response.status === 428) {
+    clearAdminSession();
+
+    if (window.location.pathname !== "/login") {
+      const reason = response.status === 428 ? "reauthentication-required" : "session-expired";
+      window.location.assign(`/login?reason=${reason}`);
+    }
+  }
+
   return response;
 }
