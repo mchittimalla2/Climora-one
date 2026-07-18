@@ -155,6 +155,7 @@ class AdminProfileController extends Controller
 
         if (!$change || !$change->isUsable() || !Hash::check($validated['otp'], $change->code_hash)) {
             if ($change) $change->increment('attempts');
+            SecurityAudit::record($request, 'auth.otp.failure', 'failure', $user, 'email_change', $change?->id);
             throw ValidationException::withMessages(['otp' => ['The verification code is invalid or expired.']]);
         }
 
@@ -163,6 +164,7 @@ class AdminProfileController extends Controller
         }
 
         $change->forceFill(['consumed_at' => now()])->save();
+        SecurityAudit::record($request, 'auth.otp.success', 'success', $user, 'email_change', $change->id);
         $user->forceFill(['email' => $newEmail, 'email_verified_at' => now()])->save();
 
         $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);

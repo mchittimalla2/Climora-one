@@ -18,7 +18,7 @@ class EnforceAdminSession
             ? AdminSession::where('token_hash', hash('sha256', $token))->first()
             : null;
 
-        if (!$session || !$session->isActive() || $session->last_activity_at->lt(now()->subMinutes(self::IDLE_MINUTES))) {
+        if (!$session || !$session->isActive() || $session->last_activity_at->lessThanOrEqualTo(now()->subMinutes(self::IDLE_MINUTES))) {
             if ($session && !$session->revoked_at) {
                 $session->forceFill(['revoked_at' => now()])->save();
             }

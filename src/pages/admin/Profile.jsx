@@ -43,7 +43,7 @@ export default function Profile() {
     event.preventDefault();
     try {
       setSaving(true); setError(""); setMessage("");
-      const data = await call("/api/admin/profile/password", "PUT", { current_password: currentPassword, password, password_confirmation: passwordConfirmation });
+      await call("/api/admin/profile/password", "PUT", { current_password: currentPassword, password, password_confirmation: passwordConfirmation });
       clearAdminSession();
       window.location.assign("/login");
     } catch (e) { setError(e.message); } finally { setSaving(false); }
@@ -75,7 +75,7 @@ export default function Profile() {
     event.preventDefault();
     try {
       setSaving(true); setError(""); setMessage("");
-      const data = await call("/api/admin/profile/email-change/verify", "POST", { new_email: newEmail, otp: emailOtp });
+      await call("/api/admin/profile/email-change/verify", "POST", { new_email: newEmail, otp: emailOtp });
       clearAdminSession();
       window.location.assign("/login");
     } catch (e) { setError(e.message); } finally { setSaving(false); }
