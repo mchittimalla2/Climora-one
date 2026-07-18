@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -171,6 +172,7 @@ class OrderController extends Controller
             ], 404);
         }
 
+        $previousStatus = $order->status;
         $history = $order->status_history
             ? json_decode($order->status_history, true)
             : [];
@@ -180,6 +182,11 @@ class OrderController extends Controller
         $order->status = $validated['status'];
         $order->status_history = json_encode($history);
         $order->save();
+        SecurityAudit::record($request, 'admin.order_status_update', 'success', null, 'order', $order->id, [
+            'order_number' => $order->order_number,
+            'before' => ['status' => $previousStatus],
+            'after' => ['status' => $order->status],
+        ]);
 
         return response()->json([
             'message' => 'Order status updated successfully',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -42,6 +43,9 @@ class ProductController extends Controller
         ]);
         $imagePaths = $this->storeSlotImages($request, $product);
         $product->update(['main_image' => $imagePaths[0] ?? null, 'images' => $imagePaths]);
+        SecurityAudit::record($request, 'product.create', 'success', null, 'product', $product->id, [
+            'after' => $product->fresh()->only(['name', 'category', 'price', 'stock']),
+        ]);
 
         return response()->json(['message' => 'Product created successfully', 'product' => $this->serializeProduct($product->fresh())], 201);
     }
@@ -51,6 +55,7 @@ class ProductController extends Controller
         $product = Product::find($id);
         if (!$product) return response()->json(['message' => 'Product not found'], 404);
 
+        $before = $product->toArray();
         $validated = $this->validateProduct($request, false);
         $existingImages = array_pad($product->images ?: array_filter([$product->main_image]), 4, null);
         $imagePaths = $this->storeSlotImages($request, $product, $existingImages);
@@ -60,6 +65,9 @@ class ProductController extends Controller
             'description' => $validated['description'] ?? null,
             'main_image' => $imagePaths[0] ?? null, 'images' => $imagePaths,
         ]);
+        SecurityAudit::record($request, 'product.update', 'success', null, 'product', $product->id,
+            SecurityAudit::changes($before, $product->fresh()->toArray(), ['name', 'category', 'price', 'stock', 'description'])
+        );
 
         return response()->json(['message' => 'Product updated successfully', 'product' => $this->serializeProduct($product->fresh())]);
     }
@@ -79,6 +87,9 @@ class ProductController extends Controller
             'purge_eligible_at' => now()->addDays(30),
         ])->save();
         $product->delete();
+        SecurityAudit::record($request, 'product.delete', 'success', $user, 'product', $product->id, [
+            'purge_eligible_at' => $product->purge_eligible_at,
+        ]);
 
         return response()->json(['message' => 'Product moved to the Recycle Bin for 30 days.']);
     }
@@ -94,6 +105,7 @@ class ProductController extends Controller
 
         $product->restore();
         $product->forceFill(['deleted_by' => null, 'purge_eligible_at' => null])->save();
+        SecurityAudit::record($request, 'product.restore', 'success', null, 'product', $product->id);
 
         return response()->json(['message' => 'Product restored successfully.', 'product' => $this->serializeProduct($product->fresh())]);
     }
@@ -136,6 +148,7 @@ class ProductController extends Controller
         Storage::disk('public')->deleteDirectory("products/{$product->id}");
         $name = $product->name;
         $product->forceDelete();
+        SecurityAudit::record($request, 'product.purge', 'success', $user, 'product', $id, ['name' => $name]);
         $this->sendPermanentDeletionAlert($user, $name, $id);
 
         return response()->json(['message' => 'Product permanently deleted. The owner has been notified.']);

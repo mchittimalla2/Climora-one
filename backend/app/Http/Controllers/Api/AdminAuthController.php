@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminOtpCode;
-use App\Models\AuditLog;
+use App\Support\SecurityAudit;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,7 +46,7 @@ class AdminAuthController extends Controller
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             RateLimiter::hit($rateKey, self::LOCK_MINUTES * 60);
-            $this->recordAudit($request, $user, 'admin_login_password', 'denied');
+            $this->recordAudit($request, $user, 'auth.login.failure', 'failure');
 
             if ($user) {
                 $attempts = $user->failed_login_attempts + 1;
@@ -65,7 +65,7 @@ class AdminAuthController extends Controller
         }
 
         if (!$user->is_active || $user->isLocked()) {
-            $this->recordAudit($request, $user, 'admin_login_account', 'denied');
+            $this->recordAudit($request, $user, 'auth.login.failure', 'failure');
 
             return response()->json([
                 'message' => 'This account is unavailable or temporarily locked.',
@@ -73,7 +73,7 @@ class AdminAuthController extends Controller
         }
 
         if (!$user->mfa_enabled) {
-            $this->recordAudit($request, $user, 'admin_login_mfa', 'denied');
+            $this->recordAudit($request, $user, 'auth.login.failure', 'failure');
 
             return response()->json([
                 'message' => 'Multi-factor authentication is required for this account.',
@@ -87,7 +87,7 @@ class AdminAuthController extends Controller
         ])->save();
 
         $this->issueAndSendOtp($request, $user);
-        $this->recordAudit($request, $user, 'admin_login_otp_sent', 'success');
+        $this->recordAudit($request, $user, 'auth.otp.sent', 'success');
 
         return response()->json([
             'message' => 'A verification code was sent to your registered email address.',
@@ -118,7 +118,7 @@ class AdminAuthController extends Controller
 
         if (!$user || !$user->is_active || $user->isLocked()) {
             RateLimiter::hit($rateKey, self::LOCK_MINUTES * 60);
-            $this->recordAudit($request, $user, 'admin_login_otp_verify', 'denied');
+            $this->recordAudit($request, $user, 'auth.otp.failure', 'failure');
 
             throw ValidationException::withMessages([
                 'otp' => ['The verification code is invalid or expired.'],
@@ -139,7 +139,7 @@ class AdminAuthController extends Controller
                 $otp->increment('attempts');
             }
 
-            $this->recordAudit($request, $user, 'admin_login_otp_verify', 'denied');
+            $this->recordAudit($request, $user, 'auth.otp.failure', 'failure');
 
             throw ValidationException::withMessages([
                 'otp' => ['The verification code is invalid or expired.'],
@@ -159,7 +159,8 @@ class AdminAuthController extends Controller
             'locked_until' => null,
         ])->save();
 
-        $this->recordAudit($request, $user, 'admin_login', 'success');
+        $this->recordAudit($request, $user, 'auth.otp.success', 'success');
+        $this->recordAudit($request, $user, 'auth.login.success', 'success');
 
         return response()->json([
             'token' => $token,
@@ -189,7 +190,7 @@ class AdminAuthController extends Controller
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password) || !$user->is_active || $user->isLocked()) {
-            $this->recordAudit($request, $user, 'admin_login_otp_resend', 'denied');
+            $this->recordAudit($request, $user, 'auth.otp.resend_failure', 'failure');
 
             throw ValidationException::withMessages([
                 'email' => ['The request could not be completed.'],
@@ -198,7 +199,7 @@ class AdminAuthController extends Controller
 
         RateLimiter::hit($rateKey, self::RESEND_SECONDS);
         $this->issueAndSendOtp($request, $user);
-        $this->recordAudit($request, $user, 'admin_login_otp_resent', 'success');
+        $this->recordAudit($request, $user, 'auth.otp.resent', 'success');
 
         return response()->json([
             'message' => 'A new verification code was sent.',
@@ -217,7 +218,7 @@ class AdminAuthController extends Controller
     {
         $user = $request->user();
         $request->user()->currentAccessToken()->delete();
-        $this->recordAudit($request, $user, 'admin_logout', 'success');
+        $this->recordAudit($request, $user, 'auth.logout', 'success');
 
         return response()->json(['message' => 'Logged out successfully.']);
     }
@@ -312,21 +313,8 @@ HTML;
 
     private function recordAudit(Request $request, ?User $user, string $event, string $result): void
     {
-        try {
-            AuditLog::create([
-                'user_id' => $user?->id,
-                'event' => $event,
-                'resource_type' => 'authentication',
-                'result' => $result,
-                'ip_address' => $request->ip(),
-                'user_agent' => Str::limit((string) $request->userAgent(), 1000, ''),
-                'metadata' => [
-                    'email_hash' => hash('sha256', Str::lower((string) $request->input('email'))),
-                ],
-                'created_at' => now(),
-            ]);
-        } catch (Throwable $exception) {
-            report($exception);
-        }
+        SecurityAudit::record($request, $event, $result, $user, 'authentication', null, [
+            'email_hash' => hash('sha256', Str::lower((string) $request->input('email'))),
+        ]);
     }
 }

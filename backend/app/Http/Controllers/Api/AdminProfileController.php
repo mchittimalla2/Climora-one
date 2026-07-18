@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminEmailChangeRequest;
+use App\Support\SecurityAudit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +21,7 @@ class AdminProfileController extends Controller
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
+        $before = $user->only(['name', 'username']);
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'username' => [
@@ -33,6 +35,9 @@ class AdminProfileController extends Controller
             'name' => trim($validated['name']),
             'username' => Str::lower(trim($validated['username'])),
         ])->save();
+        SecurityAudit::record($request, 'profile.update', 'success', $user, 'user', $user->id,
+            SecurityAudit::changes($before, $user->fresh()->toArray(), ['name', 'username'])
+        );
 
         return response()->json([
             'message' => 'Profile updated successfully.',
@@ -62,6 +67,7 @@ class AdminProfileController extends Controller
             $query->where('id', '!=', $currentTokenId);
         })->delete();
 
+        SecurityAudit::record($request, 'profile.password_change', 'success', $user, 'user', $user->id);
         return response()->json(['message' => 'Password changed successfully. Other sessions were revoked.']);
     }
 
@@ -125,6 +131,9 @@ class AdminProfileController extends Controller
             throw ValidationException::withMessages(['new_email' => ['The verification email could not be delivered.']]);
         }
 
+        SecurityAudit::record($request, 'profile.email_change_requested', 'success', $user, 'user', $user->id, [
+            'new_email_hash' => hash('sha256', $newEmail),
+        ]);
         return response()->json([
             'message' => 'A verification code was sent to the new email address.',
             'expires_in' => 600,
@@ -163,6 +172,9 @@ class AdminProfileController extends Controller
             $query->where('id', '!=', $currentTokenId);
         })->delete();
 
+        SecurityAudit::record($request, 'profile.email_change', 'success', $user, 'user', $user->id, [
+            'email_hash' => hash('sha256', $newEmail),
+        ]);
         return response()->json([
             'message' => 'Email address updated successfully. Other sessions were revoked.',
             'user' => $this->safeUser($user->fresh()),
