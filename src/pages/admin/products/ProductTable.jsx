@@ -26,7 +26,7 @@ function ProductTable({ products, onEdit, onDelete }) {
                 <td>₹{product.price}</td>
                 <td>{product.stock ?? 0}</td>
                 <td><span className={stockStatus.className}>{stockStatus.label}</span></td>
-                <td><div className="product-actions"><button type="button" onClick={() => onEdit(product)}>Edit</button>{onDelete && <button type="button" className="delete-btn" onClick={() => onDelete(product.id)}>Permanent delete</button>}</div></td>
+                <td><div className="product-actions"><button type="button" onClick={() => onEdit(product)}>Edit</button>{onDelete && <button type="button" className="delete-btn" onClick={() => onDelete(product.id)}>Move to Recycle Bin</button>}</div></td>
               </tr>
             );
           })}
