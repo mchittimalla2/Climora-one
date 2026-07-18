@@ -48,12 +48,25 @@ export default function Profile() {
     } catch (e) { setError(e.message); } finally { setSaving(false); }
   };
 
+  const sendEmailChangeCode = async () => {
+    const data = await call("/api/admin/profile/email-change", "POST", { new_email: newEmail, current_password: emailPassword });
+    setEmailStep("verify");
+    setEmailOtp("");
+    setMessage(`${data.message} Check Inbox, Junk and Spam. The code expires in 10 minutes.`);
+  };
+
   const requestEmailChange = async (event) => {
     event.preventDefault();
     try {
       setSaving(true); setError(""); setMessage("");
-      const data = await call("/api/admin/profile/email-change", "POST", { new_email: newEmail, current_password: emailPassword });
-      setEmailStep("verify"); setMessage(data.message);
+      await sendEmailChangeCode();
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const resendEmailChangeCode = async () => {
+    try {
+      setSaving(true); setError(""); setMessage("");
+      await sendEmailChangeCode();
     } catch (e) { setError(e.message); } finally { setSaving(false); }
   };
 
@@ -90,10 +103,12 @@ export default function Profile() {
             <label>Current password<input type="password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} autoComplete="current-password" required /></label>
             <button className="admin-primary-btn" disabled={saving}>Send verification code</button>
           </form> : <form className="admin-profile-form" onSubmit={verifyEmailChange}>
-            <div className="admin-profile-readonly">Code sent to {newEmail}</div>
+            <div className="admin-profile-readonly">Verification code requested for {newEmail}</div>
             <label>Six-digit code<input inputMode="numeric" pattern="[0-9]{6}" maxLength="6" value={emailOtp} onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ""))} required /></label>
+            <small>{emailOtp.length}/6 digits entered. The Verify button activates after all six digits are entered.</small>
             <button className="admin-primary-btn" disabled={saving || emailOtp.length !== 6}>Verify and update email</button>
-            <button type="button" className="admin-secondary-btn" onClick={() => setEmailStep("request")}>Cancel</button>
+            <button type="button" className="admin-secondary-btn" onClick={resendEmailChangeCode} disabled={saving}>Resend code</button>
+            <button type="button" className="admin-secondary-btn" onClick={() => { setEmailStep("request"); setEmailOtp(""); setMessage(""); setError(""); }} disabled={saving}>Cancel</button>
           </form>}
         </section>
 
