@@ -36,6 +36,9 @@ Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
     Route::post('/profile/email-change', [AdminProfileController::class, 'requestEmailChange']);
     Route::post('/profile/email-change/verify', [AdminProfileController::class, 'verifyEmailChange']);
 
+    Route::get('/products/recycle-bin', [ProductController::class, 'recycleBin']);
+    Route::post('/products/{id}/restore', [ProductController::class, 'restore']);
+    Route::delete('/products/{id}/permanent', [ProductController::class, 'forceDestroy']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
