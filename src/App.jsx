@@ -21,6 +21,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
 import Profile from "./pages/admin/Profile";
+import RecycleBin from "./pages/admin/RecycleBin";
 import Products from "./pages/admin/products/Products";
 
 import { CartProvider } from "./context/CartContext";
@@ -39,7 +40,6 @@ const isAdminHost = window.location.hostname === "admin.climoraone.com" || windo
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -48,40 +48,33 @@ function ScrollToTop() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [pathname]);
-
   return null;
 }
 
 function StoreInteractionEnhancements() {
   const navigate = useNavigate();
-
   useEffect(() => {
     if (isAdminHost) return undefined;
-
     const handleClick = (event) => {
       const buyNowButton = event.target.closest(".buy-btn");
       if (buyNowButton && !buyNowButton.disabled) {
         window.setTimeout(() => navigate("/checkout"), 80);
         return;
       }
-
       const detailImage = event.target.closest(".main-image-box img");
       if (detailImage && window.matchMedia("(min-width: 641px)").matches) {
         detailImage.closest(".main-image-box")?.classList.toggle("is-zoomed");
         return;
       }
-
       const productImage = event.target.closest(".v2-product-image-wrap");
       if (!productImage) return;
       const productCard = productImage.closest(".v2-product-card");
       const detailsButton = productCard?.querySelector(".v2-product-meta button");
       if (detailsButton && !detailsButton.disabled) detailsButton.click();
     };
-
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [navigate]);
-
   return null;
 }
 
@@ -98,6 +91,7 @@ function AdminRoutes() {
         <Route path="/admin/products" element={protect(<Products />)} />
         <Route path="/admin/reports" element={protect(<Reports />)} />
         <Route path="/admin/profile" element={protect(<Profile />)} />
+        <Route path="/admin/recycle-bin" element={protect(<RecycleBin />)} />
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
