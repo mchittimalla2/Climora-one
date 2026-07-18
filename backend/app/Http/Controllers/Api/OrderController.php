@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
@@ -24,7 +25,8 @@ class OrderController extends Controller
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'min:2', 'max:100'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'regex:/^[0-9]{10}$/'],
+            'phone' => ['required', 'regex:/^[0-9]{10}
+$/'],
             'address' => ['required', 'string', 'min:5', 'max:500'],
             'city' => ['required', 'string', 'max:100'],
             'state' => ['required', 'string', 'max:100'],
@@ -34,7 +36,7 @@ class OrderController extends Controller
                 'required',
                 'integer',
                 'distinct',
-                'exists:products,id',
+                Rule::exists('products', 'id')->whereNull('deleted_at'),
             ],
             'items.*.quantity' => [
                 'required',
@@ -140,8 +142,8 @@ class OrderController extends Controller
     public function track(Request $request)
     {
         $validated = $request->validate([
-            'order_number' => 'required|string',
-            'phone' => 'required|string',
+            'order_number' => ['required', 'string', 'max:40', 'regex:/^CLM-[A-Z0-9-]+$/'],
+            'phone' => ['required', 'regex:/^[0-9]{10}$/'],
         ]);
 
         $order = Order::with('items')
@@ -155,13 +157,22 @@ class OrderController extends Controller
             ], 404);
         }
 
-        return response()->json($order);
+        return response()->json([
+            'order_number' => $order->order_number,
+            'status' => $order->status,
+            'status_history' => $order->status_history,
+            'created_at' => $order->created_at,
+            'items' => $order->items->map(fn ($item) => [
+                'product_name' => $item->product_name,
+                'quantity' => $item->quantity,
+            ]),
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
     {
         $validated = $request->validate([
-            'status' => 'required|string',
+            'status' => ['required', Rule::in(['Order Received', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'])],
         ]);
 
         $order = Order::where('order_number', $id)->first();
