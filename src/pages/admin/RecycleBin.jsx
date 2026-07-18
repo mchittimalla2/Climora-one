@@ -50,6 +50,13 @@ export default function RecycleBin() {
     } catch (e) { setError(e.message); }
   };
 
+  const isBreakGlass = user?.role === "break_glass" || user?.is_break_glass === true;
+  const isPurgeEligible = (product) => {
+    if (!product.purge_eligible_at) return false;
+    const eligibleAt = new Date(product.purge_eligible_at).getTime();
+    return Number.isFinite(eligibleAt) && eligibleAt <= Date.now();
+  };
+
   return (
     <AdminLayout eyebrow="Data protection" title="Product Recycle Bin" description="Deleted products remain recoverable for 30 days. Owners can restore them; permanent deletion remains blocked until retention expires." actions={<button className="admin-secondary-btn" onClick={load}>Refresh</button>}>
       {error && <div className="admin-alert error">{error}</div>}
@@ -67,7 +74,8 @@ export default function RecycleBin() {
                 <td>
                   <div className="product-actions">
                     {user?.role === "owner" && <button type="button" onClick={() => restore(product.id)}>Restore</button>}
-                    {user?.is_break_glass && <button type="button" className="delete-btn" onClick={() => permanentDelete(product)}>Permanent delete</button>}
+                    {isBreakGlass && isPurgeEligible(product) && <button type="button" className="delete-btn" onClick={() => permanentDelete(product)}>Permanent delete</button>}
+                    {isBreakGlass && !isPurgeEligible(product) && <small>Retention active</small>}
                   </div>
                 </td>
               </tr>)}</tbody>
