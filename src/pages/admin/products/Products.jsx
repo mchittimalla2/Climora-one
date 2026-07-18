@@ -63,22 +63,24 @@ function Products() {
   };
 
   const deleteProduct = async (productId) => {
-    if (!window.confirm("Permanently delete this product and its images? This cannot be undone.")) return;
+    if (!window.confirm("Move this product to the Recycle Bin? It can be restored for 30 days.")) return;
     try {
       setPageError("");
       const response = await adminApi(`/api/admin/products/${productId}`, { method: "DELETE" });
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || "Failed to delete product.");
-      await fetchProducts(); setSuccessMessage("Product permanently deleted successfully.");
+      if (!response.ok) throw new Error(data?.message || "Failed to move product to the Recycle Bin.");
+      await fetchProducts(); setSuccessMessage(data.message || "Product moved to the Recycle Bin.");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) { setPageError(error.message || "Failed to delete product."); }
   };
+
+  const canSoftDelete = user?.role === "owner" || user?.is_break_glass;
 
   return (
     <AdminLayout
       eyebrow="Catalogue operations"
       title="Product management"
-      description="Add, edit and manage inventory for the Climoraone collection. Permanent deletion is reserved for the break-glass account."
+      description="Owners can move products to a 30-day Recycle Bin. Only break-glass can permanently delete them from there."
       actions={<button className="add-product-btn" onClick={() => { setEditingProduct(null); setIsModalOpen(true); }}>+ Add Product</button>}
     >
       <section className="admin-panel product-admin-container">
@@ -86,7 +88,7 @@ function Products() {
         {successMessage && <div className="admin-alert success">{successMessage}</div>}
         {pageError && <div className="admin-alert error">{pageError}</div>}
         <ProductSearch searchText={searchText} setSearchText={setSearchText} />
-        <ProductTable products={filteredProducts} onEdit={(product) => { setEditingProduct(product); setIsModalOpen(true); }} onDelete={user?.is_break_glass ? deleteProduct : undefined} />
+        <ProductTable products={filteredProducts} onEdit={(product) => { setEditingProduct(product); setIsModalOpen(true); }} onDelete={canSoftDelete ? deleteProduct : undefined} />
       </section>
       <ProductModal isOpen={isModalOpen} onClose={closeModal} onSave={saveProduct} editingProduct={editingProduct} isSaving={isSaving} />
     </AdminLayout>
