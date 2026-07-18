@@ -131,8 +131,10 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, $id, OrderEmailService $emails)
     {
+        $lifecycle = ['Order Received', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
+
         $validated = $request->validate([
-            'status' => ['required', Rule::in(['Order Received', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'])],
+            'status' => ['required', Rule::in([...$lifecycle, 'Cancelled'])],
         ]);
 
         $order = Order::where('order_number', $id)->first();
@@ -140,12 +142,43 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        $aliases = [
+            'Item Packed' => 'Packed',
+            'Out For Delivery' => 'Out for Delivery',
+            'Completed' => 'Delivered',
+            'Pending Payment' => 'Order Received',
+        ];
+
+        $currentStatus = $aliases[$order->status] ?? $order->status;
+        $requestedStatus = $validated['status'];
+
+        if ($currentStatus === 'Delivered') {
+            return response()->json([
+                'message' => 'This order is already delivered and its lifecycle cannot be changed.',
+            ], 409);
+        }
+
+        if ($requestedStatus !== 'Cancelled') {
+            $currentIndex = array_search($currentStatus, $lifecycle, true);
+            $requestedIndex = array_search($requestedStatus, $lifecycle, true);
+
+            if ($currentIndex === false || $requestedIndex === false) {
+                return response()->json(['message' => 'The current order status is invalid. Refresh the page and try again.'], 409);
+            }
+
+            if ($requestedIndex !== $currentIndex + 1) {
+                return response()->json([
+                    'message' => 'Order milestones must be completed in sequence. Complete the next available milestone only.',
+                ], 409);
+            }
+        }
+
         $previousStatus = $order->status;
         $history = $order->status_history ? json_decode($order->status_history, true) : [];
-        $history[$validated['status']] = now()->toDateTimeString();
+        $history[$requestedStatus] = now()->toDateTimeString();
 
         $order->forceFill([
-            'status' => $validated['status'],
+            'status' => $requestedStatus,
             'status_history' => json_encode($history),
         ])->save();
 
@@ -162,7 +195,7 @@ class OrderController extends Controller
         }
 
         return response()->json([
-            'message' => 'Order status updated successfully',
+            'message' => 'Order milestone completed successfully.',
             'order' => $order->load(['items', 'payment']),
         ]);
     }
