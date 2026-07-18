@@ -3,12 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminIdentifierAuthController;
 use App\Http\Controllers\Api\AdminProfileController;
 
 Route::get('/products', [ProductController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:checkout');
+Route::post('/payments/create-order', [PaymentController::class, 'createOrder'])->middleware('throttle:checkout');
+Route::post('/payments/verify', [PaymentController::class, 'verify'])->middleware('throttle:checkout');
+Route::post('/payments/cancel', [PaymentController::class, 'cancel'])->middleware('throttle:checkout');
+Route::post('/razorpay/webhook', [PaymentController::class, 'webhook']);
 Route::post('/track-order', [OrderController::class, 'track'])->middleware('throttle:order-track');
 
 Route::prefix('admin/auth')->group(function () {
