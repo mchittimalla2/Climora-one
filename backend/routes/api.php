@@ -36,7 +36,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin.session', 'admin.acce
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware('admin.role:owner,break_glass');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware('admin.role:owner');
 
     Route::get('/orders', [OrderController::class, 'index']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
