@@ -22,6 +22,7 @@ class SecurityAudit
         try {
             AuditLog::create([
                 'user_id' => ($actor ?: $request->user())?->id,
+                'session_id' => $request->attributes->get('admin_session')?->id,
                 'event' => $event,
                 'resource_type' => $resourceType,
                 'resource_id' => $resourceId === null ? null : (string) $resourceId,

@@ -24,21 +24,23 @@ Route::prefix('admin/auth')->group(function () {
     Route::post('/verify-otp', [AdminIdentifierAuthController::class, 'verifyOtp']);
     Route::post('/resend-otp', [AdminIdentifierAuthController::class, 'resendOtp']);
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'admin.session'])->group(function () {
         Route::get('/me', [AdminAuthController::class, 'me']);
         Route::post('/logout', [AdminAuthController::class, 'logout']);
     });
 });
 
-Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
+Route::prefix('admin')->middleware(['auth:sanctum', 'admin.session'])->group(function () {
     Route::put('/profile', [AdminProfileController::class, 'updateProfile']);
-    Route::put('/profile/password', [AdminProfileController::class, 'changePassword']);
-    Route::post('/profile/email-change', [AdminProfileController::class, 'requestEmailChange']);
-    Route::post('/profile/email-change/verify', [AdminProfileController::class, 'verifyEmailChange']);
+    Route::middleware('reauth.recent')->group(function () {
+        Route::put('/profile/password', [AdminProfileController::class, 'changePassword']);
+        Route::post('/profile/email-change', [AdminProfileController::class, 'requestEmailChange']);
+        Route::post('/profile/email-change/verify', [AdminProfileController::class, 'verifyEmailChange']);
+        Route::post('/products/{id}/restore', [ProductController::class, 'restore']);
+        Route::delete('/products/{id}/permanent', [ProductController::class, 'forceDestroy']);
+    });
 
     Route::get('/products/recycle-bin', [ProductController::class, 'recycleBin']);
-    Route::post('/products/{id}/restore', [ProductController::class, 'restore']);
-    Route::delete('/products/{id}/permanent', [ProductController::class, 'forceDestroy']);
     Route::get('/products', [ProductController::class, 'index']);
     Route::post('/products', [ProductController::class, 'store']);
     Route::put('/products/{id}', [ProductController::class, 'update']);

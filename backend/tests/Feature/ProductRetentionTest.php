@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\EnforceAdminSession;
+use App\Http\Middleware\RequireRecentReauthentication;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,6 +16,12 @@ use Tests\TestCase;
 class ProductRetentionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware([EnforceAdminSession::class, RequireRecentReauthentication::class]);
+    }
 
     protected function tearDown(): void
     {

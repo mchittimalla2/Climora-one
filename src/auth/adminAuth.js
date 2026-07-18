@@ -33,6 +33,6 @@ export async function adminApi(path, options = {}) {
     headers,
   });
 
-  if (response.status === 401) clearAdminSession();
+  if (response.status === 401 || response.status === 428) clearAdminSession();
   return response;
 }

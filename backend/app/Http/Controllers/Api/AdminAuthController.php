@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminOtpCode;
+use App\Models\AdminSession;
 use App\Support\SecurityAudit;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -150,8 +151,20 @@ class AdminAuthController extends Controller
         RateLimiter::clear($rateKey);
 
         // Every successful login receives a fresh token. Old tokens are revoked.
+        $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);
         $user->tokens()->delete();
         $token = $user->createToken('admin-web', ['admin'])->plainTextToken;
+        $session = AdminSession::create([
+            'id' => (string) Str::uuid(),
+            'user_id' => $user->id,
+            'token_hash' => hash('sha256', $token),
+            'ip_address' => $request->ip(),
+            'user_agent' => Str::limit((string) $request->userAgent(), 500, ''),
+            'mfa_verified_at' => now(),
+            'last_activity_at' => now(),
+            'expires_at' => now()->addHours(8),
+        ]);
+        $request->attributes->set('admin_session', $session);
 
         $user->forceFill([
             'last_login_at' => now(),
@@ -217,8 +230,10 @@ class AdminAuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $user = $request->user();
-        $request->user()->currentAccessToken()->delete();
+        $session = $request->attributes->get('admin_session');
         $this->recordAudit($request, $user, 'auth.logout', 'success');
+        $session?->forceFill(['revoked_at' => now()])->save();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully.']);
     }

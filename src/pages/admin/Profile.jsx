@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminLayout from "../../components/AdminLayout";
-import { adminApi, getAdminUser, saveAdminSession, getAdminToken } from "../../auth/adminAuth";
+import { adminApi, clearAdminSession, getAdminUser, saveAdminSession, getAdminToken } from "../../auth/adminAuth";
 
 export default function Profile() {
   const currentUser = getAdminUser();
@@ -44,7 +44,8 @@ export default function Profile() {
     try {
       setSaving(true); setError(""); setMessage("");
       const data = await call("/api/admin/profile/password", "PUT", { current_password: currentPassword, password, password_confirmation: passwordConfirmation });
-      setMessage(data.message); setCurrentPassword(""); setPassword(""); setPasswordConfirmation("");
+      clearAdminSession();
+      window.location.assign("/login");
     } catch (e) { setError(e.message); } finally { setSaving(false); }
   };
 
@@ -75,8 +76,8 @@ export default function Profile() {
     try {
       setSaving(true); setError(""); setMessage("");
       const data = await call("/api/admin/profile/email-change/verify", "POST", { new_email: newEmail, otp: emailOtp });
-      saveAdminSession(getAdminToken(), data.user);
-      setMessage(data.message); setEmailStep("request"); setNewEmail(""); setEmailPassword(""); setEmailOtp("");
+      clearAdminSession();
+      window.location.assign("/login");
     } catch (e) { setError(e.message); } finally { setSaving(false); }
   };
 

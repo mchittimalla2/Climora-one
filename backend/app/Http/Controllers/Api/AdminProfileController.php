@@ -62,13 +62,11 @@ class AdminProfileController extends Controller
             'password_changed_at' => now(),
         ])->save();
 
-        $currentTokenId = $request->user()->currentAccessToken()?->id;
-        $user->tokens()->when($currentTokenId, function ($query) use ($currentTokenId) {
-            $query->where('id', '!=', $currentTokenId);
-        })->delete();
+        $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);
+        $user->tokens()->delete();
 
         SecurityAudit::record($request, 'profile.password_change', 'success', $user, 'user', $user->id);
-        return response()->json(['message' => 'Password changed successfully. Other sessions were revoked.']);
+        return response()->json(['message' => 'Password changed successfully. Sign in again with your new password.']);
     }
 
     public function requestEmailChange(Request $request): JsonResponse
@@ -167,16 +165,14 @@ class AdminProfileController extends Controller
         $change->forceFill(['consumed_at' => now()])->save();
         $user->forceFill(['email' => $newEmail, 'email_verified_at' => now()])->save();
 
-        $currentTokenId = $request->user()->currentAccessToken()?->id;
-        $user->tokens()->when($currentTokenId, function ($query) use ($currentTokenId) {
-            $query->where('id', '!=', $currentTokenId);
-        })->delete();
+        $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);
+        $user->tokens()->delete();
 
         SecurityAudit::record($request, 'profile.email_change', 'success', $user, 'user', $user->id, [
             'email_hash' => hash('sha256', $newEmail),
         ]);
         return response()->json([
-            'message' => 'Email address updated successfully. Other sessions were revoked.',
+            'message' => 'Email address updated successfully. Sign in again with your new email.',
             'user' => $this->safeUser($user->fresh()),
         ]);
     }
