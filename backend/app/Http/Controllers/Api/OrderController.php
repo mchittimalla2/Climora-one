@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\OrderEmailService;
 use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class OrderController extends Controller
     public function index()
     {
         return response()->json(
-            Order::with('items')->latest()->get()
+            Order::with(['items', 'payment'])->latest()->get()
         );
     }
 
@@ -37,12 +38,7 @@ class OrderController extends Controller
                 'distinct',
                 Rule::exists('products', 'id')->whereNull('deleted_at'),
             ],
-            'items.*.quantity' => [
-                'required',
-                'integer',
-                'min:1',
-                'max:100',
-            ],
+            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100'],
         ]);
 
         try {
@@ -51,40 +47,22 @@ class OrderController extends Controller
                 $calculatedTotal = 0;
 
                 foreach ($validated['items'] as $requestedItem) {
-                    $product = Product::query()
-                        ->lockForUpdate()
-                        ->findOrFail($requestedItem['product_id']);
-
+                    $product = Product::query()->lockForUpdate()->findOrFail($requestedItem['product_id']);
                     $quantity = (int) $requestedItem['quantity'];
                     $availableStock = (int) $product->stock;
 
                     if ($availableStock < $quantity) {
-                        throw new \RuntimeException(
-                            "Only {$availableStock} item(s) are available for {$product->name}."
-                        );
+                        throw new \RuntimeException("Only {$availableStock} item(s) are available for {$product->name}.");
                     }
 
                     $unitPrice = (float) $product->price;
                     $subtotal = round($unitPrice * $quantity, 2);
-
-                    $preparedItems[] = [
-                        'product' => $product,
-                        'quantity' => $quantity,
-                        'unit_price' => $unitPrice,
-                        'subtotal' => $subtotal,
-                    ];
-
+                    $preparedItems[] = compact('product', 'quantity', 'unitPrice', 'subtotal');
                     $calculatedTotal += $subtotal;
                 }
 
-                $calculatedTotal = round($calculatedTotal, 2);
-
                 $order = Order::create([
-                    'order_number' => sprintf(
-                        'CLM-%s-%s',
-                        now()->format('Y'),
-                        strtoupper(uniqid())
-                    ),
+                    'order_number' => sprintf('CLM-%s-%s', now()->format('Y'), strtoupper(uniqid())),
                     'customer_name' => $validated['customer_name'],
                     'email' => strtolower($validated['email']),
                     'phone' => $validated['phone'],
@@ -92,49 +70,33 @@ class OrderController extends Controller
                     'city' => $validated['city'],
                     'state' => $validated['state'],
                     'pincode' => $validated['pincode'],
-                    'total' => $calculatedTotal,
+                    'total' => round($calculatedTotal, 2),
                     'status' => 'Order Received',
-                    'status_history' => json_encode([
-                        'Order Received' => now()->toDateTimeString(),
-                    ]),
+                    'status_history' => json_encode(['Order Received' => now()->toDateTimeString()]),
                     'payment_status' => 'Pending',
                 ]);
 
-                foreach ($preparedItems as $preparedItem) {
-                    $product = $preparedItem['product'];
-
+                foreach ($preparedItems as $item) {
                     OrderItem::create([
                         'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'product_name' => $product->name,
-                        'quantity' => $preparedItem['quantity'],
-                        'price' => $preparedItem['unit_price'],
-                        'subtotal' => $preparedItem['subtotal'],
+                        'product_id' => $item['product']->id,
+                        'product_name' => $item['product']->name,
+                        'quantity' => $item['quantity'],
+                        'price' => $item['unitPrice'],
+                        'subtotal' => $item['subtotal'],
                     ]);
-
-                    $product->decrement(
-                        'stock',
-                        $preparedItem['quantity']
-                    );
+                    $item['product']->decrement('stock', $item['quantity']);
                 }
 
                 return $order->load('items');
             }, 3);
 
-            return response()->json([
-                'message' => 'Order created successfully.',
-                'order' => $order,
-            ], 201);
+            return response()->json(['message' => 'Order created successfully.', 'order' => $order], 201);
         } catch (\RuntimeException $error) {
-            return response()->json([
-                'message' => $error->getMessage(),
-            ], 409);
+            return response()->json(['message' => $error->getMessage()], 409);
         } catch (\Throwable $error) {
             report($error);
-
-            return response()->json([
-                'message' => 'Unable to place the order. Please try again.',
-            ], 500);
+            return response()->json(['message' => 'Unable to place the order. Please try again.'], 500);
         }
     }
 
@@ -151,14 +113,13 @@ class OrderController extends Controller
             ->first();
 
         if (!$order) {
-            return response()->json([
-                'message' => 'Order not found'
-            ], 404);
+            return response()->json(['message' => 'Order not found'], 404);
         }
 
         return response()->json([
             'order_number' => $order->order_number,
             'status' => $order->status,
+            'payment_status' => $order->payment_status,
             'status_history' => $order->status_history,
             'created_at' => $order->created_at,
             'items' => $order->items->map(fn ($item) => [
@@ -168,39 +129,41 @@ class OrderController extends Controller
         ]);
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id, OrderEmailService $emails)
     {
         $validated = $request->validate([
             'status' => ['required', Rule::in(['Order Received', 'Confirmed', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'])],
         ]);
 
         $order = Order::where('order_number', $id)->first();
-
         if (!$order) {
-            return response()->json([
-                'message' => 'Order not found'
-            ], 404);
+            return response()->json(['message' => 'Order not found'], 404);
         }
 
         $previousStatus = $order->status;
-        $history = $order->status_history
-            ? json_decode($order->status_history, true)
-            : [];
-
+        $history = $order->status_history ? json_decode($order->status_history, true) : [];
         $history[$validated['status']] = now()->toDateTimeString();
 
-        $order->status = $validated['status'];
-        $order->status_history = json_encode($history);
-        $order->save();
+        $order->forceFill([
+            'status' => $validated['status'],
+            'status_history' => json_encode($history),
+        ])->save();
+
         SecurityAudit::record($request, 'admin.order_status_update', 'success', null, 'order', $order->id, [
             'order_number' => $order->order_number,
             'before' => ['status' => $previousStatus],
             'after' => ['status' => $order->status],
         ]);
 
+        if ($order->status === 'Out for Delivery') {
+            $emails->sendCustomerOutForDelivery($order);
+        } elseif ($order->status === 'Delivered') {
+            $emails->sendCustomerDelivered($order);
+        }
+
         return response()->json([
             'message' => 'Order status updated successfully',
-            'order' => $order->load('items')
+            'order' => $order->load(['items', 'payment']),
         ]);
     }
 }
