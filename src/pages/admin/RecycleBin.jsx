@@ -51,7 +51,7 @@ export default function RecycleBin() {
   };
 
   return (
-    <AdminLayout eyebrow="Data protection" title="Product Recycle Bin" description="Deleted products remain recoverable for 30 days. Owners can restore them; only break-glass can permanently remove them." actions={<button className="admin-secondary-btn" onClick={load}>Refresh</button>}>
+    <AdminLayout eyebrow="Data protection" title="Product Recycle Bin" description="Deleted products remain recoverable for 30 days. Owners can restore them; permanent deletion remains blocked until retention expires." actions={<button className="admin-secondary-btn" onClick={load}>Refresh</button>}>
       {error && <div className="admin-alert error">{error}</div>}
       {message && <div className="admin-alert success">{message}</div>}
       <section className="admin-panel">
@@ -66,7 +66,7 @@ export default function RecycleBin() {
                 <td>{product.purge_eligible_at ? new Date(product.purge_eligible_at).toLocaleDateString() : "—"}</td>
                 <td>
                   <div className="product-actions">
-                    <button type="button" onClick={() => restore(product.id)}>Restore</button>
+                    {user?.role === "owner" && <button type="button" onClick={() => restore(product.id)}>Restore</button>}
                     {user?.is_break_glass && <button type="button" className="delete-btn" onClick={() => permanentDelete(product)}>Permanent delete</button>}
                   </div>
                 </td>

@@ -85,7 +85,7 @@ class ProductController extends Controller
 
     public function restore(Request $request, $id)
     {
-        if (!$request->user()?->isOwner() && !$request->user()?->isBreakGlass()) {
+        if (!$request->user()?->isOwner()) {
             return response()->json(['message' => 'Only owners can restore deleted products.'], 403);
         }
 
@@ -116,6 +116,17 @@ class ProductController extends Controller
 
         $product = Product::onlyTrashed()->find($id);
         if (!$product) return response()->json(['message' => 'Deleted product not found'], 404);
+
+        if (!$product->purge_eligible_at) {
+            return response()->json(['message' => 'This product has no valid retention deadline and cannot be permanently deleted.'], 409);
+        }
+
+        if ($product->purge_eligible_at->isFuture()) {
+            return response()->json([
+                'message' => 'This product is still within the mandatory 30-day retention period.',
+                'purge_eligible_at' => $product->purge_eligible_at,
+            ], 409);
+        }
 
         $expected = 'DELETE PRODUCT-' . $product->id;
         if ($validated['confirmation'] !== $expected) {
