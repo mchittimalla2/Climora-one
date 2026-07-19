@@ -164,24 +164,32 @@ function Checkout() {
   if (orderSuccess) {
     return (
       <div className="checkout-page">
-        <header className="checkout-header"><Link to="/" className="checkout-brand"><BrandLogo className="brand-logo" /></Link><span>Secure Checkout</span></header>
+        <header className="checkout-header">
+          <Link to="/" className="checkout-brand"><BrandLogo className="brand-logo" /></Link>
+          <span>Secure Checkout</span>
+        </header>
         <main className="checkout-success-page">
           <div className="checkout-success-card premium-result-card">
             <div className="checkout-success-icon">✓</div>
             <p className="result-eyebrow">Order confirmed</p>
             <h1>Thank you for your order!</h1>
-            <p>Your payment was successful and your order is being prepared.</p>
+            <p>Your payment was successful and your handcrafted order is being prepared with care.</p>
             <div className="confirmation-grid">
               <div><span>Order number</span><strong>{orderSuccess.id}</strong></div>
-              <div><span>Amount paid</span><strong>₹{orderSuccess.total}</strong></div>
+              <div><span>Amount paid</span><strong>₹{Number(orderSuccess.total).toFixed(2)}</strong></div>
               <div><span>Payment</span><strong>{orderSuccess.paymentMethod}</strong></div>
               <div><span>Estimated delivery</span><strong>4–6 business days</strong></div>
             </div>
-            <p className="confirmation-email">A confirmation email has been sent to {orderSuccess.email}.</p>
+            <p className="confirmation-email">A detailed confirmation email has been sent to {orderSuccess.email}.</p>
             <div className="checkout-success-actions">
               <Link to="/track-order" className="secondary-action">Track Order</Link>
               <Link to="/" className="primary-action">Continue Shopping</Link>
             </div>
+            <section className="success-impact-strip" aria-label="Climoraone social impact">
+              <span>Our Promise</span>
+              <h2>Every purchase empowers our partners.</h2>
+              <p>Your order supports rural women, skilled artisans and meaningful livelihoods while helping preserve traditional craftsmanship.</p>
+            </section>
           </div>
         </main>
       </div>
