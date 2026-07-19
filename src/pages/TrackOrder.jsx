@@ -2,6 +2,7 @@ import { useState } from "react";
 import { API_BASE_URL } from "../config/api";
 import { PublicPageLayout } from "../components/PublicPageLayout";
 import "../styles/track-order.css";
+import "../styles/track-order-desktop.css";
 
 const timelineSteps = [
   "Order Received",
