@@ -19,6 +19,7 @@ function Orders() {
   const [expandedDates, setExpandedDates] = useState({});
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [updatingOrder, setUpdatingOrder] = useState(null);
+  const [invoiceAction, setInvoiceAction] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -70,6 +71,10 @@ function Orders() {
         total: order.total,
         status: normalizeStatus(order.status),
         paymentStatus: order.payment_status,
+        hasInvoice: Boolean(order.has_invoice),
+        invoiceNumber: order.invoice_number,
+        invoiceFileName: order.invoice_file_name,
+        invoiceUrl: order.admin_invoice_url,
         items: order.items || [],
         steps: buildSteps(order),
       }));
@@ -114,6 +119,46 @@ function Orders() {
       setError(statusError.message || "Unable to update order status.");
     } finally {
       setUpdatingOrder(null);
+    }
+  };
+
+  const accessInvoice = async (order, mode) => {
+    const actionKey = `${order.id}:${mode}`;
+    const previewTab = mode === "view" ? window.open("", "_blank") : null;
+    if (mode === "view" && !previewTab) {
+      setError("Your browser blocked the invoice tab. Please allow pop-ups and try again.");
+      return;
+    }
+    if (previewTab) previewTab.opener = null;
+
+    try {
+      setInvoiceAction(actionKey);
+      setError("");
+      const response = await adminApi(order.invoiceUrl);
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.message || "Unable to access this invoice.");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      if (mode === "view") {
+        previewTab.location.href = objectUrl;
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } else {
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = order.invoiceFileName || `Climoraone-Invoice-${order.invoiceNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch (invoiceError) {
+      if (previewTab) previewTab.close();
+      setError(invoiceError.message || "Unable to access this invoice.");
+    } finally {
+      setInvoiceAction("");
     }
   };
 
@@ -176,6 +221,18 @@ function Orders() {
                       <div><label>Total</label><p>₹{order.total}</p></div>
                       <div><label>Items</label><p>{order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</p></div>
                     </div>
+
+                    {order.hasInvoice && order.invoiceUrl && (
+                      <div className="admin-invoice-actions" aria-label={`Invoice ${order.invoiceNumber}`}>
+                        <span className="admin-invoice-number">{order.invoiceNumber}</span>
+                        <button className="admin-secondary-btn" disabled={Boolean(invoiceAction)} onClick={() => accessInvoice(order, "view")}>
+                          {invoiceAction === `${order.id}:view` ? "Opening..." : "View Invoice"}
+                        </button>
+                        <button className="admin-secondary-btn" disabled={Boolean(invoiceAction)} onClick={() => accessInvoice(order, "download")}>
+                          {invoiceAction === `${order.id}:download` ? "Downloading..." : "Download Invoice"}
+                        </button>
+                      </div>
+                    )}
 
                     <button
                       className="view-details-btn"

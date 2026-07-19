@@ -8,16 +8,19 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\User;
 use App\Services\InvoiceAccessService;
 use App\Services\InvoicePdfService;
 use App\Services\InvoiceService;
 use App\Services\OrderEmailService;
 use App\Services\PaymentProcessor;
 use App\Services\RazorpayService;
+use App\Http\Middleware\EnforceAdminSession;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -239,6 +242,81 @@ class InvoiceFeatureTest extends TestCase
         $this->assertSame(1, EmailNotification::where('event_type', 'customer.delivered')->count());
     }
 
+    public function test_authenticated_admin_downloads_existing_invoice_without_regeneration(): void
+    {
+        $this->authenticateAdmin();
+        [$order] = $this->paidOrder();
+        $invoice = $this->app->make(InvoiceService::class)->issue($order);
+        $before = Storage::disk('invoices')->get($invoice->file_path);
+
+        $this->get("/api/admin/orders/{$order->order_number}/invoice")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->assertSame(1, Invoice::where('order_id', $order->id)->count());
+        $this->assertSame($before, Storage::disk('invoices')->get($invoice->file_path));
+        $this->assertDatabaseHas('audit_logs', [
+            'event' => 'admin.invoice_access',
+            'resource_id' => (string) $invoice->id,
+        ]);
+    }
+
+    public function test_admin_invoice_endpoint_rejects_unpaid_and_missing_invoices_or_files(): void
+    {
+        $this->authenticateAdmin();
+        [$unpaid] = $this->pendingCheckout();
+        $this->getJson("/api/admin/orders/{$unpaid->order_number}/invoice")->assertStatus(422);
+
+        [$paid] = $this->paidOrder('CLM-2026-MISSING', '8888888888');
+        $this->getJson("/api/admin/orders/{$paid->order_number}/invoice")->assertNotFound();
+
+        $invoice = $this->app->make(InvoiceService::class)->issue($paid);
+        Storage::disk('invoices')->delete($invoice->file_path);
+        $this->getJson("/api/admin/orders/{$paid->order_number}/invoice")->assertNotFound();
+    }
+
+    public function test_admin_orders_include_invoice_metadata_without_hiding_failed_orders(): void
+    {
+        $this->authenticateAdmin();
+        [$paid] = $this->paidOrder();
+        $invoice = $this->app->make(InvoiceService::class)->issue($paid);
+        [$failed, $payment] = $this->pendingCheckout('CLM-2026-FAILED', '9999999999');
+        $failed->forceFill(['payment_status' => 'Failed'])->save();
+        $payment->forceFill(['status' => 'failed'])->save();
+
+        $response = $this->getJson('/api/admin/orders')->assertOk();
+        $paidJson = collect($response->json())->firstWhere('order_number', $paid->order_number);
+        $failedJson = collect($response->json())->firstWhere('order_number', $failed->order_number);
+
+        $this->assertTrue($paidJson['has_invoice']);
+        $this->assertSame($invoice->invoice_number, $paidJson['invoice_number']);
+        $this->assertSame($invoice->file_name, $paidJson['invoice_file_name']);
+        $this->assertSame("/api/admin/orders/{$paid->order_number}/invoice", $paidJson['admin_invoice_url']);
+        $this->assertNotNull($failedJson);
+        $this->assertFalse($failedJson['has_invoice']);
+        $this->assertNull($failedJson['admin_invoice_url']);
+    }
+
+    public function test_invoice_logo_uses_local_png_and_retains_text_fallback(): void
+    {
+        [$order] = $this->paidOrder();
+        $invoice = new Invoice(['invoice_number' => 'CLM-INV-2026-000001', 'invoice_date' => now()]);
+        $logo = resource_path('images/climoraone-logo.png');
+        config(['invoices.logo_path' => $logo]);
+
+        $html = (new InvoicePdfService())->renderHtml($invoice, $order);
+        $this->assertFileExists($logo);
+        $this->assertStringContainsString('data:image/png;base64,', $html);
+        $this->assertStringContainsString('<img class="logo"', $html);
+        $logoPdf = (new InvoicePdfService())->render($invoice, $order);
+        $this->assertStringContainsString('/Subtype /Image', $logoPdf);
+
+        config(['invoices.logo_path' => resource_path('images/missing-logo.png')]);
+        $fallback = (new InvoicePdfService())->renderHtml($invoice, $order);
+        $this->assertStringContainsString('<div class="brand-fallback">Climoraone</div>', $fallback);
+        $this->assertStringNotContainsString('<img class="logo"', $fallback);
+    }
+
     public function test_invoice_html_contains_every_item_totals_and_no_gst_fields(): void
     {
         [$order] = $this->paidOrder();
@@ -276,7 +354,20 @@ class InvoiceFeatureTest extends TestCase
         $this->assertLessThanOrEqual(1, preg_match_all('~/Type\s*/Page\b~', $pdf));
     }
 
-    private function pendingCheckout(): array
+    private function authenticateAdmin(): User
+    {
+        $this->withoutMiddleware(EnforceAdminSession::class);
+        $admin = User::factory()->create([
+            'role' => User::ROLE_OWNER,
+            'is_active' => true,
+            'mfa_enabled' => true,
+        ]);
+        Sanctum::actingAs($admin, ['admin']);
+
+        return $admin;
+    }
+
+    private function pendingCheckout(string $orderNumber = 'CLM-2026-TESTORDER', string $phone = '9876543210'): array
     {
         $product = Product::create([
             'name' => 'Test artisan product',
@@ -284,7 +375,7 @@ class InvoiceFeatureTest extends TestCase
             'price' => 200,
             'stock' => 10,
         ]);
-        $order = $this->makeOrder('CLM-2026-TESTORDER', '9876543210');
+        $order = $this->makeOrder($orderNumber, $phone);
 
         OrderItem::create([
             'order_id' => $order->id,
@@ -306,9 +397,9 @@ class InvoiceFeatureTest extends TestCase
         return [$order, $payment, $product];
     }
 
-    private function paidOrder(): array
+    private function paidOrder(string $orderNumber = 'CLM-2026-TESTORDER', string $phone = '9876543210'): array
     {
-        [$order, $payment, $product] = $this->pendingCheckout();
+        [$order, $payment, $product] = $this->pendingCheckout($orderNumber, $phone);
         $order->forceFill(['payment_status' => 'Paid', 'status' => 'Confirmed'])->save();
         $payment->forceFill([
             'provider_payment_id' => 'pay_' . $payment->id,

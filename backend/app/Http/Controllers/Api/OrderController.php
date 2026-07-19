@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Services\InvoiceAccessService;
+use App\Services\InvoiceService;
 use App\Services\OrderEmailService;
 use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
@@ -16,11 +17,23 @@ use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(InvoiceService $invoices)
     {
-        return response()->json(
-            Order::with(['items', 'payment'])->latest()->get()
-        );
+        $orders = Order::with(['items', 'payment', 'invoice'])->latest()->get();
+
+        return response()->json($orders->map(function (Order $order) use ($invoices) {
+            $invoice = $order->invoice;
+            $available = $invoices->isPaidAndVerified($order)
+                && $invoice
+                && Storage::disk($invoice->disk)->exists($invoice->file_path);
+
+            $order->setAttribute('has_invoice', (bool) $available);
+            $order->setAttribute('invoice_number', $available ? $invoice->invoice_number : null);
+            $order->setAttribute('invoice_file_name', $available ? $invoice->file_name : null);
+            $order->setAttribute('admin_invoice_url', $available ? "/api/admin/orders/{$order->order_number}/invoice" : null);
+
+            return $order;
+        }));
     }
 
     public function store(Request $request)

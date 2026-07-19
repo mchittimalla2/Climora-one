@@ -47,5 +47,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin.session', 'admin.acce
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware('admin.role:owner');
 
     Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}/invoice', [InvoiceController::class, 'adminDownload']);
     Route::put('/orders/{id}/status', [OrderController::class, 'updateStatus']);
 });

@@ -32,6 +32,7 @@ class RouteAuthorizationTest extends TestCase
             ['DELETE', '/api/admin/products/1/permanent'],
             ['GET', '/api/admin/orders'],
             ['PUT', '/api/admin/orders/CLM-2026-TEST/status'],
+            ['GET', '/api/admin/orders/CLM-2026-TEST/invoice'],
         ];
     }
 }

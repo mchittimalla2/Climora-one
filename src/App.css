@@ -1227,6 +1227,29 @@ body {
   cursor: pointer;
 }
 
+.admin-invoice-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid #e0d4bb;
+  border-radius: 14px;
+  background: #fbf7ed;
+}
+
+.admin-invoice-number {
+  margin-right: auto;
+  color: #1f3d2b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-invoice-actions .admin-secondary-btn {
+  min-width: 132px;
+}
+
 .modern-order-details {
   margin-top: 20px;
   padding-top: 18px;
@@ -1286,6 +1309,11 @@ body {
 
   .status-btn {
     margin-left: 0;
+  }
+
+  .admin-invoice-actions .admin-secondary-btn {
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 .order-date-toggle {

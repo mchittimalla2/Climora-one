@@ -17,7 +17,11 @@ class InvoiceAccessService
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        return route('invoices.download', ['token' => $plainToken]);
+        return route(
+            'invoices.download',
+            ['token' => $plainToken],
+            false
+        );
     }
 
     public function resolve(string $plainToken): ?InvoiceDownloadToken
