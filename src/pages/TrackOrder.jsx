@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { API_BASE_URL } from "../config/api";
 import { PublicPageLayout } from "../components/PublicPageLayout";
-import "../styles/CheckoutExperience.css";
+import "../styles/track-order.css";
 
 const timelineSteps = [
   "Order Received",
@@ -21,6 +21,8 @@ const normalizeStatus = (status = "") => {
   };
   return aliases[status] || status;
 };
+
+const formatMoney = (value) => Number(value || 0).toFixed(2);
 
 function TrackOrder() {
   const [orderId, setOrderId] = useState("");
@@ -47,7 +49,7 @@ function TrackOrder() {
     return timelineSteps.map((step, index) => ({
       name: step,
       completed: step === "Order Received" || Boolean(normalizedHistory[step]) || (currentIndex >= 0 && index <= currentIndex),
-      completedAt: normalizedHistory[step] || (step === "Order Received" && order.created_at ? order.created_at : null),
+      completedAt: normalizedHistory[step] || (step === "Order Received" ? order.created_at : null),
     }));
   };
 
@@ -55,33 +57,36 @@ function TrackOrder() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setMatchedOrder(null);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/track-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ order_number: orderId.trim(), phone: phone.trim() }),
+        body: JSON.stringify({ order_number: orderId.trim().toUpperCase(), phone: phone.trim() }),
       });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setMatchedOrder(null);
         setError(data?.message || "No order found with these details.");
         return;
       }
 
+      const items = Array.isArray(data.items) ? data.items : [];
       setMatchedOrder({
         id: data.order_number,
-        customerName: data.customer_name,
+        customerName: data.customer_name || "Customer",
+        email: data.email || "",
         total: data.total,
+        paymentStatus: data.payment_status,
+        paymentMethod: data.payment_method || "Online payment",
         status: normalizeStatus(data.status),
-        items: data.items || [],
+        items,
         createdAt: data.created_at,
         steps: buildSteps(data),
       });
     } catch (requestError) {
       console.error("Track order failed:", requestError);
-      setMatchedOrder(null);
       setError("Unable to check the order right now. Please try again.");
     } finally {
       setLoading(false);
@@ -95,10 +100,30 @@ function TrackOrder() {
       title="Track your order"
       description="Enter your confirmation number and the phone number used at checkout to follow your order journey."
     >
-      <section className="tracking-card">
+      <section className="tracking-search-card">
         <form className="tracking-form" onSubmit={handleTrack}>
-          <label><span>Order number</span><input placeholder="CLM-2026-XXXXXXXX" value={orderId} onChange={(event) => setOrderId(event.target.value.toUpperCase())} autoComplete="off" required /></label>
-          <label><span>Phone number</span><input placeholder="10-digit phone number" value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))} inputMode="numeric" pattern="[0-9]{10}" maxLength="10" required /></label>
+          <label>
+            <span>Order number</span>
+            <input
+              placeholder="CLM-2026-XXXXXXXX"
+              value={orderId}
+              onChange={(event) => setOrderId(event.target.value.toUpperCase())}
+              autoComplete="off"
+              required
+            />
+          </label>
+          <label>
+            <span>Phone number</span>
+            <input
+              placeholder="10-digit phone number"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength="10"
+              required
+            />
+          </label>
           <button type="submit" disabled={loading}>{loading ? "Checking..." : "Track Order"}</button>
         </form>
         {error && <div className="tracking-error" role="alert">{error}</div>}
@@ -107,37 +132,52 @@ function TrackOrder() {
       {matchedOrder && (
         <section className="tracking-result-card">
           <div className="tracking-order-header">
-            <div><span>Order number</span><h2>{matchedOrder.id}</h2><p>Placed {new Date(matchedOrder.createdAt).toLocaleString()}</p></div>
+            <div>
+              <span>Order number</span>
+              <h2>{matchedOrder.id}</h2>
+              <p>Placed {new Date(matchedOrder.createdAt).toLocaleString()}</p>
+            </div>
             <span className="tracking-status">{matchedOrder.status}</span>
           </div>
 
           <div className="tracking-summary-grid">
-            <div><span>Customer</span><strong>{matchedOrder.customerName}</strong></div>
-            <div><span>Total</span><strong>₹{matchedOrder.total}</strong></div>
-            <div><span>Items</span><strong>{matchedOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)}</strong></div>
-            <div><span>Estimated delivery</span><strong>4–6 business days</strong></div>
+            <article><span>Customer</span><strong>{matchedOrder.customerName}</strong></article>
+            <article><span>Total amount</span><strong>₹{formatMoney(matchedOrder.total)}</strong></article>
+            <article><span>Payment</span><strong>{matchedOrder.paymentStatus || matchedOrder.paymentMethod}</strong></article>
+            <article><span>Estimated delivery</span><strong>4–6 business days</strong></article>
           </div>
 
-          <div className="tracking-items">
-            <h3>Items ordered</h3>
-            {matchedOrder.items.map((item) => (
-              <div className="tracking-item-row" key={item.id}>
-                <div><strong>{item.product_name}</strong><span>Quantity: {item.quantity}</span></div>
-                <strong>₹{item.subtotal || Number(item.price) * Number(item.quantity)}</strong>
+          <div className="tracking-details-grid">
+            <section className="tracking-items-card">
+              <div className="tracking-section-heading">
+                <h3>Items ordered</h3>
+                <span>{matchedOrder.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)} item(s)</span>
               </div>
-            ))}
-          </div>
-
-          <div className="tracking-timeline-wrap">
-            <h3>Order progress</h3>
-            <div className="tracking-timeline">
-              {matchedOrder.steps.map((step) => (
-                <div key={step.name} className={step.completed ? "tracking-step completed" : "tracking-step"}>
-                  <span className="tracking-step-dot">{step.completed ? "✓" : ""}</span>
-                  <div><strong>{step.name}</strong>{step.completedAt && <small>{new Date(step.completedAt).toLocaleString()}</small>}</div>
+              {matchedOrder.items.length > 0 ? matchedOrder.items.map((item, index) => (
+                <div className="tracking-item-row" key={item.id || `${item.product_id || item.product_name}-${index}`}>
+                  <div>
+                    <strong>{item.product_name || "Product"}</strong>
+                    <span>Quantity: {item.quantity}</span>
+                  </div>
+                  <strong>₹{formatMoney(item.subtotal || Number(item.price || 0) * Number(item.quantity || 0))}</strong>
                 </div>
-              ))}
-            </div>
+              )) : <p className="tracking-empty-items">Order item details are unavailable.</p>}
+            </section>
+
+            <section className="tracking-timeline-card">
+              <h3>Order progress</h3>
+              <div className="tracking-timeline">
+                {matchedOrder.steps.map((step) => (
+                  <div key={step.name} className={step.completed ? "tracking-step completed" : "tracking-step"}>
+                    <span className="tracking-step-dot">{step.completed ? "✓" : ""}</span>
+                    <div>
+                      <strong>{step.name}</strong>
+                      {step.completedAt && <small>{new Date(step.completedAt).toLocaleString()}</small>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           </div>
         </section>
       )}
