@@ -11,14 +11,21 @@
   .tracking-page .tracking-timeline-card::before,
   .tracking-page .tracking-timeline-card::after,
   .tracking-page .tracking-timeline::before,
-  .tracking-page .tracking-timeline::after {
+  .tracking-page .tracking-timeline::after,
+  .tracking-page .tracking-timeline-card h3::before,
+  .tracking-page .tracking-timeline-card h3::after {
     content: none !important;
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
     border: 0 !important;
+    background: transparent !important;
   }
 
   .tracking-page .tracking-timeline-card {
+    position: relative !important;
     padding: 26px 28px;
+    overflow: hidden !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-timeline {
@@ -26,39 +33,54 @@
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 0 !important;
-    margin-top: 22px !important;
+    width: 100% !important;
+    margin: 22px 0 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: visible !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step {
+    position: relative !important;
     display: grid !important;
     grid-template-columns: 32px minmax(0, 1fr) !important;
     align-items: start !important;
     width: 100% !important;
     min-height: 70px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
     text-align: left !important;
-    border: 0 !important;
   }
 
-  .tracking-page .tracking-timeline-card .tracking-step::after {
+  .tracking-page .tracking-timeline-card .tracking-step::after,
+  .tracking-page .tracking-timeline-card .tracking-step:last-child::before,
+  .tracking-page .tracking-timeline-card .tracking-step:last-child::after {
     content: none !important;
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
     border: 0 !important;
-  }
-
-  .tracking-page .tracking-timeline-card .tracking-step:last-child::before {
-    content: none !important;
-    display: none !important;
+    background: transparent !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step:not(:last-child)::before {
     content: "" !important;
     display: block !important;
+    position: absolute !important;
     top: 32px !important;
     bottom: 0 !important;
     left: 15px !important;
     width: 2px !important;
     height: auto !important;
     border: 0 !important;
+    background: #d9e0d7 !important;
+  }
+
+  .tracking-page .tracking-timeline-card .tracking-step.completed:not(:last-child)::before {
+    background: #4d8b48 !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step-dot {
@@ -68,6 +90,13 @@
 
   .tracking-page .tracking-timeline-card .tracking-step > div {
     padding-top: 5px !important;
+    border: 0 !important;
+  }
+
+  .tracking-page .tracking-timeline-card .tracking-step strong,
+  .tracking-page .tracking-timeline-card .tracking-step small {
+    border: 0 !important;
+    text-decoration: none !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step strong {
