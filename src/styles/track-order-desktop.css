@@ -4,6 +4,19 @@
     gap: 28px;
   }
 
+  .tracking-page .tracking-details-grid::before,
+  .tracking-page .tracking-details-grid::after,
+  .tracking-page .tracking-items-card::before,
+  .tracking-page .tracking-items-card::after,
+  .tracking-page .tracking-timeline-card::before,
+  .tracking-page .tracking-timeline-card::after,
+  .tracking-page .tracking-timeline::before,
+  .tracking-page .tracking-timeline::after {
+    content: none !important;
+    display: none !important;
+    border: 0 !important;
+  }
+
   .tracking-page .tracking-timeline-card {
     padding: 26px 28px;
   }
@@ -16,12 +29,6 @@
     margin-top: 22px !important;
   }
 
-  .tracking-page .tracking-timeline-card .tracking-timeline::before,
-  .tracking-page .tracking-timeline-card .tracking-timeline::after {
-    content: none !important;
-    display: none !important;
-  }
-
   .tracking-page .tracking-timeline-card .tracking-step {
     display: grid !important;
     grid-template-columns: 32px minmax(0, 1fr) !important;
@@ -29,19 +36,29 @@
     width: 100% !important;
     min-height: 70px !important;
     text-align: left !important;
+    border: 0 !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step::after {
     content: none !important;
     display: none !important;
+    border: 0 !important;
+  }
+
+  .tracking-page .tracking-timeline-card .tracking-step:last-child::before {
+    content: none !important;
+    display: none !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step:not(:last-child)::before {
+    content: "" !important;
+    display: block !important;
     top: 32px !important;
     bottom: 0 !important;
     left: 15px !important;
     width: 2px !important;
     height: auto !important;
+    border: 0 !important;
   }
 
   .tracking-page .tracking-timeline-card .tracking-step-dot {
