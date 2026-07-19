@@ -59,6 +59,8 @@ class Kernel extends HttpKernel
         'admin.access' => \App\Http\Middleware\EnsureAdminAccess::class,
         'admin.role' => \App\Http\Middleware\RequireAdminRole::class,
         'reauth.recent' => \App\Http\Middleware\RequireRecentReauthentication::class,
+        'customer.active' => \App\Http\Middleware\EnsureCustomerActive::class,
+        'customer.verified' => \App\Http\Middleware\EnsureCustomerVerified::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,

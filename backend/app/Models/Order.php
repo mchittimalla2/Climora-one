@@ -10,6 +10,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
+        'customer_id',
         'order_number',
         'customer_name',
         'email',
@@ -23,6 +24,8 @@ class Order extends Model
         'status_history',
         'payment_status',
     ];
+
+    public function customer() { return $this->belongsTo(Customer::class); }
 
     public function items()
     {

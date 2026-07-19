@@ -14,14 +14,14 @@ class SecurityAudit
         Request $request,
         string $event,
         string $result = 'success',
-        ?User $actor = null,
+        $actor = null,
         ?string $resourceType = null,
         $resourceId = null,
         array $metadata = []
     ): void {
         try {
             AuditLog::create([
-                'user_id' => ($actor ?: $request->user())?->id,
+                'user_id' => ($actor ?: ($request->user() instanceof User ? $request->user() : null))?->id,
                 'session_id' => $request->attributes->get('admin_session')?->id,
                 'event' => $event,
                 'resource_type' => $resourceType,

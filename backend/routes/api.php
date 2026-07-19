@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminIdentifierAuthController;
 use App\Http\Controllers\Api\AdminProfileController;
+use App\Http\Controllers\Api\CustomerAuthController;
+use App\Http\Controllers\Api\CustomerGoogleAuthController;
+use App\Http\Controllers\Api\CustomerAccountController;
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/payments/create-order', [PaymentController::class, 'createOrder'])->middleware('throttle:checkout');
@@ -18,6 +21,33 @@ Route::post('/track-order', [OrderController::class, 'track'])->middleware('thro
 Route::get('/invoices/download/{token}', [InvoiceController::class, 'download'])->where('token', '[a-f0-9]{64}')
     ->middleware('throttle:order-track')
     ->name('invoices.download');
+
+Route::prefix('customer/auth')->group(function () {
+    Route::post('/register', [CustomerAuthController::class, 'register'])->middleware('throttle:customer-register');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->middleware('throttle:customer-login');
+    Route::post('/forgot-password', [CustomerAuthController::class, 'forgot'])->middleware('throttle:customer-sensitive');
+    Route::post('/reset-password', [CustomerAuthController::class, 'reset'])->middleware('throttle:customer-sensitive');
+    Route::post('/email/verify', [CustomerAuthController::class, 'verify'])->middleware('throttle:customer-sensitive');
+    Route::get('/google/redirect', [CustomerGoogleAuthController::class, 'redirect'])->middleware('throttle:customer-sensitive');
+    Route::get('/google/callback', [CustomerGoogleAuthController::class, 'callback'])->middleware('throttle:customer-sensitive');
+    Route::post('/google/exchange', [CustomerGoogleAuthController::class, 'exchange'])->middleware('throttle:customer-sensitive');
+});
+
+Route::post('/customer/email-change/verify', [CustomerAccountController::class, 'verifyEmailChange'])->middleware('throttle:customer-sensitive');
+
+Route::prefix('customer')->middleware(['auth:sanctum', 'customer.active'])->group(function () {
+    Route::post('/auth/logout', [CustomerAuthController::class, 'logout']);
+    Route::post('/auth/email/resend', [CustomerAuthController::class, 'resend'])->middleware('throttle:customer-sensitive');
+    Route::get('/me', [CustomerAccountController::class, 'me']);
+    Route::put('/profile', [CustomerAccountController::class, 'profile']);
+    Route::put('/password', [CustomerAccountController::class, 'password'])->middleware(['customer.verified', 'throttle:customer-sensitive']);
+    Route::middleware('customer.verified')->group(function () {
+        Route::get('/orders', [CustomerAccountController::class, 'orders']);
+        Route::get('/orders/{order}', [CustomerAccountController::class, 'order']);
+        Route::get('/orders/{order}/invoice', [CustomerAccountController::class, 'invoice']);
+        Route::get('/recommendations', [CustomerAccountController::class, 'recommendations']);
+    });
+});
 
 Route::prefix('admin/auth')->group(function () {
     Route::post('/login', [AdminIdentifierAuthController::class, 'login'])->middleware('throttle:admin-auth');
