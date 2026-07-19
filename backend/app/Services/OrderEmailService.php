@@ -3,14 +3,21 @@
 namespace App\Services;
 
 use App\Models\EmailNotification;
+use App\Models\Invoice;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class OrderEmailService
 {
     public function sendCustomerOrderConfirmed(Order $order): void
     {
+        $invoice = $this->eligibleInvoice($order);
+        if (!$invoice) {
+            return;
+        }
         $this->sendOnce(
             $order,
             'customer.order_confirmed',
@@ -22,12 +29,17 @@ class OrderEmailService
                 'Order confirmed',
                 'Your payment was successful and your order is now being prepared with care.',
                 '4–6 business days'
-            )
+            ),
+            $invoice
         );
     }
 
     public function sendCustomerOutForDelivery(Order $order): void
     {
+        $invoice = $this->eligibleInvoice($order);
+        if (!$invoice) {
+            return;
+        }
         $this->sendOnce(
             $order,
             'customer.out_for_delivery',
@@ -39,12 +51,17 @@ class OrderEmailService
                 'Out for delivery',
                 'Your order is on the way and should reach you soon.',
                 'Arriving soon'
-            )
+            ),
+            $invoice
         );
     }
 
     public function sendCustomerDelivered(Order $order): void
     {
+        $invoice = $this->eligibleInvoice($order);
+        if (!$invoice) {
+            return;
+        }
         $this->sendOnce(
             $order,
             'customer.delivered',
@@ -56,7 +73,8 @@ class OrderEmailService
                 'Order delivered',
                 'Your order has been delivered. We hope you love your handcrafted piece.',
                 'Delivered'
-            )
+            ),
+            $invoice
         );
     }
 
@@ -77,32 +95,54 @@ class OrderEmailService
         );
     }
 
-    private function sendOnce(Order $order, string $eventType, string $recipient, string $recipientType, string $subject, string $html): void
+    private function sendOnce(Order $order, string $eventType, string $recipient, string $recipientType, string $subject, string $html, ?Invoice $invoice = null): void
     {
-        $notification = EmailNotification::firstOrCreate(
-            [
+        $notification = DB::transaction(function () use ($order, $eventType, $recipient, $recipientType) {
+            $recipientEmail = strtolower($recipient);
+            DB::table('email_notifications')->insertOrIgnore([
                 'order_id' => $order->id,
                 'event_type' => $eventType,
-                'recipient_email' => strtolower($recipient),
-            ],
-            [
+                'recipient_email' => $recipientEmail,
                 'recipient_type' => $recipientType,
                 'status' => 'pending',
-            ]
-        );
+                'attempts' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        if ($notification->status === 'sent') {
+            $locked = EmailNotification::query()
+                ->where('order_id', $order->id)
+                ->where('event_type', $eventType)
+                ->where('recipient_email', $recipientEmail)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $claimIsFresh = $locked->status === 'sending'
+                && $locked->updated_at
+                && $locked->updated_at->gt(now()->subMinutes(10));
+
+            if ($locked->status === 'sent' || $claimIsFresh) {
+                return null;
+            }
+
+            $locked->forceFill([
+                'status' => 'sending',
+                'attempts' => (int) $locked->attempts + 1,
+                'last_error' => null,
+            ])->save();
+
+            return $locked;
+        }, 3);
+
+        if (!$notification) {
             return;
         }
-
-        $notification->increment('attempts');
 
         try {
             $response = Http::withHeaders([
                 'api-key' => (string) config('services.brevo.api_key'),
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post('https://api.brevo.com/v3/smtp/email', [
+            ])->post('https://api.brevo.com/v3/smtp/email', array_merge([
                 'sender' => [
                     'name' => config('services.brevo.from_name', 'Climoraone'),
                     'email' => config('services.brevo.from_email', 'info@climoraone.com'),
@@ -113,7 +153,7 @@ class OrderEmailService
                 ]],
                 'subject' => $subject,
                 'htmlContent' => $html,
-            ]);
+            ], $this->attachmentPayload($invoice)));
 
             if (!$response->successful()) {
                 throw new \RuntimeException($response->body());
@@ -132,6 +172,46 @@ class OrderEmailService
                 'last_error' => mb_substr($error->getMessage(), 0, 2000),
             ])->save();
         }
+    }
+
+    private function eligibleInvoice(Order $order): ?Invoice
+    {
+        $order->loadMissing(['payment', 'invoice']);
+        $payment = $order->payment;
+        $invoice = $order->invoice;
+
+        if (
+            $order->payment_status !== 'Paid'
+            || !$payment
+            || $payment->status !== 'captured'
+            || !$payment->verified_at
+            || !$payment->provider_payment_id
+            || !$invoice
+            || !Storage::disk($invoice->disk)->exists($invoice->file_path)
+        ) {
+            return null;
+        }
+
+        return $invoice;
+    }
+
+    private function attachmentPayload(?Invoice $invoice): array
+    {
+        if (!$invoice) {
+            return [];
+        }
+
+        $disk = Storage::disk($invoice->disk);
+        if (!$disk->exists($invoice->file_path)) {
+            throw new \RuntimeException('The stored invoice attachment is unavailable.');
+        }
+
+        return [
+            'attachment' => [[
+                'content' => base64_encode($disk->get($invoice->file_path)),
+                'name' => $invoice->file_name,
+            ]],
+        ];
     }
 
     private function customerTemplate(Order $order, string $statusTitle, string $message, string $deliveryEstimate): string

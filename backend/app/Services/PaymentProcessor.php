@@ -9,7 +9,10 @@ use RuntimeException;
 
 class PaymentProcessor
 {
-    public function __construct(private OrderEmailService $emails)
+    public function __construct(
+        private OrderEmailService $emails,
+        private InvoiceService $invoices
+    )
     {
     }
 
@@ -77,6 +80,7 @@ class PaymentProcessor
             return $lockedPayment->load('order.items');
         }, 3);
 
+        $this->invoices->issue($confirmed->order);
         $this->emails->sendCustomerOrderConfirmed($confirmed->order);
         $this->emails->sendAdminNewPaidOrder($confirmed->order);
 

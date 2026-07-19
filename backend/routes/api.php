@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\AdminIdentifierAuthController;
@@ -14,6 +15,9 @@ Route::post('/payments/verify', [PaymentController::class, 'verify'])->middlewar
 Route::post('/payments/cancel', [PaymentController::class, 'cancel'])->middleware('throttle:checkout');
 Route::post('/razorpay/webhook', [PaymentController::class, 'webhook']);
 Route::post('/track-order', [OrderController::class, 'track'])->middleware('throttle:order-track');
+Route::get('/invoices/download/{token}', [InvoiceController::class, 'download'])->where('token', '[a-f0-9]{64}')
+    ->middleware('throttle:order-track')
+    ->name('invoices.download');
 
 Route::prefix('admin/auth')->group(function () {
     Route::post('/login', [AdminIdentifierAuthController::class, 'login'])->middleware('throttle:admin-auth');

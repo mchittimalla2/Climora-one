@@ -35,6 +35,12 @@ return [
             'root' => storage_path('app'),
         ],
 
+        'invoices' => [
+            'driver' => 'local',
+            'root' => storage_path('app/invoices'),
+            'visibility' => 'private',
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

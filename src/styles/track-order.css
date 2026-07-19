@@ -334,3 +334,57 @@
     align-items: flex-start;
   }
 }
+.tracking-page .tracking-invoice-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(182, 135, 61, 0.35);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fbf7ed, #f5efe2);
+}
+
+.tracking-page .tracking-invoice-action > div {
+  display: grid;
+  gap: 4px;
+}
+
+.tracking-page .tracking-invoice-action strong {
+  color: #173f2a;
+  font-size: 16px;
+}
+
+.tracking-page .tracking-invoice-action span {
+  color: #6f766f;
+  font-size: 12px;
+}
+
+.tracking-page .tracking-invoice-action button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: #173f2a;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tracking-page .tracking-invoice-action button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+@media (max-width: 560px) {
+  .tracking-page .tracking-invoice-action {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tracking-page .tracking-invoice-action button {
+    width: 100%;
+  }
+}

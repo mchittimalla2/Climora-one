@@ -34,6 +34,11 @@ class Order extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
     public function emailNotifications()
     {
         return $this->hasMany(EmailNotification::class);

@@ -31,9 +31,11 @@ function TrackOrder() {
   const [matchedOrder, setMatchedOrder] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [invoiceLoading, setInvoiceLoading] = useState(false);
+  const [invoiceError, setInvoiceError] = useState("");
 
   const buildSteps = (order) => {
-    let history = {};
+    let history;
     try {
       history = order.status_history ? JSON.parse(order.status_history) : {};
     } catch {
@@ -58,6 +60,7 @@ function TrackOrder() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setInvoiceError("");
     setMatchedOrder(null);
 
     try {
@@ -81,6 +84,8 @@ function TrackOrder() {
         total: data.total,
         paymentStatus: data.payment_status,
         paymentMethod: data.payment_method || "Online payment",
+        invoiceUrl: data.has_invoice ? data.invoice_download_url : null,
+        invoiceFileName: data.invoice_file_name || `Climoraone-Invoice-${data.order_number}.pdf`,
         status: normalizeStatus(data.status),
         items,
         createdAt: data.created_at,
@@ -91,6 +96,38 @@ function TrackOrder() {
       setError("Unable to check the order right now. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    if (!matchedOrder?.invoiceUrl) return;
+
+    setInvoiceLoading(true);
+    setInvoiceError("");
+
+    try {
+      const response = await fetch(matchedOrder.invoiceUrl, {
+        headers: { Accept: "application/pdf" },
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.message || "Unable to download the invoice.");
+      }
+
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = matchedOrder.invoiceFileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(objectUrl);
+    } catch (downloadError) {
+      setInvoiceError(downloadError instanceof Error ? downloadError.message : "Unable to download the invoice.");
+    } finally {
+      setInvoiceLoading(false);
     }
   };
 
@@ -147,6 +184,19 @@ function TrackOrder() {
             <article><span>Payment</span><strong>{matchedOrder.paymentStatus || matchedOrder.paymentMethod}</strong></article>
             <article><span>Estimated delivery</span><strong>4–6 business days</strong></article>
           </div>
+
+          {matchedOrder.paymentStatus === "Paid" && matchedOrder.invoiceUrl && (
+            <div className="tracking-invoice-action">
+              <div>
+                <strong>Your paid invoice is ready</strong>
+                <span>The secure download link expires after 15 minutes.</span>
+              </div>
+              <button type="button" onClick={downloadInvoice} disabled={invoiceLoading}>
+                {invoiceLoading ? "Preparing invoice..." : "Download Invoice"}
+              </button>
+            </div>
+          )}
+          {invoiceError && <div className="tracking-error" role="alert">{invoiceError}</div>}
 
           <div className="tracking-details-grid">
             <section className="tracking-items-card">

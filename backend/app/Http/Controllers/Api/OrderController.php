@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\InvoiceAccessService;
 use App\Services\OrderEmailService;
 use App\Support\SecurityAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -100,7 +102,7 @@ class OrderController extends Controller
         }
     }
 
-    public function track(Request $request)
+    public function track(Request $request, InvoiceAccessService $invoiceAccess)
     {
         $validated = $request->validate([
             'order_number' => ['required', 'string', 'max:40', 'regex:/^CLM-[A-Z0-9-]+$/'],
@@ -116,6 +118,18 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        $paymentVerified = $order->payment_status === 'Paid'
+            && $order->payment
+            && $order->payment->status === 'captured'
+            && $order->payment->verified_at
+            && $order->payment->provider_payment_id;
+        $invoice = $paymentVerified ? $order->invoice()->first() : null;
+        $invoiceAvailable = $invoice
+            && Storage::disk($invoice->disk)->exists($invoice->file_path);
+        $invoiceDownloadUrl = $invoiceAvailable
+            ? $invoiceAccess->createDownloadUrl($invoice)
+            : null;
+
         return response()->json([
             'order_number' => $order->order_number,
             'customer_name' => $order->customer_name,
@@ -127,6 +141,9 @@ class OrderController extends Controller
             'payment_method' => $order->payment?->method,
             'status_history' => $order->status_history,
             'created_at' => $order->created_at,
+            'has_invoice' => (bool) $invoiceAvailable,
+            'invoice_download_url' => $invoiceDownloadUrl,
+            'invoice_file_name' => $invoiceAvailable ? $invoice->file_name : null,
             'items' => $order->items->map(fn ($item) => [
                 'id' => $item->id,
                 'product_id' => $item->product_id,
@@ -160,6 +177,24 @@ class OrderController extends Controller
 
         $currentStatus = $aliases[$order->status] ?? $order->status;
         $requestedStatus = $validated['status'];
+
+        if (in_array($requestedStatus, ['Out for Delivery', 'Delivered'], true)) {
+            $order->loadMissing(['payment', 'invoice']);
+            $invoice = $order->invoice;
+            $eligibleForCustomerEmail = $order->payment_status === 'Paid'
+                && $order->payment
+                && $order->payment->status === 'captured'
+                && $order->payment->verified_at
+                && $order->payment->provider_payment_id
+                && $invoice
+                && Storage::disk($invoice->disk)->exists($invoice->file_path);
+
+            if (!$eligibleForCustomerEmail) {
+                return response()->json([
+                    'message' => 'This milestone requires a verified paid order with an available invoice.',
+                ], 422);
+            }
+        }
 
         if ($currentStatus === 'Delivered') {
             return response()->json([
