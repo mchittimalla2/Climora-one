@@ -107,8 +107,8 @@ class OrderController extends Controller
             'phone' => ['required', 'regex:/^[0-9]{10}$/'],
         ]);
 
-        $order = Order::with('items')
-            ->where('order_number', $validated['order_number'])
+        $order = Order::with(['items', 'payment'])
+            ->where('order_number', strtoupper($validated['order_number']))
             ->where('phone', $validated['phone'])
             ->first();
 
@@ -118,14 +118,23 @@ class OrderController extends Controller
 
         return response()->json([
             'order_number' => $order->order_number,
+            'customer_name' => $order->customer_name,
+            'email' => $order->email,
+            'phone' => $order->phone,
+            'total' => $order->total,
             'status' => $order->status,
             'payment_status' => $order->payment_status,
+            'payment_method' => $order->payment?->method,
             'status_history' => $order->status_history,
             'created_at' => $order->created_at,
             'items' => $order->items->map(fn ($item) => [
+                'id' => $item->id,
+                'product_id' => $item->product_id,
                 'product_name' => $item->product_name,
-                'quantity' => $item->quantity,
-            ]),
+                'quantity' => (int) $item->quantity,
+                'price' => $item->price,
+                'subtotal' => $item->subtotal,
+            ])->values(),
         ]);
     }
 
