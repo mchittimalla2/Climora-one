@@ -8,6 +8,10 @@ return [
         'admin_email' => env('ADMIN_NOTIFICATION_EMAIL', env('BREVO_FROM_EMAIL', 'info@climoraone.com')),
     ],
 
+    'storefront' => [
+        'url' => rtrim(env('CLIMORAONE_STORE_URL', 'https://dev.climoraone.com'), '/'),
+    ],
+
     'razorpay' => [
         'key_id' => env('RAZORPAY_KEY_ID'),
         'key_secret' => env('RAZORPAY_KEY_SECRET'),
