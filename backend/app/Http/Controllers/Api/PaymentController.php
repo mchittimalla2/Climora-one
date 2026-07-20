@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\PaymentEvent;
 use App\Models\Product;
+use App\Models\Customer;
 use App\Services\PaymentProcessor;
 use App\Services\RazorpayService;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +30,7 @@ class PaymentController extends Controller
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'min:2', 'max:100'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'not_regex:/[^\r\n]*[\r\n][^\r\n]*/', 'max:255'],
             'phone' => ['required', 'regex:/^[0-9]{10}$/'],
             'address' => ['required', 'string', 'min:5', 'max:500'],
             'city' => ['required', 'string', 'max:100'],
@@ -46,7 +47,9 @@ class PaymentController extends Controller
         ]);
 
         try {
-            $order = DB::transaction(function () use ($validated) {
+            $customer = $request->user('sanctum');
+            $customer = $customer instanceof Customer && $customer->isActive() ? $customer : null;
+            $order = DB::transaction(function () use ($validated, $customer) {
                 $preparedItems = [];
                 $total = 0;
 
@@ -65,6 +68,7 @@ class PaymentController extends Controller
                 }
 
                 $order = Order::create([
+                    'customer_id' => $customer?->id,
                     'order_number' => sprintf('CLM-%s-%s', now()->format('Y'), strtoupper(uniqid())),
                     'customer_name' => $validated['customer_name'],
                     'email' => strtolower($validated['email']),

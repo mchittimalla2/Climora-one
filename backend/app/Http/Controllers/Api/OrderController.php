@@ -40,7 +40,7 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'min:2', 'max:100'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'email', 'not_regex:/[^\r\n]*[\r\n][^\r\n]*/', 'max:255'],
             'phone' => ['required', 'regex:/^[0-9]{10}$/'],
             'address' => ['required', 'string', 'min:5', 'max:500'],
             'city' => ['required', 'string', 'max:100'],
