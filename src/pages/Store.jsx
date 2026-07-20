@@ -6,6 +6,7 @@ import "../styles/store-v2.css";
 import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
 import { BrandLogo } from "../components/BrandLogo";
+import CustomerAccountControl from "../components/CustomerAccountControl";
 import { parseProductDetails, visibleSpecifications } from "../utils/productDetails";
 
 const placeholderImage = `${import.meta.env.BASE_URL}images/climoraone-logo.svg`;
@@ -273,6 +274,7 @@ function Store() {
           <button type="button" onClick={() => scrollToSection("craft")}>Our Craft</button>
           <Link to="/contact">Contact</Link>
           <button type="button" className="v2-cart-link" onClick={() => scrollToSection("cart")}>🛒 Cart ({cartCount})</button>
+          <CustomerAccountControl />
         </nav>
 
         <button type="button" className="v2-menu-button" onClick={() => setShowMobileMenu(!showMobileMenu)} aria-label="Open menu">☰</button>
@@ -283,6 +285,7 @@ function Store() {
             <button type="button" onClick={() => scrollToSection("craft")}>Our Craft</button>
             <button type="button" onClick={() => scrollToSection("cart")}>Cart ({cartCount})</button>
             <Link to="/track-order">Track Order</Link>
+            <CustomerAccountControl />
           </div>
         )}
       </header>

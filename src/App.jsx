@@ -24,8 +24,12 @@ import Reports from "./pages/admin/Reports";
 import Profile from "./pages/admin/Profile";
 import RecycleBin from "./pages/admin/RecycleBin";
 import Products from "./pages/admin/products/Products";
+import CustomerAuth from "./pages/CustomerAuth";
+import CustomerAccount from "./pages/CustomerAccount";
+import ProtectedCustomerRoute from "./components/ProtectedCustomerRoute";
 
 import { CartProvider } from "./context/CartContext";
+import { CustomerProvider } from "./context/CustomerContext";
 import "./App.css";
 import "./styles/brand-experience.css";
 import "./styles/store-v2-polish.css";
@@ -112,6 +116,12 @@ function StoreRoutes() {
       <Route path="/track-order" element={<TrackOrder />} />
       <Route path="/return-policy" element={<ReturnPolicy />} />
       <Route path="/shipping-policy" element={<ShippingPolicy />} />
+      <Route path="/account/auth" element={<CustomerAuth />} />
+      <Route path="/verify-email" element={<CustomerAuth />} />
+      <Route path="/verify-email-change" element={<CustomerAuth />} />
+      <Route path="/reset-password" element={<CustomerAuth />} />
+      <Route path="/auth/google/callback" element={<CustomerAuth />} />
+      {["/account", "/account/orders", "/account/profile", "/account/security"].map((path) => <Route key={path} path={path} element={<ProtectedCustomerRoute><CustomerAccount /></ProtectedCustomerRoute>} />)}
       <Route path="/admin/*" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -120,14 +130,14 @@ function StoreRoutes() {
 
 function App() {
   return (
-    <CartProvider>
+    <CustomerProvider><CartProvider>
       <BrowserRouter basename={routerBase}>
         <ScrollToTop />
         <StoreInteractionEnhancements />
         {!isAdminHost && <ImpactPromiseMounts />}
         {isAdminHost ? <AdminRoutes /> : <StoreRoutes />}
       </BrowserRouter>
-    </CartProvider>
+    </CartProvider></CustomerProvider>
   );
 }
 

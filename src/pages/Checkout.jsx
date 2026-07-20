@@ -7,6 +7,8 @@ import { API_BASE_URL } from "../config/api";
 import { useCart } from "../context/CartContext";
 import { BrandLogo } from "../components/BrandLogo";
 import { loadRazorpayCheckout } from "../services/razorpay";
+import { getCustomerToken } from "../auth/customerAuth";
+import { useCustomer } from "../context/CustomerContext";
 
 const INDIA_STATES = [
   "Andhra Pradesh", "Karnataka", "Kerala", "Maharashtra", "Tamil Nadu", "Telangana", "Other",
@@ -15,6 +17,7 @@ const INDIA_STATES = [
 function Checkout() {
   const navigate = useNavigate();
   const { cart, cartCount, total, clearCart } = useCart();
+  const { customer } = useCustomer();
   const [checkoutStep, setCheckoutStep] = useState("address");
   const [orderPayload, setOrderPayload] = useState(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
@@ -99,7 +102,7 @@ function Checkout() {
 
       const createResponse = await fetch(`${API_BASE_URL}/api/payments/create-order`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json", ...(getCustomerToken() ? { Authorization: `Bearer ${getCustomerToken()}` } : {}) },
         body: JSON.stringify(orderPayload),
       });
       const paymentOrder = await parseResponse(createResponse);
@@ -222,10 +225,11 @@ function Checkout() {
           {checkoutStep === "address" ? (
             <>
               <div className="checkout-section-title"><span>1</span><div><h1>Delivery address</h1><p>Enter the information required to deliver your order.</p></div></div>
+              <div className="checkout-account-choice">{customer ? <p>Signed in as <strong>{customer.email}</strong>. This order will appear in My Orders.</p> : <p><Link to="/account/auth">Sign In</Link> · <Link to="/account/auth">Create Account</Link> · <strong>Continue as Guest</strong></p>}</div>
               <form id="checkout-order-form" className="amazon-checkout-form" onSubmit={prepareReview}>
-                <div className="amazon-field"><label htmlFor="customerName">Full name <span>*</span></label><input id="customerName" name="customerName" type="text" autoComplete="name" minLength="2" maxLength="100" required /></div>
-                <div className="amazon-field"><label htmlFor="phone">Phone number <span>*</span></label><input id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" pattern="[0-9]{10}" maxLength="10" required /><small>Used for payment and delivery updates.</small></div>
-                <div className="amazon-field"><label htmlFor="email">Email address <span>*</span></label><input id="email" name="email" type="email" autoComplete="email" maxLength="255" required /></div>
+                <div className="amazon-field"><label htmlFor="customerName">Full name <span>*</span></label><input id="customerName" name="customerName" type="text" autoComplete="name" minLength="2" maxLength="100" defaultValue={customer?.name || ""} required /></div>
+                <div className="amazon-field"><label htmlFor="phone">Phone number <span>*</span></label><input id="phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" pattern="[0-9]{10}" maxLength="10" defaultValue={customer?.phone?.replace(/^\+91/, "") || ""} required /><small>Used for payment and delivery updates.</small></div>
+                <div className="amazon-field"><label htmlFor="email">Email address <span>*</span></label><input id="email" name="email" type="email" autoComplete="email" maxLength="255" defaultValue={customer?.email_verified_at ? customer.email : ""} required /></div>
                 <div className="amazon-field"><label htmlFor="address">Address <span>*</span></label><input id="address" name="address" type="text" autoComplete="address-line1" placeholder="House number, street name" minLength="5" maxLength="300" required /><input id="addressLine2" name="addressLine2" type="text" autoComplete="address-line2" placeholder="Apartment, area, landmark (optional)" maxLength="200" /></div>
                 <div className="amazon-address-row">
                   <div className="amazon-field"><label htmlFor="city">City <span>*</span></label><input id="city" name="city" type="text" autoComplete="address-level2" maxLength="100" required /></div>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { BrandLogo } from "./BrandLogo";
+import CustomerAccountControl from "./CustomerAccountControl";
 
 export function PublicPageLayout({ eyebrow, title, description, children, className = "" }) {
   return (
@@ -14,7 +15,7 @@ export function PublicPageLayout({ eyebrow, title, description, children, classN
           <Link to="/track-order">Track Order</Link>
           <Link to="/contact">Contact</Link>
         </nav>
-        <Link to="/" className="public-store-link">Back to Store</Link>
+        <div className="public-header-actions"><CustomerAccountControl /><Link to="/" className="public-store-link">Back to Store</Link></div>
       </header>
 
       <main className="public-main">
