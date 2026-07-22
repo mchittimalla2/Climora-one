@@ -15,9 +15,26 @@ class CustomerAuthController extends Controller
 {
     public function register(Request $request, CustomerTokenService $tokens, CustomerEmailService $emails)
     {
-        $request->merge(['email' => strtolower(trim((string) $request->email)), 'phone' => $this->phone($request->phone)]);
-        $data = $request->validate(['name' => ['required','string','min:2','max:100'], 'email' => ['required','email','not_regex:/[^\r\n]*[\r\n][^\r\n]*/','max:255','unique:customers,email'], 'phone' => ['nullable','regex:/^\+91[6-9][0-9]{9}$/','unique:customers,phone'], 'password' => ['required','confirmed',Password::min(8)->mixedCase()->numbers()], 'terms' => ['accepted']]);
-        $customer = Customer::create(['name' => trim($data['name']), 'email' => $data['email'], 'phone' => $data['phone'] ?: null, 'password' => Hash::make($data['password'])]);
+        $request->merge([
+            'email' => strtolower(trim((string) $request->email)),
+            'username' => strtolower(trim((string) $request->username)),
+            'phone' => $this->phone($request->phone),
+        ]);
+        $data = $request->validate([
+            'name' => ['required','string','min:2','max:100'],
+            'username' => ['required','string','min:3','max:50','regex:/^[a-z0-9._-]+$/','unique:customers,username'],
+            'email' => ['required','email','not_regex:/[^\r\n]*[\r\n][^\r\n]*/','max:255','unique:customers,email'],
+            'phone' => ['nullable','regex:/^\+91[6-9][0-9]{9}$/','unique:customers,phone'],
+            'password' => ['required','confirmed',Password::min(8)->mixedCase()->numbers()],
+            'terms' => ['accepted'],
+        ]);
+        $customer = Customer::create([
+            'name' => trim($data['name']),
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?: null,
+            'password' => Hash::make($data['password']),
+        ]);
         $plain = $tokens->issue($customer, 'verify_email', 60);
         $emails->verification($customer, $this->customerUrl('/verify-email?token='.$plain));
         SecurityAudit::record($request, 'customer.registered', 'success', null, 'customer', $customer->id, ['customer_id' => $customer->id]);
@@ -27,10 +44,14 @@ class CustomerAuthController extends Controller
     public function login(Request $request)
     {
         $data = $request->validate(['identifier' => ['required','string','max:255'], 'password' => ['required','string']]);
-        $identifier = trim($data['identifier']);
-        if (!filter_var($identifier, FILTER_VALIDATE_EMAIL)) return response()->json(['message' => 'Mobile login will be available after your number is verified.'], 422);
-        $customer = Customer::where('email', strtolower($identifier))->first();
-        if (!$customer || !$customer->password || !Hash::check($data['password'], $customer->password)) { SecurityAudit::record($request, 'customer.login', 'failure', null, 'customer', null); return response()->json(['message' => 'The supplied credentials are invalid.'], 401); }
+        $identifier = strtolower(trim($data['identifier']));
+        $customer = Customer::whereRaw('LOWER(email) = ?', [$identifier])
+            ->orWhereRaw('LOWER(username) = ?', [$identifier])
+            ->first();
+        if (!$customer || !$customer->password || !Hash::check($data['password'], $customer->password)) {
+            SecurityAudit::record($request, 'customer.login', 'failure', null, 'customer', null);
+            return response()->json(['message' => 'The supplied credentials are invalid.'], 401);
+        }
         if (!$customer->isActive()) return response()->json(['message' => 'This customer account is unavailable.'], 403);
         $customer->forceFill(['last_login_at' => now()])->save();
         SecurityAudit::record($request, 'customer.login', 'success', null, 'customer', $customer->id, ['customer_id' => $customer->id]);
