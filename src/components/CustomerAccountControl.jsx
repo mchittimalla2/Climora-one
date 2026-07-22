@@ -1,7 +1,29 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCustomer } from "../context/CustomerContext";
+
 export default function CustomerAccountControl() {
   const { customer, logout } = useCustomer();
-  if (!customer) return <Link className="customer-account-link" to="/account/auth">Sign In</Link>;
-  return <details className="customer-account-menu"><summary>Hello, {customer.name?.split(" ")[0] || "Customer"}</summary><div><Link to="/account">My Account</Link><Link to="/account/orders">My Orders</Link><Link to="/account/profile">Profile</Link><Link to="/account/security">Change Password</Link><button type="button" onClick={logout}>Logout</button></div></details>;
+  const navigate = useNavigate();
+
+  if (!customer) {
+    return <Link className="customer-account-link" to="/account/auth">Sign In</Link>;
+  }
+
+  const displayName = customer.username || customer.name?.split(" ")[0] || "Account";
+
+  const signOut = async () => {
+    await logout();
+    navigate("/", { replace: true });
+  };
+
+  return (
+    <details className="customer-account-menu">
+      <summary>{displayName}</summary>
+      <div>
+        <Link to="/account">My Account</Link>
+        <Link to="/account/orders">My Orders</Link>
+        <button type="button" onClick={signOut}>Logout</button>
+      </div>
+    </details>
+  );
 }
