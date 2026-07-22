@@ -12,6 +12,7 @@ import StoreRoute from "./components/StoreRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import AdminFetchBridge from "./components/AdminFetchBridge";
 import ImpactPromiseMounts from "./components/ImpactPromiseMounts";
+import StorefrontPolish from "./components/StorefrontPolish";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
@@ -139,6 +140,7 @@ function App() {
         <ScrollToTop />
         <StoreInteractionEnhancements />
         {!isAdminHost && <ImpactPromiseMounts />}
+        {!isAdminHost && <StorefrontPolish />}
         {isAdminHost ? <AdminRoutes /> : <StoreRoutes />}
       </BrowserRouter>
     </CartProvider></CustomerProvider>
