@@ -20,7 +20,7 @@ read_laravel_config() {
     $root = getenv("APP_ROOT");
     require $root . "/vendor/autoload.php";
     $app = require $root . "/bootstrap/app.php";
-    $kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
     $kernel->bootstrap();
     $value = config(getenv("CONFIG_KEY"));
     if ($value === null) { exit(2); }
@@ -28,7 +28,7 @@ read_laravel_config() {
   '
 }
 
-mapfile -t backups < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'climoraone_*.dump' -printf '%T@ %p\n' | sort -nr | awk '{print $2}')
+mapfile -t backups < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'climoraone_*.dump' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
 (( ${#backups[@]} > 0 )) || fail "no backups found in $BACKUP_DIR"
 
 printf 'Available backups:\n'
