@@ -21,13 +21,11 @@ function OurPromiseImage({ variant = "checkout" }) {
 function ImpactPromiseMounts() {
   const [checkoutTarget, setCheckoutTarget] = useState(null);
   const [cartTarget, setCartTarget] = useState(null);
-  const [footerTarget, setFooterTarget] = useState(null);
 
   useEffect(() => {
     const findTargets = () => {
       setCheckoutTarget(document.querySelector(".checkout-trust-list"));
       setCartTarget(document.querySelector(".inline-cart-summary"));
-      setFooterTarget(document.querySelector(".footer-content"));
     };
 
     findTargets();
@@ -40,7 +38,6 @@ function ImpactPromiseMounts() {
     <>
       {checkoutTarget && createPortal(<OurPromiseImage variant="checkout" />, checkoutTarget)}
       {cartTarget && createPortal(<OurPromiseImage variant="cart" />, cartTarget)}
-      {footerTarget && createPortal(<OurPromiseImage variant="footer" />, footerTarget)}
     </>
   );
 }
