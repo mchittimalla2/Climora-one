@@ -31,7 +31,14 @@ export default function AdminLogin() {
     event.preventDefault();
     try {
       setLoading(true); setError(""); setMessage("");
-      await request("/api/admin/auth/login", { login, password });
+      const data = await request("/api/admin/auth/login", { login, password });
+
+      if (data.requires_otp === false && data.token && data.user) {
+        saveAdminSession(data.token, data.user);
+        navigate(location.state?.from || "/admin", { replace: true });
+        return;
+      }
+
       setStep("otp");
       setMessage("A six-digit security code was sent to your registered email address.");
     } catch (err) { setError(err.message); } finally { setLoading(false); }
@@ -61,7 +68,7 @@ export default function AdminLogin() {
         <BrandLogo className="admin-login-logo" />
         <span className="admin-login-eyebrow">Private administration</span>
         <h1>{step === "password" ? "Sign in to Commerce Studio" : "Verify your identity"}</h1>
-        <p>{step === "password" ? "Use your assigned username or personal email address. MFA is required on every login." : "Enter the code sent to your registered personal email. It expires in five minutes."}</p>
+        <p>{step === "password" ? "Use your assigned username or personal email address." : "Enter the code sent to your registered personal email. It expires in five minutes."}</p>
         {message && <div className="admin-login-message">{message}</div>}
         {error && <div className="admin-login-error">{error}</div>}
         {step === "password" ? (
