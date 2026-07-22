@@ -12,6 +12,8 @@ import StoreRoute from "./components/StoreRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import AdminFetchBridge from "./components/AdminFetchBridge";
 import ImpactPromiseMounts from "./components/ImpactPromiseMounts";
+import CustomerSiteHeader from "./components/CustomerSiteHeader";
+import CustomerSiteFooter from "./components/CustomerSiteFooter";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
@@ -38,6 +40,7 @@ import "./styles/store-v2-polish.css";
 import "./styles/public-pages.css";
 import "./styles/navigation-fixes.css";
 import "./styles/product-details.css";
+import "./styles/customer-site-shell.css";
 import "./styles/admin-premium.css";
 import "./styles/admin-legacy-polish.css";
 import "./styles/layout-compact.css";
@@ -86,6 +89,35 @@ function StoreInteractionEnhancements() {
   return null;
 }
 
+function StoreSearchBridge() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search).get("q")?.trim();
+    if (!query || !["/", "/home", "/products", "/cart"].includes(location.pathname)) return undefined;
+
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      const input = document.querySelector(".v2-search");
+      if (!input) {
+        if (attempts > 20) window.clearInterval(timer);
+        return;
+      }
+
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+      setter?.call(input, query);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      window.clearInterval(timer);
+    }, 100);
+
+    return () => window.clearInterval(timer);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 const protect = (element) => <ProtectedAdminRoute>{element}</ProtectedAdminRoute>;
 
 function AdminRoutes() {
@@ -109,27 +141,32 @@ function AdminRoutes() {
 
 function StoreRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<StoreRoute />} />
-      <Route path="/home" element={<StoreRoute />} />
-      <Route path="/products" element={<StoreRoute />} />
-      <Route path="/cart" element={<StoreRoute />} />
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/track-order" element={<TrackOrder />} />
-      <Route path="/return-policy" element={<ReturnPolicy />} />
-      <Route path="/shipping-policy" element={<ShippingPolicy />} />
-      <Route path="/terms" element={<TermsOfUse />} />
-      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-      <Route path="/account/auth" element={<CustomerAuth />} />
-      <Route path="/verify-email" element={<CustomerAuth />} />
-      <Route path="/verify-email-change" element={<CustomerAuth />} />
-      <Route path="/reset-password" element={<CustomerAuth />} />
-      <Route path="/auth/google/callback" element={<CustomerAuth />} />
-      {["/account", "/account/orders", "/account/profile", "/account/security"].map((path) => <Route key={path} path={path} element={<ProtectedCustomerRoute><CustomerAccount /></ProtectedCustomerRoute>} />)}
-      <Route path="/admin/*" element={<Navigate to="/" replace />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <div className="customer-shell">
+      <CustomerSiteHeader />
+      <StoreSearchBridge />
+      <Routes>
+        <Route path="/" element={<StoreRoute />} />
+        <Route path="/home" element={<StoreRoute />} />
+        <Route path="/products" element={<StoreRoute />} />
+        <Route path="/cart" element={<StoreRoute />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/track-order" element={<TrackOrder />} />
+        <Route path="/return-policy" element={<ReturnPolicy />} />
+        <Route path="/shipping-policy" element={<ShippingPolicy />} />
+        <Route path="/terms" element={<TermsOfUse />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/account/auth" element={<CustomerAuth />} />
+        <Route path="/verify-email" element={<CustomerAuth />} />
+        <Route path="/verify-email-change" element={<CustomerAuth />} />
+        <Route path="/reset-password" element={<CustomerAuth />} />
+        <Route path="/auth/google/callback" element={<CustomerAuth />} />
+        {["/account", "/account/orders", "/account/profile", "/account/security"].map((path) => <Route key={path} path={path} element={<ProtectedCustomerRoute><CustomerAccount /></ProtectedCustomerRoute>} />)}
+        <Route path="/admin/*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <CustomerSiteFooter />
+    </div>
   );
 }
 
