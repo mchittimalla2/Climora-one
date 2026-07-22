@@ -15,6 +15,8 @@ import ImpactPromiseMounts from "./components/ImpactPromiseMounts";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfUse from "./pages/TermsOfUse";
 import TrackOrder from "./pages/TrackOrder";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/admin/Admin";
@@ -116,6 +118,8 @@ function StoreRoutes() {
       <Route path="/track-order" element={<TrackOrder />} />
       <Route path="/return-policy" element={<ReturnPolicy />} />
       <Route path="/shipping-policy" element={<ShippingPolicy />} />
+      <Route path="/terms" element={<TermsOfUse />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/account/auth" element={<CustomerAuth />} />
       <Route path="/verify-email" element={<CustomerAuth />} />
       <Route path="/verify-email-change" element={<CustomerAuth />} />
