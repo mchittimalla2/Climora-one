@@ -28,34 +28,6 @@ export function PublicPageLayout({ eyebrow, title, description, children, classN
         </section>
         <div className="public-content">{children}</div>
       </main>
-
-      <footer className="footer shared-store-footer">
-        <div className="footer-content">
-          <div className="footer-brand-column">
-            <BrandLogo className="footer-logo" />
-            <p>Premium handcrafted décor bringing timeless Indian craftsmanship into beautiful homes.</p>
-          </div>
-          <div className="footer-column">
-            <h4>Customer</h4>
-            <Link to="/account">My Account</Link>
-            <Link to="/track-order">Track Order</Link>
-            <Link to="/shipping-policy">Shipping Policy</Link>
-            <Link to="/return-policy">Return Policy</Link>
-          </div>
-          <div className="footer-column">
-            <h4>Legal</h4>
-            <Link to="/privacy-policy">Privacy Policy</Link>
-            <Link to="/terms">Terms of Use</Link>
-          </div>
-          <div className="footer-column">
-            <h4>About Climoraone</h4>
-            <Link to="/#craft">About Us</Link>
-            <Link to="/#craft">Our Mission</Link>
-            <Link to="/#craft">Support Rural Women</Link>
-          </div>
-        </div>
-        <div className="footer-bottom">© 2026 Climoraone. Handmade with purpose in India.</div>
-      </footer>
     </div>
   );
 }
