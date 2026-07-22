@@ -236,6 +236,7 @@
     order: 3;
     flex-basis: 100%;
     max-width: none;
+    margin-left: 0;
   }
 
   .customer-site-nav {
@@ -299,10 +300,17 @@
     height: 72px;
   }
 
+  /* Keep product search visible on mobile, directly below the logo row. */
   .customer-site-search {
-    display: none;
+    display: block;
+    order: 3;
+    width: 100%;
+    flex: 0 0 100%;
+    max-width: none;
+    margin: 4px 0 0;
   }
 
+  .customer-site-search input,
   .customer-site-mobile-menu input {
     height: 50px;
     font-size: 15px;
