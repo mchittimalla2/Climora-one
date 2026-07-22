@@ -13,9 +13,11 @@ export function PublicPageLayout({ eyebrow, title, description, children, classN
           <Link to="/">Home</Link>
           <Link to="/products">Collection</Link>
           <Link to="/track-order">Track Order</Link>
-          <Link to="/contact">Contact</Link>
         </nav>
-        <div className="public-header-actions"><CustomerAccountControl /><Link to="/" className="public-store-link">Back to Store</Link></div>
+        <div className="public-header-actions">
+          <CustomerAccountControl />
+          <Link to="/" className="public-store-link">Back to Store</Link>
+        </div>
       </header>
 
       <main className="public-main">
@@ -27,23 +29,32 @@ export function PublicPageLayout({ eyebrow, title, description, children, classN
         <div className="public-content">{children}</div>
       </main>
 
-      <footer className="public-footer">
-        <div className="public-footer-brand">
-          <BrandLogo className="public-footer-logo" />
-          <p>Premium handcrafted décor rooted in timeless Indian craftsmanship.</p>
+      <footer className="footer shared-store-footer">
+        <div className="footer-content">
+          <div className="footer-brand-column">
+            <BrandLogo className="footer-logo" />
+            <p>Premium handcrafted décor bringing timeless Indian craftsmanship into beautiful homes.</p>
+          </div>
+          <div className="footer-column">
+            <h4>Customer</h4>
+            <Link to="/account">My Account</Link>
+            <Link to="/track-order">Track Order</Link>
+            <Link to="/shipping-policy">Shipping Policy</Link>
+            <Link to="/return-policy">Return Policy</Link>
+          </div>
+          <div className="footer-column">
+            <h4>Legal</h4>
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Use</Link>
+          </div>
+          <div className="footer-column">
+            <h4>About Climoraone</h4>
+            <Link to="/#craft">About Us</Link>
+            <Link to="/#craft">Our Mission</Link>
+            <Link to="/#craft">Support Rural Women</Link>
+          </div>
         </div>
-        <div>
-          <h4>Explore</h4>
-          <Link to="/products">Collection</Link>
-          <Link to="/track-order">Track Order</Link>
-        </div>
-        <div>
-          <h4>Customer Care</h4>
-          <Link to="/return-policy">Return Policy</Link>
-          <Link to="/shipping-policy">Shipping Policy</Link>
-          <Link to="/contact">Contact</Link>
-        </div>
-        <small>© 2026 Climoraone. All rights reserved.</small>
+        <div className="footer-bottom">© 2026 Climoraone. Handmade with purpose in India.</div>
       </footer>
     </div>
   );
