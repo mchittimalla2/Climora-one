@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AdminOtpCode;
 use App\Models\AdminSession;
-use App\Support\SecurityAudit;
 use App\Models\User;
+use App\Support\SecurityAudit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -73,11 +73,15 @@ class AdminAuthController extends Controller
             ], 423);
         }
 
-        if (!$user->mfa_enabled) {
+        // During development, owner and editor accounts authenticate with their
+        // password only. The emergency/break-glass account always requires OTP.
+        $requiresOtp = $user->isBreakGlass() || $user->role === User::ROLE_BREAK_GLASS;
+
+        if ($requiresOtp && !$user->mfa_enabled) {
             $this->recordAudit($request, $user, 'auth.login.failure', 'failure');
 
             return response()->json([
-                'message' => 'Multi-factor authentication is required for this account.',
+                'message' => 'Multi-factor authentication is required for the emergency account.',
             ], 403);
         }
 
@@ -86,6 +90,12 @@ class AdminAuthController extends Controller
             'failed_login_attempts' => 0,
             'locked_until' => null,
         ])->save();
+
+        if (!$requiresOtp) {
+            $this->recordAudit($request, $user, 'auth.login.mfa_bypassed', 'success');
+
+            return $this->completeLogin($request, $user, false);
+        }
 
         $this->issueAndSendOtp($request, $user);
         $this->recordAudit($request, $user, 'auth.otp.sent', 'success');
@@ -117,7 +127,7 @@ class AdminAuthController extends Controller
         /** @var User|null $user */
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-        if (!$user || !$user->is_active || $user->isLocked()) {
+        if (!$user || !$user->is_active || $user->isLocked() || !($user->isBreakGlass() || $user->role === User::ROLE_BREAK_GLASS)) {
             RateLimiter::hit($rateKey, self::LOCK_MINUTES * 60);
             $this->recordAudit($request, $user, 'auth.otp.failure', 'failure');
 
@@ -149,37 +159,9 @@ class AdminAuthController extends Controller
 
         $otp->forceFill(['consumed_at' => now()])->save();
         RateLimiter::clear($rateKey);
-
-        // Every successful login receives a fresh token. Old tokens are revoked.
-        $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);
-        $user->tokens()->delete();
-        $token = $user->createToken('admin-web', ['admin'])->plainTextToken;
-        $session = AdminSession::create([
-            'id' => (string) Str::uuid(),
-            'user_id' => $user->id,
-            'token_hash' => hash('sha256', $token),
-            'ip_address' => $request->ip(),
-            'user_agent' => Str::limit((string) $request->userAgent(), 500, ''),
-            'mfa_verified_at' => now(),
-            'last_activity_at' => now(),
-            'expires_at' => now()->addHours(8),
-        ]);
-        $request->attributes->set('admin_session', $session);
-
-        $user->forceFill([
-            'last_login_at' => now(),
-            'failed_login_attempts' => 0,
-            'locked_until' => null,
-        ])->save();
-
         $this->recordAudit($request, $user, 'auth.otp.success', 'success');
-        $this->recordAudit($request, $user, 'auth.login.success', 'success');
 
-        return response()->json([
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $this->safeUser($user),
-        ]);
+        return $this->completeLogin($request, $user, true);
     }
 
     public function resendOtp(Request $request): JsonResponse
@@ -201,8 +183,9 @@ class AdminAuthController extends Controller
 
         /** @var User|null $user */
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        $isEmergencyAccount = $user && ($user->isBreakGlass() || $user->role === User::ROLE_BREAK_GLASS);
 
-        if (!$user || !Hash::check($credentials['password'], $user->password) || !$user->is_active || $user->isLocked()) {
+        if (!$user || !Hash::check($credentials['password'], $user->password) || !$user->is_active || $user->isLocked() || !$isEmergencyAccount) {
             $this->recordAudit($request, $user, 'auth.otp.resend_failure', 'failure');
 
             throw ValidationException::withMessages([
@@ -236,6 +219,47 @@ class AdminAuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully.']);
+    }
+
+    private function completeLogin(Request $request, User $user, bool $mfaVerified): JsonResponse
+    {
+        // Every successful login receives a fresh token. Old tokens are revoked.
+        $user->adminSessions()->whereNull('revoked_at')->update(['revoked_at' => now()]);
+        $user->tokens()->delete();
+        $token = $user->createToken('admin-web', ['admin'])->plainTextToken;
+        $session = AdminSession::create([
+            'id' => (string) Str::uuid(),
+            'user_id' => $user->id,
+            'token_hash' => hash('sha256', $token),
+            'ip_address' => $request->ip(),
+            'user_agent' => Str::limit((string) $request->userAgent(), 500, ''),
+            // The session is considered authenticated after the configured login flow.
+            // The audit event records whether OTP was actually used.
+            'mfa_verified_at' => now(),
+            'last_activity_at' => now(),
+            'expires_at' => now()->addHours(8),
+        ]);
+        $request->attributes->set('admin_session', $session);
+
+        $user->forceFill([
+            'last_login_at' => now(),
+            'failed_login_attempts' => 0,
+            'locked_until' => null,
+        ])->save();
+
+        $this->recordAudit(
+            $request,
+            $user,
+            $mfaVerified ? 'auth.login.success' : 'auth.login.password_only.success',
+            'success'
+        );
+
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'requires_otp' => false,
+            'user' => $this->safeUser($user),
+        ]);
     }
 
     private function issueAndSendOtp(Request $request, User $user): void
