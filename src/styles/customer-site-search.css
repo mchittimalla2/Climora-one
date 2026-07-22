@@ -1,0 +1,123 @@
+.customer-site-search,
+.customer-site-mobile-search {
+  position: relative;
+}
+
+.customer-site-mobile-search,
+.customer-site-mobile-search-row {
+  display: none;
+}
+
+.customer-site-search-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 220;
+  overflow: hidden;
+  padding: 8px;
+  border: 1px solid rgba(215, 185, 126, .62);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #173f2a, #102f20);
+  box-shadow: 0 18px 42px rgba(16, 47, 32, .24);
+}
+
+.customer-site-search-suggestions button {
+  width: 100%;
+  min-height: 58px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.customer-site-search-suggestions button:hover,
+.customer-site-search-suggestions button:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, .1);
+}
+
+.customer-site-search-suggestions button > span:nth-child(2) {
+  min-width: 0;
+}
+
+.customer-site-search-suggestions strong,
+.customer-site-search-suggestions small {
+  display: block;
+}
+
+.customer-site-search-suggestions strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-site-search-suggestions small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, .68);
+  font-size: 11px;
+}
+
+.customer-site-search-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(215, 185, 126, .72);
+  border-radius: 50%;
+  color: #d7b97e;
+}
+
+.customer-site-search-empty {
+  padding: 16px;
+  color: #fff;
+}
+
+.customer-site-search-empty small {
+  margin-top: 5px;
+}
+
+@media (max-width: 640px) {
+  .customer-site-mobile-search-row {
+    order: 3;
+    width: 100%;
+    display: block;
+  }
+
+  .customer-site-mobile-search {
+    width: 100%;
+    display: block;
+  }
+
+  .customer-site-search {
+    display: none !important;
+  }
+
+  .customer-site-mobile-search input {
+    width: 100%;
+    height: 50px;
+    padding: 0 18px;
+    box-sizing: border-box;
+    border: 1px solid rgba(31, 61, 43, .16);
+    border-radius: 999px;
+    background: #fff;
+    color: #1f3d2b;
+    font-size: 15px;
+  }
+
+  .customer-site-search-suggestions {
+    top: calc(100% + 7px);
+    max-height: 340px;
+    overflow-y: auto;
+  }
+}
