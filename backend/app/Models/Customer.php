@@ -11,7 +11,7 @@ class Customer extends Authenticatable
 {
     use HasApiTokens, HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'email', 'email_verified_at', 'phone', 'phone_verified_at', 'password', 'avatar_url', 'status', 'last_login_at'];
+    protected $fillable = ['name', 'username', 'email', 'email_verified_at', 'phone', 'phone_verified_at', 'password', 'avatar_url', 'status', 'last_login_at'];
     protected $hidden = ['password', 'remember_token'];
     protected $appends = ['has_password'];
     protected $casts = ['email_verified_at' => 'datetime', 'phone_verified_at' => 'datetime', 'last_login_at' => 'datetime'];
