@@ -12,7 +12,6 @@ import StoreRoute from "./components/StoreRoute";
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import AdminFetchBridge from "./components/AdminFetchBridge";
 import ImpactPromiseMounts from "./components/ImpactPromiseMounts";
-import StorefrontPolish from "./components/StorefrontPolish";
 import Contact from "./pages/Contact";
 import ReturnPolicy from "./pages/ReturnPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
@@ -41,6 +40,7 @@ import "./styles/navigation-fixes.css";
 import "./styles/product-details.css";
 import "./styles/admin-premium.css";
 import "./styles/admin-legacy-polish.css";
+import "./styles/layout-compact.css";
 
 const viteBase = import.meta.env.BASE_URL || "/";
 const routerBase = viteBase === "/" ? "/" : viteBase.replace(/\/$/, "");
@@ -140,7 +140,6 @@ function App() {
         <ScrollToTop />
         <StoreInteractionEnhancements />
         {!isAdminHost && <ImpactPromiseMounts />}
-        {!isAdminHost && <StorefrontPolish />}
         {isAdminHost ? <AdminRoutes /> : <StoreRoutes />}
       </BrowserRouter>
     </CartProvider></CustomerProvider>
