@@ -43,7 +43,13 @@ class CustomerAccountController extends Controller
 
     public function profile(Request $request, CustomerTokenService $tokens, CustomerEmailService $emails)
     {
-        $customer = $request->user(); $data = $request->validate(['name' => ['required','string','min:2','max:100'], 'phone' => ['nullable','regex:/^\+91[6-9][0-9]{9}$/','unique:customers,phone,'.$customer->id], 'email' => ['required','email','not_regex:/[^\r\n]*[\r\n][^\r\n]*/','max:255']]);
+        $customer = $request->user();
+        $data = $request->validate([
+            'name' => ['required','string','min:2','max:100'],
+            'username' => ['nullable','string','min:3','max:50','regex:/^[a-zA-Z0-9._-]+$/','unique:customers,username,'.$customer->id],
+            'phone' => ['nullable','regex:/^\+91[6-9][0-9]{9}$/','unique:customers,phone,'.$customer->id],
+            'email' => ['required','email','not_regex:/[^\r\n]*[\r\n][^\r\n]*/','max:255'],
+        ]);
         $email = strtolower(trim($data['email']));
         if ($email !== $customer->email) {
             if (!$customer->email_verified_at) return response()->json(['message' => 'Verify your current email before changing it.'], 403);
@@ -51,7 +57,12 @@ class CustomerAccountController extends Controller
             $plain = $tokens->issue($customer, 'email_change', 60, $email); $emails->verificationTo($customer, $email, rtrim(config('services.customer_app_url'),'/').'/verify-email-change?token='.$plain);
         }
         $phoneChanged = ($data['phone'] ?: null) !== $customer->phone;
-        $customer->forceFill(['name' => trim($data['name']), 'phone' => $data['phone'] ?: null, 'phone_verified_at' => $phoneChanged ? null : $customer->phone_verified_at])->save();
+        $customer->forceFill([
+            'name' => trim($data['name']),
+            'username' => !empty($data['username']) ? strtolower(trim($data['username'])) : $customer->username,
+            'phone' => $data['phone'] ?: null,
+            'phone_verified_at' => $phoneChanged ? null : $customer->phone_verified_at,
+        ])->save();
         return response()->json(['message' => $email !== $customer->email ? 'Profile updated. Verify the new email before it replaces the current email.' : 'Profile updated.', 'customer' => $customer->fresh()]);
     }
 
