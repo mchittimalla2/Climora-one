@@ -16,6 +16,7 @@ fail() {
   exit 1
 }
 
+[[ "${EUID}" -eq 0 ]] || fail "run this script with sudo/root"
 [[ -d "$APP_ROOT" ]] || fail "Laravel backend directory not found: $APP_ROOT"
 [[ -f "$APP_ROOT/artisan" ]] || fail "artisan not found under: $APP_ROOT"
 command -v php >/dev/null 2>&1 || fail "php is not installed"
@@ -37,7 +38,7 @@ read_laravel_config() {
     $root = getenv("APP_ROOT");
     require $root . "/vendor/autoload.php";
     $app = require $root . "/bootstrap/app.php";
-    $kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);
+    $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
     $kernel->bootstrap();
     $value = config(getenv("CONFIG_KEY"));
     if ($value === null) { exit(2); }
@@ -82,7 +83,7 @@ mv "$TEMP_FILE" "$FINAL_FILE"
 chmod 600 "$FINAL_FILE"
 trap - EXIT
 
-mapfile -t backups < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'climoraone_*.dump' -printf '%T@ %p\n' | sort -nr | awk '{print $2}')
+mapfile -t backups < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'climoraone_*.dump' -printf '%T@ %p\n' | sort -nr | cut -d' ' -f2-)
 
 if (( ${#backups[@]} > RETENTION_COUNT )); then
   for old_backup in "${backups[@]:RETENTION_COUNT}"; do
