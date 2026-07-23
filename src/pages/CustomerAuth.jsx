@@ -154,7 +154,10 @@ export default function CustomerAuth() {
             {tab === "register" && <>
               {field("password_confirmation", "Confirm password", <input name="password_confirmation" type="password" required autoComplete="new-password" placeholder="Re-enter your password" />)}
               <label className={`customer-check ${fieldErrors.terms ? "field-has-error" : ""}`}>
-                <input name="terms" type="checkbox" required /> I agree to the <Link to="/terms" target="_blank">Terms of Use</Link> and <Link to="/privacy-policy" target="_blank">Privacy Policy</Link>
+                <input name="terms" type="checkbox" required />
+                <span className="customer-check-copy">
+                  I agree to the <Link to="/terms" target="_blank">Terms of Use</Link> and <Link to="/privacy-policy" target="_blank">Privacy Policy</Link>.
+                </span>
                 {fieldErrors.terms && <small className="field-error">{fieldErrors.terms}</small>}
               </label>
             </>}
