@@ -43,6 +43,7 @@ import "./styles/product-details.css";
 import "./styles/customer-site-shell.css";
 import "./styles/customer-site-search.css";
 import "./styles/customer-auth-polish.css";
+import "./styles/customer-auth-mobile-fix.css";
 import "./styles/admin-premium.css";
 import "./styles/admin-legacy-polish.css";
 import "./styles/layout-compact.css";
