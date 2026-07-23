@@ -70,7 +70,7 @@
 }
 
 .customer-check {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   column-gap: 10px;
   font-size: 13px;
@@ -163,34 +163,157 @@
 .customer-alert.success { background: #edf8f0; color: #236438; border: 1px solid rgba(35, 100, 56, .15); }
 
 @media (max-width: 640px) {
+  .customer-page .public-main {
+    width: calc(100% - 24px);
+    padding: 28px 0 44px;
+  }
+
+  .customer-page .public-hero {
+    max-width: 100%;
+    margin-bottom: 20px;
+    padding-inline: 4px;
+  }
+
+  .customer-page .public-hero h1 {
+    font-size: 34px;
+    line-height: 1.08;
+  }
+
+  .customer-page .public-hero p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
   .customer-page .public-content {
     width: 100%;
     max-width: 100%;
-    margin-inline: auto;
-    padding: 22px 16px;
+    margin: 0 auto;
+    padding: 16px 14px 20px;
     box-sizing: border-box;
+    border-radius: 24px 10px 24px 10px;
+    overflow: hidden;
   }
 
   .customer-auth-card {
     width: 100%;
     max-width: 100%;
-    margin-inline: auto;
+    margin: 0 auto;
     padding: 0;
-    overflow: hidden;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
   .customer-auth-tabs {
     width: 100%;
-    margin-inline: auto;
+    gap: 4px;
+    padding: 4px;
+    margin: 0 auto 18px;
   }
 
   .customer-auth-tabs button {
-    padding-inline: 8px;
+    min-height: 44px;
+    padding: 9px 6px;
+    font-size: 14px;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .customer-form {
+    width: 100%;
+    gap: 11px;
+  }
+
+  .customer-form label {
+    width: 100%;
+    min-width: 0;
+    gap: 5px;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .customer-form input:not([type="checkbox"]) {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding-inline: 13px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .customer-check {
+    width: 100%;
+    grid-template-columns: 20px minmax(0, 1fr);
+    column-gap: 9px;
+    align-items: start;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .customer-check input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px;
+    padding: 0 !important;
+    margin: 1px 0 0 !important;
+    border-radius: 5px;
+  }
+
+  .customer-primary {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 3px;
+  }
+
+  .customer-text-button {
+    margin-top: 9px;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  .customer-or {
+    margin: 18px 0 13px;
+  }
+
+  .customer-google {
+    width: 100%;
+    min-height: 50px;
+    padding-inline: 12px;
+    gap: 10px;
     font-size: 14px;
   }
 
-  .customer-form { gap: 12px; }
-  .customer-form input { height: 47px; font-size: 14px; }
-  .customer-google { min-height: 54px; padding-inline: 14px; font-size: 14px; }
-  .customer-guest { font-size: 15px; }
+  .google-icon {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
+  }
+
+  .customer-guest {
+    margin-top: 16px;
+    font-size: 14px;
+  }
+
+  .customer-alert {
+    margin-bottom: 13px;
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .customer-page .public-main {
+    width: calc(100% - 16px);
+  }
+
+  .customer-page .public-content {
+    padding-inline: 11px;
+  }
+
+  .customer-auth-tabs button {
+    font-size: 13px;
+  }
+
+  .customer-google {
+    font-size: 13px;
+  }
 }
