@@ -1,15 +1,37 @@
 @media (max-width: 640px) {
   .customer-page .public-content {
-    padding-inline: 18px;
+    padding: 18px 12px 22px;
   }
 
   .customer-auth-card {
+    width: min(88%, 520px);
+    max-width: 520px;
+    margin-inline: auto;
+  }
+
+  .customer-auth-tabs,
+  .customer-form,
+  .customer-alert,
+  .customer-or,
+  .customer-google,
+  .customer-guest,
+  .customer-text-button {
     width: 100%;
-    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .customer-form {
+    gap: 16px;
   }
 
   .customer-form label:not(.customer-check) {
-    padding-inline: 1px;
+    width: 100%;
+    padding-inline: 0;
+  }
+
+  .customer-form input:not([type="checkbox"]) {
+    width: 100%;
+    max-width: 100%;
   }
 
   .customer-check {
@@ -44,13 +66,28 @@
 
   .customer-primary,
   .customer-google {
+    width: 100%;
     max-width: 100%;
   }
 }
 
-@media (max-width: 380px) {
-  .customer-page .public-content {
-    padding-inline: 14px;
+@media (max-width: 420px) {
+  .customer-auth-card {
+    width: 86%;
+  }
+
+  .customer-form {
+    gap: 15px;
+  }
+
+  .customer-auth-tabs button {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .customer-auth-card {
+    width: 84%;
   }
 
   .customer-check-copy {
