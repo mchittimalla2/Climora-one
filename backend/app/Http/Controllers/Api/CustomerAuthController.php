@@ -20,6 +20,7 @@ class CustomerAuthController extends Controller
             'username' => strtolower(trim((string) $request->username)),
             'phone' => $this->phone($request->phone),
         ]);
+
         $data = $request->validate([
             'name' => ['required','string','min:2','max:100'],
             'username' => ['required','string','min:3','max:50','regex:/^[a-z0-9._-]+$/','unique:customers,username'],
@@ -27,7 +28,27 @@ class CustomerAuthController extends Controller
             'phone' => ['nullable','regex:/^\+91[6-9][0-9]{9}$/','unique:customers,phone'],
             'password' => ['required','confirmed',Password::min(8)->mixedCase()->numbers()],
             'terms' => ['accepted'],
+        ], [
+            'name.required' => 'Please enter your full name.',
+            'name.min' => 'Full name must contain at least 2 characters.',
+            'username.required' => 'Please choose a username.',
+            'username.min' => 'Username must contain at least 3 characters.',
+            'username.max' => 'Username cannot exceed 50 characters.',
+            'username.regex' => 'Username may contain only letters, numbers, dots, underscores and hyphens.',
+            'username.unique' => 'This username is not available. Please choose a different username.',
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'An account already exists with this email address. Please sign in instead.',
+            'phone.regex' => 'Please enter a valid 10-digit Indian mobile number.',
+            'phone.unique' => 'This mobile number is already associated with another account.',
+            'password.required' => 'Please create a password.',
+            'password.confirmed' => 'The password and confirmation password do not match.',
+            'password.min' => 'Password must contain at least 8 characters.',
+            'password.mixed' => 'Password must include both uppercase and lowercase letters.',
+            'password.numbers' => 'Password must include at least one number.',
+            'terms.accepted' => 'Please accept the Terms of Use and Privacy Policy to continue.',
         ]);
+
         $customer = Customer::create([
             'name' => trim($data['name']),
             'username' => $data['username'],
