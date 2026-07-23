@@ -74,9 +74,17 @@ export default function CustomerAuth() {
       const path = tab === "register" ? "register" : tab === "forgot" ? "forgot-password" : tab === "reset" ? "reset-password" : "login";
       if (tab === "reset") payload.token = new URLSearchParams(location.search).get("token");
       const response = await customerApi(`/api/customer/auth/${path}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 429) {
+          const retryAfter = Number(response.headers.get("Retry-After"));
+          const waitText = Number.isFinite(retryAfter) && retryAfter > 0
+            ? `Please wait ${retryAfter} seconds and try again.`
+            : "Please wait a moment and try again.";
+          throw new Error(`You have made several attempts. ${waitText}`);
+        }
+
         if (data.errors) {
           const normalized = Object.fromEntries(Object.entries(data.errors).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value]));
           setFieldErrors(normalized);
@@ -107,11 +115,10 @@ export default function CustomerAuth() {
     else { setError(data.message); setBusy(false); }
   };
 
-  const field = (name, label, input, hint) => (
+  const field = (name, label, input) => (
     <label className={fieldErrors[name] ? "field-has-error" : ""}>
       {label}
       {input}
-      {hint && !fieldErrors[name] && <small className="field-hint">{hint}</small>}
       {fieldErrors[name] && <small className="field-error">{fieldErrors[name]}</small>}
     </label>
   );
@@ -129,23 +136,23 @@ export default function CustomerAuth() {
 
         <form onSubmit={submit} className="customer-form" noValidate>
           {tab === "register" && <>
-            {field("name", "Full name", <input name="name" required minLength="2" autoComplete="name" />)}
-            {field("username", "Username", <input name="username" required minLength="3" pattern="[A-Za-z0-9._-]+" autoComplete="username" />, "Use letters, numbers, dots, underscores or hyphens.")}
-            {field("email", "Email address", <input name="email" type="email" required autoComplete="email" />)}
+            {field("name", "Full name", <input name="name" required minLength="2" autoComplete="name" placeholder="Enter your full name" />)}
+            {field("username", "Username", <input name="username" required minLength="3" pattern="[A-Za-z0-9._-]+" autoComplete="username" placeholder="Letters, numbers, dots, _ or -" />)}
+            {field("email", "Email address", <input name="email" type="email" required autoComplete="email" placeholder="name@example.com" />)}
             {field("phone", <>Mobile number <small>Optional</small></>, <input name="phone" inputMode="tel" autoComplete="tel" placeholder="10-digit Indian mobile number" />)}
           </>}
 
-          {tab === "login" && field("identifier", "Username or email", <input name="identifier" autoComplete="username" required />)}
-          {tab === "forgot" && field("email", "Email address", <input name="email" type="email" required />)}
+          {tab === "login" && field("identifier", "Username or email", <input name="identifier" autoComplete="username" required placeholder="Enter username or email" />)}
+          {tab === "forgot" && field("email", "Email address", <input name="email" type="email" required placeholder="name@example.com" />)}
           {tab === "reset" && <>
-            {field("password", "New password", <input name="password" type="password" required />)}
-            {field("password_confirmation", "Confirm password", <input name="password_confirmation" type="password" required />)}
+            {field("password", "New password", <input name="password" type="password" required placeholder="8+ chars, upper, lower and number" />)}
+            {field("password_confirmation", "Confirm password", <input name="password_confirmation" type="password" required placeholder="Re-enter your new password" />)}
           </>}
 
           {["login", "register"].includes(tab) && <>
-            {field("password", "Password", <input name="password" type="password" required autoComplete={tab === "register" ? "new-password" : "current-password"} />, tab === "register" ? "At least 8 characters with uppercase, lowercase and a number." : null)}
+            {field("password", "Password", <input name="password" type="password" required autoComplete={tab === "register" ? "new-password" : "current-password"} placeholder={tab === "register" ? "8+ chars, upper, lower and number" : "Enter your password"} />)}
             {tab === "register" && <>
-              {field("password_confirmation", "Confirm password", <input name="password_confirmation" type="password" required autoComplete="new-password" />)}
+              {field("password_confirmation", "Confirm password", <input name="password_confirmation" type="password" required autoComplete="new-password" placeholder="Re-enter your password" />)}
               <label className={`customer-check ${fieldErrors.terms ? "field-has-error" : ""}`}>
                 <input name="terms" type="checkbox" required /> I agree to the <Link to="/terms" target="_blank">Terms of Use</Link> and <Link to="/privacy-policy" target="_blank">Privacy Policy</Link>
                 {fieldErrors.terms && <small className="field-error">{fieldErrors.terms}</small>}
