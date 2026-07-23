@@ -1,0 +1,59 @@
+@media (max-width: 640px) {
+  .customer-page .public-content {
+    padding-inline: 18px;
+  }
+
+  .customer-auth-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .customer-form label:not(.customer-check) {
+    padding-inline: 1px;
+  }
+
+  .customer-check {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: start;
+    gap: 0 10px;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .customer-check-copy {
+    display: block;
+    min-width: 0;
+    color: #173f2a;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.55;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .customer-check-copy a {
+    display: inline;
+    white-space: normal;
+  }
+
+  .customer-check .field-error {
+    grid-column: 2;
+    margin-top: 4px;
+  }
+
+  .customer-primary,
+  .customer-google {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .customer-page .public-content {
+    padding-inline: 14px;
+  }
+
+  .customer-check-copy {
+    font-size: 12.5px;
+  }
+}
